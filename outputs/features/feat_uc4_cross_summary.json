@@ -1,0 +1,36 @@
+{
+  "intent_distribution": {
+    "otro": 25761,
+    "solicitud_producto": 11487,
+    "consulta_saldo": 4638,
+    "consulta_movimientos": 1792,
+    "soporte_tecnico": 1275,
+    "pregunta_beneficios": 787,
+    "reporte_fraude": 350,
+    "problema_transaccion": 46
+  },
+  "cross_signals": {
+    "pregunta_post_rechazo": 0,
+    "fraude_y_atipico": 23,
+    "cashback_no_pro": 188,
+    "inversion_sin_producto": 297
+  },
+  "shapes": {
+    "turns": [
+      46136,
+      14
+    ],
+    "convs": [
+      22444,
+      11
+    ],
+    "users": [
+      14095,
+      24
+    ],
+    "embeddings": [
+      46136,
+      384
+    ]
+  }
+}
