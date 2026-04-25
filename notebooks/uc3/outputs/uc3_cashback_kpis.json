@@ -1,0 +1,30 @@
+{
+  "descripcion": "UC3 — Cashback Perdido No-Pro — EDA resultados",
+  "periodo_meses": 12,
+  "universo_nopro": 7680,
+  "cashback_total_perdido_mxn": 2425956.5,
+  "cashback_mensual_universo_mxn": 202163.04,
+  "segmentos": {
+    "A": {
+      "descripcion": ">$300/mes",
+      "n_usuarios": 24,
+      "pct_universo": 0.0031,
+      "pct_con_nomina": 0.0,
+      "cashback_mediana": 482.21
+    },
+    "B": {
+      "descripcion": "$100–$300/mes",
+      "n_usuarios": 845,
+      "pct_universo": 0.11,
+      "cashback_mediana": 164.5
+    },
+    "C": {
+      "descripcion": "<$100/mes",
+      "n_usuarios": 6811,
+      "pct_universo": 0.8868
+    }
+  },
+  "senal_conversacional_pct": 0.0905,
+  "mensaje_havi_seg_a": "El mes pasado dejaste $482 en la mesa. Con Hey Pro ya los tendrías de vuelta.",
+  "mensaje_havi_seg_b": "El mes pasado dejaste $165 en cashback. ¿Activamos Hey Pro ahora?"
+}

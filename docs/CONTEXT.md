@@ -2,6 +2,7 @@
 
 > **Competencia:** DSC x Hey 2026 — Datathon para Hey Banco
 > **Producto:** Havi — copiloto financiero proactivo con IA para usuarios de Hey Banco
+> **Fase actual**: ✅ EDA cerrado · ✅ Pre-requisitos FE cerrados · 🚧 Feature Engineering arrancando.
 
 ---
 
@@ -220,6 +221,59 @@ Datathon-2026/
 > - **10-19**: Feature Engineering (a crear durante la próxima fase)
 > - **20-29**: Modelado
 > - **30-39**: Integración / demo
+
+---
+
+## 📊 Estado de la Fase EDA
+
+| Notebook | Estado |
+|---|---|
+| `notebooks/eda/00_eda_unificado_dq.ipynb` | ✅ Ejecutado |
+| `notebooks/eda/01_eda_carga_datos.ipynb` | ✅ Ejecutado |
+| `notebooks/eda/02_eda_clientes_dq.ipynb` | ✅ Ejecutado (fix: `infer_datetime_format` + paths) |
+| `notebooks/eda/03_eda_transacciones_dq.ipynb` | ✅ Ejecutado |
+| `notebooks/uc1/01_eda_rechazos.ipynb` | ✅ Ejecutado (fix: `pd.cut` bin edge + paths) |
+| `notebooks/uc2/01_eda_patrones_gasto_mcc_bi.ipynb` | ✅ Ejecutado (fix: paths absolutos) |
+| `notebooks/uc2/02_eda_compromisos_financieros.ipynb` | ✅ Ejecutado |
+| `notebooks/uc3/01_analisis_portafolio_productos.ipynb` | ✅ Ejecutado (fix: paths) |
+| `notebooks/uc3/02_eda_cashback_perdido.ipynb` | ✅ Ejecutado (fix: merge duplicado + paths) |
+| `notebooks/uc4/01_eda_conversaciones.ipynb` | ✅ Ejecutado |
+| `notebooks/uc4/02_eda_atipicas.ipynb` | ✅ Ejecutado (fix: paths) |
+
+---
+
+## 🧭 Decisiones Técnicas Acordadas
+
+### Ventanas temporales por UC
+
+| UC | Ventana | Razón |
+|---|---|---|
+| UC1 (alertas) | `30d` activa + `90d` baseline | Detectar anomalías comparando reciente vs histórico cercano |
+| UC2 (gemelo digital) | `all` | El perfil conductual necesita todo el historial |
+| UC3 (upselling) | `90d` + `all` para historial de pagos | Comportamiento reciente pesa más, pero historial valida capacidad |
+| UC4 (conversacional) | Período completo hasta fecha de corte | Necesita todos los intents para la taxonomía |
+
+En los notebooks de FE usar siempre estas constantes:
+```python
+WINDOW_30D  = 30
+WINDOW_90D  = 90
+CUTOFF_DATE = pd.Timestamp("2025-10-31")
+```
+
+### Fecha de corte: 2025-10-31
+
+Octubre 2025 es el último mes donde **ambos datasets** (transacciones y conversaciones) tienen volumen alto y representativo:
+
+- Transacciones: estable todo el año (~16-17k transacciones/semana).
+- Conversaciones: caída drástica en noviembre (7.5% del total vs 25-28% en meses anteriores). La semana del 20-27 nov solo tiene **284 registros**.
+- Intersección real de fechas máximas: transacciones llegan a 2025-12-15, conversaciones a 2025-11-27. Pero el volumen de conversaciones es inútil en noviembre.
+
+**Todos los notebooks de FE deben filtrar antes de calcular cualquier feature:**
+```python
+CUTOFF_DATE = pd.Timestamp("2025-10-31")
+df_tx    = df_tx[df_tx["fecha_hora"] <= CUTOFF_DATE]
+df_convs = df_convs[df_convs["date"]  <= CUTOFF_DATE]
+```
 
 ---
 
