@@ -50,7 +50,15 @@ Analiza las 50k conversaciones del dataset para extraer **intenciones, sentimien
 
 ## 📦 Datasets
 
-Ruta local base: `/path/to/dataton/` *(cada uno configura la suya)*
+Rutas base en el repo:
+
+```python
+from pathlib import Path
+BASE_TXN  = Path("Datathon_Hey_2026_dataset_transacciones 1/dataset_transacciones")
+BASE_CONV = Path("Datathon_Hey_dataset_conversaciones 1/dataset_conversaciones")
+```
+
+> Para detalle técnico (dtypes, joins, nulls, gotchas) ver [`DATA_CONTEXT.md`](./DATA_CONTEXT.md).
 
 ### `hey_clientes.csv`
 Datos demográficos y señales de comportamiento del usuario. Es la tabla de dimensión central — casi todo join pasa por acá.
@@ -164,46 +172,54 @@ jupyter lab
 
 Accedé desde el browser en `http://localhost:8888`.
 
-### Estructura de carpetas recomendada
+### Estructura del repo (actual)
 
 ```
-datamoles/
-├── CONTEXT.md              ← este archivo
-├── requirements.txt
-├── .venv/                  ← no commitear
-├── data/                   ← no commitear (agregar a .gitignore)
-│   ├── hey_clientes.csv
-│   ├── hey_productos.csv
-│   ├── hey_transacciones.csv
-│   └── dataset_50k_anonymized.parquet
+Datathon-2026/
+├── README.md                       ← entry point
+├── .gitignore
+├── docs/
+│   ├── CONTEXT.md                  ← este archivo
+│   ├── DATA_CONTEXT.md             ← esquema técnico de los 4 datasets
+│   ├── FEATURE_ENGINEERING_PLAN.md ← bridge a la próxima fase
+│   └── findings/                   ← hallazgos consolidados del EDA
+│       ├── README.md
+│       ├── 00_GENERAL.md
+│       ├── UC1_anomalias_y_alertas.md
+│       ├── UC2_gemelo_digital.md
+│       ├── UC3_upselling.md
+│       └── UC4_conversacional.md
 ├── notebooks/
-│   ├── eda/
-│   │   ├── 01_eda_clientes_dq.ipynb
-│   │   ├── 02_eda_transacciones_dq.ipynb
-│   │   ├── 03_eda_productos_dq.ipynb
-│   │   └── 04_eda_conversaciones_dq.ipynb
-│   ├── uc1/
-│   │   ├── 01_feature_eng_fh.ipynb
-│   │   └── 02_model_anomaly_fh.ipynb
-│   ├── uc2/
-│   │   ├── 01_feature_eng_bi.ipynb
-│   │   └── 02_clustering_digital_twin_bi.ipynb
-│   ├── uc3/
-│   │   ├── 01_feature_eng_jv.ipynb
-│   │   └── 02_model_upselling_jv.ipynb
-│   └── uc4/
-│       ├── 01_intent_extraction_fh.ipynb
-│       └── 02_cross_dataset_analysis_jv.ipynb
-├── src/
-│   ├── features/           ← funciones reutilizables de feature eng
-│   ├── models/             ← clases/wrappers de modelos
-│   └── utils/              ← helpers (loaders, formatters, etc.)
-└── outputs/
-    ├── uc1_alerts_sample.json
-    ├── uc2_profiles_sample.json
-    ├── uc3_recommendations_sample.json
-    └── uc4_intent_taxonomy.json
+│   ├── eda/                        EDA transversal (00-09)
+│   │   ├── 00_eda_unificado_dq.ipynb
+│   │   ├── 01_eda_carga_datos.ipynb
+│   │   ├── 02_eda_clientes_dq.ipynb
+│   │   └── 03_eda_transacciones_dq.ipynb
+│   ├── uc1/                        UC1: anomalías y alertas
+│   │   └── 01_eda_rechazos.ipynb
+│   ├── uc2/                        UC2: gemelo digital
+│   │   ├── 01_eda_patrones_gasto_mcc_bi.ipynb
+│   │   └── 02_eda_compromisos_financieros.ipynb
+│   ├── uc3/                        UC3: upselling
+│   │   ├── 01_analisis_portafolio_productos.ipynb
+│   │   ├── 02_eda_cashback_perdido.ipynb
+│   │   └── 03_eda_cashback_perdido_jv.py
+│   └── uc4/                        UC4: conversacional
+│       ├── 01_eda_conversaciones.ipynb
+│       └── 02_eda_atipicas.ipynb
+├── outputs/                        artefactos generados
+│   └── uc3_cashback_perdido.csv
+├── Datathon_Hey_2026_dataset_transacciones 1/
+│   └── dataset_transacciones/      hey_clientes.csv, hey_productos.csv, hey_transacciones.csv
+└── Datathon_Hey_dataset_conversaciones 1/
+    └── dataset_conversaciones/     dataset_50k_anonymized.parquet
 ```
+
+> Convención de números en notebooks:
+> - **00-09**: EDA
+> - **10-19**: Feature Engineering (a crear durante la próxima fase)
+> - **20-29**: Modelado
+> - **30-39**: Integración / demo
 
 ---
 

@@ -1,3 +1,30 @@
+# ============================================================
+# datamoles — Datathon Hey 2026
+# ============================================================
+
 # Datasets grandes — no versionar
 Datathon_Hey_2026_dataset_transacciones 1/dataset_transacciones/hey_transacciones.csv
 Datathon_Hey_2026_dataset_transacciones 1/hey_transacciones.csv
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Outputs intermedios opcionales (descomentar si crece)
+# outputs/tmp/
+# outputs/*.parquet
