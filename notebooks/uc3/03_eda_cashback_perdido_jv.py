@@ -1,7 +1,8 @@
 import pandas as pd
 from pathlib import Path
 
-BASE_TXN  = Path("Datathon_Hey_2026_dataset_transacciones 1/dataset_transacciones")
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_TXN = ROOT_DIR / "Datathon_Hey_2026_dataset_transacciones 1" / "dataset_transacciones"
 
 print("Cargando clientes...")
 df_clientes = pd.read_csv(BASE_TXN / "hey_clientes.csv", dtype={"user_id": str})
@@ -67,7 +68,7 @@ df_final["monto_top_categoria"] = df_final["monto_top_categoria"].fillna(0.0)
 df_final["cashback_perdido_mes"] = df_final["cashback_perdido_mes"].round(2)
 df_final["monto_top_categoria"] = df_final["monto_top_categoria"].round(2)
 
-output_file = "resultados_cashback_perdido.csv"
+output_file = ROOT_DIR / "outputs" / "uc3_cashback_perdido.csv"
 df_final.to_csv(output_file, index=False)
 print(f"Resultados guardados en {output_file}")
 
