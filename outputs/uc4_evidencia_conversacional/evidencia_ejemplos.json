@@ -1,0 +1,70 @@
+{
+  "UC1_rechazos": [
+    {
+      "input": "Mi tarjeta quedó bloqueada desde el mes de enero por alerta Hey debido a dos compras a la misma empresa por montos diferentes a lo pactado, pero el día de ayer quisieron cobrar otra vez esos montos y fue rechazada por cancelación de la tarjeta",
+      "output": "Lamento escuchar eso. Es importante que actúes rápidamente. Si tu tarjeta está bloqueada por alertas de compras indebidas, te recomiendo que sigas estos pasos:\n\n1. **Revisa la app Hey**: Ve a la opción de 'Cuentas', selecciona 'Tarjetas' y verifica si puedes desbloquearla desde ahí. \n2. **Reporta el intento de cobro**: Puedes hacerlo desde la app seleccionando 'Tarjeta de Crédito', luego 'Movimientos' y elige 'Levantar una aclaración' para reportar el cargo no reconocido.\n3. **Contacta al Centro de Atención a Clientes**: Si necesitas más ayuda, llama al 8143922626 para que te asistan con el bloqueo y cualquier otro problema relacionado.\n\nEs fundamental que mantengas tu información segura y que actúes ante cualquier intento de fraude. Si tienes más preguntas o necesitas ayuda adicional, ¡aquí estoy para ayudarte!",
+      "user_id": "USR-06135"
+    },
+    {
+      "input": "La tramité en la App y la solicitud siempre se queda \"En Proceso\". Llamé y el ejecutivo comenta que mi solicitud fue rechazada al revisar mi estado en buró de crédito. No tengo ningún problema de score negativo en buró de crédito ",
+      "output": "Lamento escuchar que tu solicitud está en ese estado. Cuando tramitas tu tarjeta de crédito en la app, si la solicitud está \"En Proceso\" y te informan que fue rechazada por buró, puede ser que el sistema haya detectado algún detalle en tu historial que no cumple con el perfil requerido para la Tarjeta de Crédito Hey. Sin embargo, si cumples con el perfil, te ofrecerán la opción de la Tarjeta de Crédito Hey con Garantía, que no requiere un buen score en buró y funciona dejando una garantía para acceder al crédito.\n\nTe recomiendo revisar si te ofrecieron esta opción, ya que es una excelente alternativa para seguir adelante con tu crédito. ¿Quieres que te explique cómo funciona la Tarjeta de Crédito Hey con Garantía o te ayude con algo más?",
+      "user_id": "USR-03657"
+    },
+    {
+      "input": "Si, tengo una compra rechazada el día 5 de marzo a las 744 am al parecer por 199 pesos en Amazon México pero yo no intente comprar nada en Amazon a esa hr y tampoco fue algún pago que hiciera ",
+      "output": "Lamento escuchar eso. Si ves un intento de compra que no reconoces, lo mejor es que contactes a nuestro centro de atención a clientes con los detalles del cargo. Ellos te ayudarán a resolverlo y a tomar las medidas necesarias para proteger tu cuenta.\n\nSi necesitas más información sobre cómo reportar un cargo no reconocido, no dudes en preguntarme. ¡Estoy aquí para ayudarte!",
+      "user_id": "USR-12040"
+    }
+  ],
+  "UC2_presupuesto": [
+    {
+      "input": "Soy cliente Hey pro y estoy interesada en invertir mi dinero y no retirarlo hasta abril y quiera retomarlo  para una inversión mas a largo plazo, es la primera vez que lo hago y quiero ser muy conservadora en esto. Mi presupuesto para invertir son 4mil mensuales, cuanto tendré de aqui al 16 de abril?",
+      "output": "¡Claro! Para calcular tu inversión, necesito saber el plazo exacto en días hasta abril. Si estás invirtiendo mensualmente, ¿podrías confirmarme si deseas hacer una inversión de 7 días o 28 días cada mes? \n\nRecuerda que como cliente Hey Pro, obtendrás un rendimiento del 7% anual a 7 días y del 7.50% anual a 28 días. Una vez que me confirmes el plazo, procederé a calcular tu inversión. ¡Espero tu respuesta!",
+      "user_id": "USR-14916"
+    },
+    {
+      "input": "En mi tarjeta principal tengo un límite de 1500, la tarjeta adicional tiene un límite de 1000, ya me gaste los 1500 de la tarjeta principal, mi esposa no podrá usar su tarjeta adicional con límite de 1000?",
+      "output": "Claro que puedo ayudarte. En este caso, tu esposa podrá usar su tarjeta adicional con un límite de 1000, ya que el límite de la tarjeta adicional es independiente del límite de la tarjeta principal. Aunque hayas alcanzado el límite de tu tarjeta principal, la tarjeta adicional aún tiene su propio límite disponible para ser utilizado.\n\nSi tienes más preguntas o necesitas más información, no dudes en decírmelo. ¡Estoy aquí para ayudarte!",
+      "user_id": "USR-03625"
+    },
+    {
+      "input": "OK entonces si no gaste nada antes del.17 de marzo y hoy 18 de marzo la uso lo pago cuando? Porque me dice fecha de corte 25 de febrero,",
+      "output": "Si tu fecha de corte es el 25 de febrero y hoy, 18 de marzo, usas tu tarjeta, deberás pagar el monto que gastaste en tu próxima fecha límite de pago, que será el 15 de abril. Esto se debe a que tu fecha de corte determina el periodo de facturación y, al no haber gastado nada antes del 17 de marzo, tu deuda se incluirá en el próximo ciclo.\n\nRecuerda que es importante estar al tanto de tus fechas de corte y límite de pago para evitar cargos adicionales. Si tienes más preguntas o necesitas ayuda con algo más, ¡no dudes en decírmelo!",
+      "user_id": "USR-12440"
+    }
+  ],
+  "UC3_upselling": [
+    {
+      "input": "Tengo mi cuenta de hey banco y aquí me depositan mi nómina , yo ya había pasado el número  de la clave interbancaria, no pase el número de la tarjeta , después hace días pedí una tarjeta y me desactivaron por que pedí un reposición , y ya casi me pagan en el trabajo . Aun así me pueden depositar si yo lo que pasé fue la clave interbancaria",
+      "output": "Claro, puedes recibir depósitos si proporcionas la CLABE interbancaria. No es necesario que compartas el número de tu tarjeta. Solo asegúrate de que la persona que te va a hacer el depósito tenga la CLABE correcta. Si tienes más preguntas o necesitas ayuda con algo más, ¡no dudes en decírmelo!",
+      "user_id": "USR-03203"
+    },
+    {
+      "input": "Inicialmente mi nómina está en BBVA pero la cambié con ustedes y se hace el depósito en BBVA y automáticamente a mi aplicación de HEY, con esto dicho, significa que mi nómina seguirá estando con ustedes y no tengo que realizar ningún movimiento? Ya que ya pasó el 29 de enero y sigo recibiendo mi nómina en mi aplicación de hey",
+      "output": "Claro! Así es, tu nómina seguirá siendo depositada en tu Cuenta Hey sin necesidad de que realices ningún movimiento adicional. Continuarás recibiéndola en tu aplicación de Hey hasta que decidas hacer un cambio a otra institución, si así lo deseas. \n\nSi tienes alguna otra pregunta o necesitas más información, ¡estoy aquí para ayudarte!",
+      "user_id": "USR-13765"
+    },
+    {
+      "input": "En la app trae la opción de inversión pero dice plazo de 7 y 28 dias y en las dos dice anual. Osea si invierto mil pesos y elige 28 dias el interese sera del 4% anual osea por un año tener los mil pesos y al final del año se obtendrá un 4% o como es?",
+      "output": "Claro que puedo ayudarte! La tasa de interés que mencionas se refiere al rendimiento anual, pero el plazo de inversión es de 7 o 28 días. \n\nSi decides invertir mil pesos a 28 días, el rendimiento que obtendrás será del 4% anual, pero este rendimiento se calculará solo para el período de 28 días. Es decir, al final de esos 28 días, recibirás un interés proporcional a ese 4% anual.\n\nPara ser más claro, el interés que ganarías en 28 días sería aproximadamente 1/12 del 4%, ya que hay 12 meses en un año. Así que, si inviertes mil pesos, al final de los 28 días, obtendrás un poco más de mil pesos, pero no el 4% completo, ya que eso sería al final del año.\n\nSi deseas, puedo calcular exactamente cuánto ganarías si decides invertir mil pesos a 28 días. ¿Te gustaría que lo hiciera?",
+      "user_id": "USR-04723"
+    }
+  ],
+  "UC4_fraude": [
+    {
+      "input": "un asesor de hey me dio de baja mi tarjeta virtual,por qué yo le expliqué que hice una compra en una aplicación y resultó que la aplicación era fraude ,entonces me seguían haciendo cobros aún después de cancelar la suscripción,por ello fue que pedí que la dieran de baja \nMi pregunta es … si la activo de nuevo ,me seguirán haciendo los cobros de esa aplicación fraude ? O se activa como “nueva”?",
+      "output": "Lamento decirte que no tengo información acerca de cómo se manejan los cobros de aplicaciones fraudulentas al activar una nueva tarjeta virtual. Sin embargo, tengo información de los siguientes temas:\n\na) ¿Qué pasa con la tarjeta anterior al activar una nueva tarjeta física?\nb) ¿Qué hago si mi tarjeta virtual ya venció?\nc) ¿Qué hago si quiero renovar mi tarjeta virtual?\n\nSi tienes duda acerca de estos u otros temas, estaré encantado de ayudarte.",
+      "user_id": "USR-12707"
+    },
+    {
+      "input": "Cuando será que ya pueda hacer disposiciones del dinero que tengo ahora en esta cuenta porque la abrí hace 3 dias y no podía acceder a mi banca electrónica,  luego me la desbloquearon y que tenia que completar mis datos, los complete desde ayer y todavía no puedo abrir en donde dice cuenta y veo el saldo pero cuando le doy clic no abre y de cambia a 0.0 pesos",
+      "output": "Lamento que estés teniendo esa experiencia. Por lo general, la verificación de la documentación y la activación completa de tu cuenta toma entre 24 y 72 horas después de que completes todos tus datos. Si ya pasaron tres días y aún no puedes ver correctamente tu saldo ni hacer disposiciones, puede ser que la verificación aún esté en proceso o haya algún detalle pendiente.\n\nTe recomiendo intentar nuevamente más tarde, ya que una vez que tu cuenta esté verificada y activada, podrás acceder a tu saldo y hacer disposiciones sin problema desde la banca web o la app. \n\n¿Quieres que te ayude con algún paso para revisar tu cuenta o con otra duda que tengas? Estoy aquí para apoyarte.",
+      "user_id": "USR-03096"
+    },
+    {
+      "input": "Tengo bloqueada mi tarjeta ya anteriores días se me quiso cobrar un pago de Didi que tampoco reconosco pero si alcanze a bloquearla y hace rato hice un pago en Suburbia con la tarjeta fisica y quedó dinero fue de ahí donde se me hizo el cobro de telcel el cual se me estába intentado con ese desde hace 2 horas ",
+      "output": "Lamento escuchar que estás teniendo estos inconvenientes con tu tarjeta. Si tienes la tarjeta bloqueada y viste un intento de cobro no reconocido de Didi, además del cargo de Telcel que mencionas fue un pago reciente en Suburbia, lo ideal es que revises los movimientos detalladamente en la app Hey Banco para confirmar cada cargo.\n\nPara el pago no reconocido de Didi, puedes levantar una aclaración desde la app o conmigo para que se investigue ese intento de cobro. En cuanto al cargo de Telcel que fue un pago reciente en Suburbia, si tú lo reconoces como un pago legítimo, no habría problema con ese cargo.\n\nSi tu tarjeta está bloqueada, puede ser por seguridad debido a estos movimientos. Te recomiendo desbloquearla desde la app si confirmas que los cargos son correctos, o mantenerla bloqueada mientras se aclaran los cargos no reconocidos.\n\n¿Quieres que te ayude a levantar la aclaración por el intento de cobro de Didi o necesitas guía para desbloquear tu tarjeta? Estoy aquí para apoyarte. ¿Qué prefieres?",
+      "user_id": "USR-03205"
+    }
+  ]
+}

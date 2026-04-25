@@ -1,0 +1,30 @@
+[
+  {
+    "UC":"UC1_rechazos",
+    "msgs_match":101,
+    "pct_total":0.2,
+    "usuarios_unicos":92,
+    "convs_unicas":96
+  },
+  {
+    "UC":"UC2_presupuesto",
+    "msgs_match":43,
+    "pct_total":0.09,
+    "usuarios_unicos":39,
+    "convs_unicas":41
+  },
+  {
+    "UC":"UC3_upselling",
+    "msgs_match":1238,
+    "pct_total":2.48,
+    "usuarios_unicos":767,
+    "convs_unicas":913
+  },
+  {
+    "UC":"UC4_fraude",
+    "msgs_match":541,
+    "pct_total":1.08,
+    "usuarios_unicos":455,
+    "convs_unicas":510
+  }
+]
