@@ -1,0 +1,210 @@
+{
+  "UC1_rechazos": [
+    {
+      "input": "compra rechazada",
+      "freq": 2,
+      "sample_output": "Lamento escuchar eso. Si te están rechazando la transacción en línea, asegúrate de estar usando la tarjeta virtual. También verifica que el NIP o CVV que ingresaste sea correcto y que tengas saldo suf"
+    },
+    {
+      "input": "mas  abisinecesito  ayuda  con  una  tran  una  transaccion  que  estoy  haciendo  en  facebook  de  mi  tarjeta  de  eta  de  debito y  no  puedo  realizar  el  pago  me  marca  tu  me  marca  tu  excension  declinada",
+      "freq": 1,
+      "sample_output": " Disculpa  por  el  inconveniente . Si  no  puedes  realizar  el  pago  con  tu  tarjeta  de  débito  en  Facebook ,  es  posible  que  el  problema  esté  relacionado  con  la  autenticación o  la  s"
+    },
+    {
+      "input": "oye me hicieron un cobro doble, disque en el restaurante no pasó el cobro y a mí me lo cobraron dos veces, que según el banco me tiene que regresar la transacción",
+      "freq": 1,
+      "sample_output": "Lamento escuchar que te hicieron un cobro doble, eso puede ser muy frustrante. Para resolverlo, puedes reportar el cargo que no te han devuelto directamente desde HAVI seleccionando la opción 'Asesor "
+    },
+    {
+      "input": "le declinada pagos en linea hay algun problema con mi cuenta?",
+      "freq": 1,
+      "sample_output": "Lamento que estés teniendo problemas con pagos en línea. Para ayudarte, te recomiendo revisar primero en la app si tu tarjeta está bloqueada por emergencia. También asegúrate de que el NIP o CVV que i"
+    },
+    {
+      "input": "es que querían transferirme un total de 80 euros y no paso la transferencia, quiero saber porque tengo una cuenta hey banco menores",
+      "freq": 1,
+      "sample_output": "Claro que puedo ayudarte con eso. En Hey Banco, la Cuenta Hey Menores recibe transferencias desde cualquier banco, pero es importante que la transferencia se haga en pesos mexicanos, ya que la cuenta "
+    },
+    {
+      "input": "no pasó del usuario",
+      "freq": 1,
+      "sample_output": "Lamento que estés teniendo ese inconveniente. Si no puedes avanzar más allá de la pantalla de usuario al intentar entrar a la banca web, puede ser que el usuario o la contraseña que estás ingresando n"
+    },
+    {
+      "input": "en el buzón no aparece tarjeta rechazada pero con dhl si y jamás llegaron",
+      "freq": 1,
+      "sample_output": "Lamento escuchar que no has recibido tu tarjeta física y que el seguimiento con DHL indica un problema. Normalmente, la tarjeta tarda entre 7 y 10 días hábiles en llegar, y la guía de rastreo se gener"
+    },
+    {
+      "input": "entonces no hay ningún motivo para que sea rechazada la hey garantizada cierto? con que tenga la garantía lista",
+      "freq": 1,
+      "sample_output": "Claro! Tener la garantía lista para la Tarjeta de Crédito Hey con Garantía es un paso muy importante y aumenta mucho tus posibilidades de aprobación. Sin embargo, la aprobación también depende de otro"
+    },
+    {
+      "input": "hice dos pagos en una tienda me los descontaron en la terminal del negocio no pasó",
+      "freq": 1,
+      "sample_output": "Lamento escuchar que tuviste ese problema con los pagos en la tienda. Si los pagos ya se descontaron pero no aparecen reflejados en la terminal del negocio, puede ser que la operación esté en proceso "
+    },
+    {
+      "input": "mi tarjeta quedó bloqueada desde el mes de enero por alerta hey debido a dos compras a la misma empresa por montos diferentes a lo pactado, pero el día de ayer quisieron cobrar otra vez esos montos y fue rechazada por cancelación de la tarjeta",
+      "freq": 1,
+      "sample_output": "Lamento escuchar eso. Es importante que actúes rápidamente. Si tu tarjeta está bloqueada por alertas de compras indebidas, te recomiendo que sigas estos pasos:\n\n1. **Revisa la app Hey**: Ve a la opció"
+    }
+  ],
+  "UC2_presupuesto": [
+    {
+      "input": "en cuanto me quedarían mis mensualidades",
+      "freq": 1,
+      "sample_output": "Claro! Para un crédito automotriz de $274,000 pesos a 60 meses, con un enganche de $170,000 pesos, la mensualidad que tendrías que pagar sería de aproximadamente $3,957.44 pesos. \n\nRecuerda que esta c"
+    },
+    {
+      "input": "ok entonces si no gaste nada antes del.17 de marzo y hoy 18 de marzo la uso lo pago cuando? porque me dice fecha de corte 25 de febrero,",
+      "freq": 1,
+      "sample_output": "Si tu fecha de corte es el 25 de febrero y hoy, 18 de marzo, usas tu tarjeta, deberás pagar el monto que gastaste en tu próxima fecha límite de pago, que será el 15 de abril. Esto se debe a que tu fec"
+    },
+    {
+      "input": "si me alcanza por que ya tome 2 empleos",
+      "freq": 1,
+      "sample_output": "¡Eso es genial! Tener dos empleos puede ayudarte a mejorar tu situación financiera. Asegúrate de equilibrar tu tiempo y cuidar de tu salud. \n\nSi estás buscando maneras de administrar mejor tus ingreso"
+    },
+    {
+      "input": "si volvería a la misma pregunta si la solicito y no alcanza a llegar como quiera podría activar misma beneficios de la edición de tecate pal norte ?",
+      "freq": 1,
+      "sample_output": "Claro que sí puedes activar y disfrutar los beneficios aunque tu Tarjeta Hey Edición Tecate Pa’l Norte no llegue a tiempo. Desde que abres tu cuenta, puedes usar tu Tarjeta Virtual Hey para hacer comp"
+    },
+    {
+      "input": "entonces adicionando esto en cuanto me quedaría la mensualidad",
+      "freq": 1,
+      "sample_output": "Claro! Para calcular la mensualidad total incluyendo el seguro del automóvil, sumaremos el costo del seguro a la mensualidad del crédito.\n\n1. **Mensualidad del Crédito**: $3,150.61 pesos.\n2. **Costo d"
+    },
+    {
+      "input": "quiero pagar mi tarjeta de crédito pero no me alcanza",
+      "freq": 1,
+      "sample_output": "Lamento escuchar eso. Si no puedes realizar el pago mínimo de tu Tarjeta de Crédito Hey, ten en cuenta que se te cobrará una comisión por pago tardío de $300 más IVA, además de los intereses que se ac"
+    },
+    {
+      "input": "por ejemplo,  como pagaría mi compra en tres meses si gaste $1200?",
+      "freq": 1,
+      "sample_output": "Claro! Para pagar tu compra de $1,200 en tres meses con tu Tarjeta de Crédito Hey, debes seguir estos pasos:\n\n1. Abre la app de Hey Banco.\n2. Ve a la opción de \"Pagar\".\n3. Selecciona \"Diferir pagos\".\n"
+    },
+    {
+      "input": "pero me gasté todo el crédito",
+      "freq": 1,
+      "sample_output": "Si ya utilizaste todo el crédito de tu Tarjeta de Crédito Hey Garantizada, no podrás cancelar la tarjeta hasta que pagues el saldo total que debes. Es importante que primero saldes cualquier deuda pen"
+    },
+    {
+      "input": "5000 a 6 meses cuánto me quedaría",
+      "freq": 1,
+      "sample_output": "Para calcular el pago mensual al diferir $5,000 a 6 meses, primero es importante considerar que no hay comisiones adicionales, pero sí se aplicará la tasa de interés anual que tengas asignada en tu Ta"
+    },
+    {
+      "input": "pero hice la suma total y no corresponde lo que debo de pagar con lo que gaste",
+      "freq": 1,
+      "sample_output": "Lamento escuchar eso. Es importante que revises detalladamente tus movimientos en la app Hey para asegurarte de que todos los cargos estén correctos. A veces, puede haber cargos que no reconoces o err"
+    }
+  ],
+  "UC3_upselling": [
+    {
+      "input": "oye ,  ¿  me  podrías  decir  cuánto  es  el  cashback si  contrato  la  anualidad ?",
+      "freq": 1,
+      "sample_output": "Si  decides  pagar  la  anualidad  de  la  Tarjeta  de  Crédito  Hey ,  obtendrás  un  1 %  de  recompensas  en  todas  tus  compras  con  la  tarjeta ,  ya  sea  física o  virtual .  Además , si  usa"
+    },
+    {
+      "input": "la anualidad opcional en la tdc ¿que beneficios da? ¿y por qué a mi me aparece como pago únicamente \"tres meses\" en lugar de pago único",
+      "freq": 1,
+      "sample_output": "Lamento decirte que no tengo información acerca de la anualidad opcional en la TDC o sobre los detalles específicos de los pagos que aparecen en tu cuenta. Sin embargo, tengo información de los siguie"
+    },
+    {
+      "input": "es decir, que se vuelve más beneficioso mientras más compres verdad? entonces cuál es el límite de crédito?",
+      "freq": 1,
+      "sample_output": "Claro! El límite de crédito que puedes obtener con la Tarjeta de Crédito Hey puede llegar hasta $250,000.00 M.N. Este límite es establecido por el titular de la tarjeta y puede variar según la evaluac"
+    },
+    {
+      "input": "ya active la función pero no se refleja en mi cuenta de ahorro inmediato",
+      "freq": 1,
+      "sample_output": "Lamento escuchar que no ves reflejado tu ahorro inmediato aún. Te recomiendo revisar que la compra que realizaste haya sido con tu Tarjeta de Débito Hey y que el porcentaje de ahorro esté correctament"
+    },
+    {
+      "input": "2000 es el monto total por el momento no cuento con enganche ,lo que tengo como garantía e echo mi potabilidad de nomina con hustedes",
+      "freq": 1,
+      "sample_output": "La mensualidad que tendrás que pagar, para un monto de $2,000.00 pesos a un plazo de 6 meses, para una tasa de interés anual de 12.49% es de $345.58 pesos de manera mensual. Recuerda que la tasa del C"
+    },
+    {
+      "input": "tengo cashback en mi tarjeta de crédito",
+      "freq": 1,
+      "sample_output": "Claro que sí! Con la Tarjeta de Crédito Hey puedes obtener recompensas en efectivo por tus compras. Si decides pagar la anualidad opcional de $600.00 pesos más IVA, recibirás un 1% de recompensas en e"
+    },
+    {
+      "input": "gracias  cuanto  es  lo  minimo  con  lo  que  puede  invertir  en  acciones",
+      "freq": 1,
+      "sample_output": " No ,  no  necesitas  tener  una  cantidad  mínima  invertida  en  Acciones  Hey ."
+    },
+    {
+      "input": "pero ese porcentaje tiene un monto máximo de cashback?",
+      "freq": 1,
+      "sample_output": "Claro! Sí, el porcentaje de recompensas está topado al 1% de la línea de crédito de tu Tarjeta de Crédito Hey. Por ejemplo, si tienes una línea de crédito de $100,000.00 pesos, el máximo de recompensa"
+    },
+    {
+      "input": "beneficios por referidos",
+      "freq": 1,
+      "sample_output": "Claro! Si refieres a alguien a Hey Banco, podrías ganar hasta $4,350, dependiendo de los productos que esa persona contrate. Esto también aplica si refieres a una empresa. \n\nPara referir a un amigo, s"
+    },
+    {
+      "input": "mm ,  me  parece  que  me  das  el 10 por 100 en  cashback ,  verdad ?",
+      "freq": 1,
+      "sample_output": " Sí ,  con  la  Tarjeta  de  Crédito  Hey ,  puedes  recibir  recompensas  por  tus  compras ,  pero  necesitas  pagar  una  anualidad  opcional  de $  600 .  00  pesos  más  IVA ."
+    }
+  ],
+  "UC4_fraude": [
+    {
+      "input": "tengo un cargo no reconocido",
+      "freq": 8,
+      "sample_output": "Lamento escuchar eso. Si tienes un cargo que no reconoces, puedes reportarlo de la siguiente manera:\n\n1. Desde la aplicación Hey Banco, ve a la sección de 'Tarjeta de Crédito' o 'Cuentas', dependiendo"
+    },
+    {
+      "input": "cargo no reconocido",
+      "freq": 6,
+      "sample_output": "Claro que puedo ayudarte con eso. Si tienes un cargo no reconocido en tu cuenta o tarjeta Hey, puedes reportarlo fácilmente desde la app Hey Banco. Solo tienes que ir a la sección de 'Cuentas' o 'Tarj"
+    },
+    {
+      "input": "cargo no reconocidos",
+      "freq": 2,
+      "sample_output": "Lamento escuchar eso. Si tienes cargos no reconocidos en tu cuenta, puedes reportarlos de la siguiente manera:\n\n1. Desde la app de Hey Banco, ve a 'Cuentas' y luego a 'Movimientos'.\n2. Encuentra el ca"
+    },
+    {
+      "input": "quiero reportar un cargo no reconocido",
+      "freq": 1,
+      "sample_output": "Claro que puedo ayudarte. Para reportar un movimiento no reconocido en tu Tarjeta de Débito Hey, puedes seguir estos pasos:\n\n1. Abre la app Hey Banco y asegúrate de haber iniciado sesión.\n2. Ve a 'Cue"
+    },
+    {
+      "input": "necesito ayuda para desbloquear una cuenta",
+      "freq": 1,
+      "sample_output": "Lamento escuchar eso. Si tu cuenta está bloqueada y no puedes solucionarlo desde la app, lo mejor es que te pongas en contacto con nuestro centro de atención al cliente. Ellos te ayudarán a resolverlo"
+    },
+    {
+      "input": "hola ,  necesito  ayuda  para  poder  desbloquear  la  cuenta .",
+      "freq": 1,
+      "sample_output": " ¿  Qué  tipo  de  cuenta  tienes ?  ¿  Es  una  cuenta  de  ahorro ,  de  inversión o  de  tarjeta  de  débito ?"
+    },
+    {
+      "input": "tengo un cargo en mi tarjeta de crédito qué el comercio me hará una devolución ¿debo reportarlo como cargo no reconocido?",
+      "freq": 1,
+      "sample_output": "Claro! Si el comercio te ha confirmado que te hará una devolución, no es necesario que reportes el cargo como no reconocido. Simplemente espera a que la devolución se procese. Sin embargo, si el cargo"
+    },
+    {
+      "input": "si tengo un diferímiento de saldo y mi tarjeta se bloqueó, cuando se va a desbloquear ?",
+      "freq": 1,
+      "sample_output": "Lamento escuchar eso. Si tu tarjeta está bloqueada, lo mejor es que te comuniques con nuestro centro de atención al cliente al 8143922626. Ellos podrán revisar tu situación específica y ayudarte a res"
+    },
+    {
+      "input": "por qué bloquearon mi tarjeta?",
+      "freq": 1,
+      "sample_output": "Lamento escuchar eso. Tu tarjeta puede haber sido bloqueada por varias razones, como un pago atrasado o por razones de seguridad. Te recomiendo que revises si tienes algún pago pendiente. También pued"
+    },
+    {
+      "input": "un asesor de hey me dio de baja mi tarjeta virtual,por qué yo le expliqué que hice una compra en una aplicación y resultó que la aplicación era fraude ,entonces me seguían haciendo cobros aún después de cancelar la suscripción,por ello fue que pedí que la dieran de baja \nmi pregunta es … si la activo de nuevo ,me seguirán haciendo los cobros de esa aplicación fraude ? o se activa como “nueva”?",
+      "freq": 1,
+      "sample_output": "Lamento decirte que no tengo información acerca de cómo se manejan los cobros de aplicaciones fraudulentas al activar una nueva tarjeta virtual. Sin embargo, tengo información de los siguientes temas:"
+    }
+  ]
+}
