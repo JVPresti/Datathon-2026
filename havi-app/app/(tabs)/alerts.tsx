@@ -25,6 +25,8 @@ const D = {
   error: "#FF453A",
 };
 
+function stripMd(s: string) { return s.replace(/\*\*|__|\*|_|`/g, ""); }
+
 const ALERT_CFG: Record<string, { icon: string; color: string }> = {
   txn_atipica: { icon: "shield-outline", color: "#FF453A" },
   rechazo_saldo: { icon: "card-outline", color: "#FF9F0A" },
@@ -59,7 +61,7 @@ export default function AlertsScreen() {
         alignItems: "center",
         justifyContent: "space-between",
       }}>
-        <Text style={{ color: D.text, fontSize: 24, fontWeight: "700" }}>Alertas</Text>
+        <Text style={{ color: D.text, fontSize: 24, fontWeight: "700" }}>Buzón</Text>
         {unreadCount > 0 && (
           <View style={{
             backgroundColor: D.card,
@@ -176,7 +178,9 @@ function UrgentCard({ alert, onPress, onChat }: { alert: HaviAlert; onPress: () 
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: D.text, fontSize: 14, fontWeight: "600", marginBottom: 2 }}>{alert.titulo}</Text>
-          <Text style={{ color: D.textSub, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>{alert.mensaje}</Text>
+          <Text style={{ color: D.textSub, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
+            {stripMd(alert.mensaje)}
+          </Text>
           <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 4 }}>{timeAgo(alert.timestamp)}</Text>
         </View>
       </View>
@@ -188,20 +192,22 @@ function UrgentCard({ alert, onPress, onChat }: { alert: HaviAlert; onPress: () 
             backgroundColor: pressed ? "#CC0000" : D.error,
             borderRadius: 10,
             paddingVertical: 10,
+            paddingHorizontal: 8,
             alignItems: "center",
           })}
         >
-          <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>
+          <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }} numberOfLines={1}>
             {alert.accion_primaria?.label ?? "Ver detalles"}
           </Text>
         </Pressable>
         <Pressable
-          onPress={onChat}
+          onPress={onPress}
           style={({ pressed }) => ({
             flex: 1,
             backgroundColor: pressed ? D.cardAlt : D.surface,
             borderRadius: 10,
             paddingVertical: 10,
+            paddingHorizontal: 8,
             alignItems: "center",
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: D.sep,
@@ -211,7 +217,7 @@ function UrgentCard({ alert, onPress, onChat }: { alert: HaviAlert; onPress: () 
           })}
         >
           <Text style={{ color: "#FFFFFF", fontSize: 13 }}>✦</Text>
-          <Text style={{ color: D.textSub, fontSize: 13, fontWeight: "500" }}>Hablar con Havi</Text>
+          <Text style={{ color: D.textSub, fontSize: 13, fontWeight: "500" }} numberOfLines={1}>Havi</Text>
         </Pressable>
       </View>
     </Pressable>
@@ -248,7 +254,7 @@ function AlertCard({ alert, onPress, onChat, dimmed = false }: { alert: HaviAler
             <Text style={{ color: D.text, fontSize: 14, fontWeight: "500", flex: 1 }}>{alert.titulo}</Text>
             {!alert.leida && <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: cfg.color }} />}
           </View>
-          <Text style={{ color: D.textSub, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>{alert.mensaje}</Text>
+          <Text style={{ color: D.textSub, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>{stripMd(alert.mensaje)}</Text>
           <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 4 }}>{timeAgo(alert.timestamp)}</Text>
         </View>
       </View>

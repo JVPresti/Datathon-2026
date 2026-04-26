@@ -15,7 +15,13 @@ import {
   Animated,
   Modal,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+
+const { width: SCREEN_W } = Dimensions.get("window");
+// Padding on each side (16) + avatar (28) + gap (8)
+const HAVI_BUBBLE_MAX = SCREEN_W - 32 - 36;
+const USER_BUBBLE_MAX = SCREEN_W * 0.76;
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MarkdownText } from "../../src/utils/markdown";
@@ -488,7 +494,7 @@ function MessageBubble({
 
   if (isLoading) {
     return (
-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, alignSelf: "flex-start", maxWidth: "80%" }}>
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
         <View style={styles.haviAvatarSm}>
           <Text style={{ fontSize: 12, color: "#FFFFFF" }}>✦</Text>
         </View>
@@ -512,8 +518,8 @@ function MessageBubble({
 
   if (!isHavi) {
     return (
-      <View style={{ alignSelf: "flex-end", maxWidth: "78%" }}>
-        <View style={styles.userMsgBubble}>
+      <View style={{ alignItems: "flex-end" }}>
+        <View style={[styles.userMsgBubble, { maxWidth: USER_BUBBLE_MAX }]}>
           <Text style={{ color: "#FFFFFF", fontSize: 15, lineHeight: 22 }}>
             {message.content}
           </Text>
@@ -523,19 +529,16 @@ function MessageBubble({
   }
 
   return (
-    <View style={{ alignSelf: "flex-start", maxWidth: "88%" }}>
-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
-        <View style={styles.haviAvatarSm}>
-          <Text style={{ fontSize: 12, color: "#FFFFFF" }}>✦</Text>
-        </View>
-        <View style={[styles.haviMsgBubble, { flex: 1 }]}>
-          <MarkdownText
-            text={message.content}
-            style={{ color: "rgba(255,255,255,0.90)", fontSize: 15, lineHeight: 22 }}
-          />
-        </View>
+    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+      <View style={styles.haviAvatarSm}>
+        <Text style={{ fontSize: 12, color: "#FFFFFF" }}>✦</Text>
       </View>
-
+      <View style={[styles.haviMsgBubble, { maxWidth: HAVI_BUBBLE_MAX }]}>
+        <MarkdownText
+          text={message.content}
+          style={{ color: "rgba(255,255,255,0.90)", fontSize: 15, lineHeight: 22 }}
+        />
+      </View>
     </View>
   );
 }

@@ -29,11 +29,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="movements"
+        name="pagos"
         options={{
-          title: "Movimientos",
+          title: "Pagos",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "bar-chart" : "bar-chart-outline"} size={22} color={color} />
+            <Ionicons name={focused ? "receipt" : "receipt-outline"} size={22} color={color} />
           ),
         }}
       />
@@ -55,13 +55,22 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="transferir"
+        options={{
+          title: "Transferir",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "swap-horizontal" : "swap-horizontal-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="alerts"
         options={{
-          title: "Alertas",
+          title: "Buzón",
           tabBarIcon: ({ color, focused }) => (
             <View>
               <Ionicons
-                name={focused ? "notifications" : "notifications-outline"}
+                name={focused ? "mail" : "mail-outline"}
                 size={22}
                 color={color}
               />
@@ -76,13 +85,17 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Hidden screens — accessible via router.push but not shown in tab bar */}
+      <Tabs.Screen
+        name="movements"
+        options={{
+          href: null,
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Perfil",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
-          ),
+          href: null,
         }}
       />
     </Tabs>

@@ -200,13 +200,13 @@ export const ALERTAS_MOCK: HaviAlert[] = [
     priority: "alta",
     titulo: "Cargo inusual detectado",
     mensaje:
-      "Detecté un cargo de $2,150 MXN en Amazon US, Seattle, WA a las 3:14 AM. ¿Lo reconoces?",
+      "Detecté un cargo de $2,150 en Amazon US, Seattle WA a las 3 AM. Parece inusual. ¿Lo reconoces?",
     timestamp: "2025-08-24T03:14:00",
     leida: false,
     accionada: false,
     uc4_context: UC4_MOCK,
-    accion_primaria: { label: "Sí, era yo — liberar compra", type: "approve" },
-    accion_secundaria: { label: "No, bloquear mi tarjeta", type: "block" },
+    accion_primaria: { label: "Sí, era yo", type: "approve" },
+    accion_secundaria: { label: "Bloquear tarjeta", type: "block" },
   },
   {
     id: "ALT-002",
@@ -214,12 +214,12 @@ export const ALERTAS_MOCK: HaviAlert[] = [
     priority: "alta",
     titulo: "Cargo rechazado",
     mensaje:
-      "Tu pago de **$349** en NewsDigital MX fue rechazado por saldo insuficiente. Tienes **$88,790** disponibles en tu tarjeta de crédito Hey. ¿Quieres que lo intente con esa?",
+      "Tu pago de **$349** en NewsDigital MX fue rechazado por saldo insuficiente. Tienes **$88,790** en tu crédito Hey. ¿Quieres intentarlo con esa?",
     timestamp: "2025-08-23T20:37:31",
     leida: false,
     accionada: false,
     uc1_context: UC1_MOCK,
-    accion_primaria: { label: "Reintentar con tarjeta de crédito", type: "transfer" },
+    accion_primaria: { label: "Usar crédito Hey", type: "transfer" },
     accion_secundaria: { label: "No, gracias", type: "dismiss" },
   },
   {

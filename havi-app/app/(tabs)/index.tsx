@@ -110,30 +110,45 @@ export default function HomeScreen() {
               {user.nombre}
             </Text>
           </View>
-          <Pressable
-            onPress={() => router.push("/(tabs)/alerts")}
-            style={({ pressed }) => ({
-              width: 38,
-              height: 38,
-              borderRadius: 19,
-              backgroundColor: pressed ? D.card : "transparent",
-              alignItems: "center",
-              justifyContent: "center",
-            })}
-          >
-            <Ionicons name="notifications-outline" size={22} color={D.textSub} />
-            {unreadCount > 0 && (
-              <View style={{
-                position: "absolute",
-                top: 7,
-                right: 7,
-                width: 7,
-                height: 7,
-                borderRadius: 3.5,
-                backgroundColor: D.error,
-              }} />
-            )}
-          </Pressable>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Pressable
+              onPress={() => router.push("/(tabs)/alerts")}
+              style={({ pressed }) => ({
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                backgroundColor: pressed ? D.card : "transparent",
+                alignItems: "center",
+                justifyContent: "center",
+              })}
+            >
+              <Ionicons name="notifications-outline" size={22} color={D.textSub} />
+              {unreadCount > 0 && (
+                <View style={{
+                  position: "absolute",
+                  top: 7,
+                  right: 7,
+                  width: 7,
+                  height: 7,
+                  borderRadius: 3.5,
+                  backgroundColor: D.error,
+                }} />
+              )}
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/(tabs)/profile")}
+              style={({ pressed }) => ({
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                backgroundColor: pressed ? D.card : "transparent",
+                alignItems: "center",
+                justifyContent: "center",
+              })}
+            >
+              <Ionicons name="person-outline" size={22} color={D.textSub} />
+            </Pressable>
+          </View>
         </View>
 
         {/* ── Balance Card ── */}
@@ -379,7 +394,7 @@ export default function HomeScreen() {
           }}>
             <Text style={{ color: D.text, fontSize: 14 }}>✦</Text>
             <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 0.9, textTransform: "uppercase", flex: 1 }}>
-              Gemelo Digital · UC2
+              Gemelo Digital
             </Text>
             <Text style={{ color: D.textMuted, fontSize: 12 }}>Simular →</Text>
           </View>

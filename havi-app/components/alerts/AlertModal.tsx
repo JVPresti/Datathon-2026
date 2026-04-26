@@ -221,13 +221,13 @@ function ContextRow({ label, value, valueColor }: { label: string; value: string
 function getAlertConfig(alert: HaviAlert) {
   switch (alert.type) {
     case "txn_atipica":
-      return { icon: "shield", iconColor: D.error, iconBg: "rgba(255,69,58,0.12)", label: "Seguridad · UC4" };
+      return { icon: "shield", iconColor: D.error, iconBg: "rgba(255,69,58,0.12)", label: "Seguridad" };
     case "rechazo_saldo":
     case "rechazo_limite":
-      return { icon: "card-outline", iconColor: D.warning, iconBg: "rgba(255,159,10,0.12)", label: "Copiloto financiero · UC1" };
+      return { icon: "card-outline", iconColor: D.warning, iconBg: "rgba(255,159,10,0.12)", label: "Pago rechazado" };
     case "cashback_proximo_perdido":
     case "upselling_pro":
-      return { icon: "star-outline", iconColor: D.text, iconBg: D.card, label: "Upselling · UC3" };
+      return { icon: "star-outline", iconColor: D.text, iconBg: D.card, label: "Oportunidad" };
     default:
       return { icon: "notifications-outline", iconColor: D.text, iconBg: D.card, label: "Havi" };
   }
