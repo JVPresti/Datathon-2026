@@ -189,15 +189,26 @@ function AlertContent({
           <ContextRow label="Comercio" value={alert.uc4_context.comercio} />
           <View style={styles.contextSep} />
           <ContextRow label="Monto" value={formatMXN(alert.uc4_context.monto)} valueColor={D.error} />
-          <View style={styles.contextSep} />
-          <ContextRow
-            label="Ciudad"
-            value={`${alert.uc4_context.ciudad_transaccion.split(",")[0]}${alert.uc4_context.es_internacional ? " 🌍" : ""}`}
-          />
+          {alert.uc4_context.ciudad_transaccion ? (
+            <>
+              <View style={styles.contextSep} />
+              <ContextRow
+                label="Ciudad"
+                value={`${alert.uc4_context.ciudad_transaccion.split(",")[0]}${alert.uc4_context.es_internacional ? " 🌍" : ""}`}
+              />
+            </>
+          ) : null}
           <View style={styles.contextSep} />
           <ContextRow
             label="Hora"
-            value={`${alert.uc4_context.hora_del_dia}:14 AM${alert.uc4_context.es_nocturna ? " · Horario inusual" : ""}`}
+            value={`${
+              (() => {
+                const f = new Date(alert.uc4_context.fecha_hora);
+                const h = f.getHours();
+                const m = f.getMinutes().toString().padStart(2, "0");
+                return `${h % 12 || 12}:${m} ${h >= 12 ? "PM" : "AM"}`;
+              })()
+            }${alert.uc4_context.es_nocturna ? " · Horario inusual" : ""}`}
             valueColor={alert.uc4_context.es_nocturna ? D.warning : undefined}
           />
         </View>
@@ -207,20 +218,34 @@ function AlertContent({
       {alert.uc1_context && (
         <View style={styles.contextCard}>
           <ContextRow
-            label="Comercio"
-            value={alert.uc1_context.comercio}
+            label="Comercio / Tipo"
+            value={alert.uc1_context.comercio || "Transferencia"}
           />
-          <View style={styles.contextSep} />
-          <ContextRow
-            label="Alternativa disponible"
-            value={alert.uc1_context.producto_alternativo?.replace(/_/g, " ").replace(/hey/i, "Hey") ?? "—"}
-          />
-          <View style={styles.contextSep} />
-          <ContextRow
-            label="Límite disponible"
-            value={formatMXN(alert.uc1_context.monto_disponible_alternativo ?? 0)}
-            valueColor={D.success}
-          />
+          {alert.type === "rechazo_saldo" && (
+            <>
+              <View style={styles.contextSep} />
+              <ContextRow
+                label="Alternativa sugerida"
+                value={alert.uc1_context.producto_alternativo?.replace(/_/g, " ").replace(/hey/i, "Hey") ?? "Inversión Hey"}
+              />
+              <View style={styles.contextSep} />
+              <ContextRow
+                label="Saldo en alternativa"
+                value={formatMXN(alert.uc1_context.monto_disponible_alternativo ?? 0)}
+                valueColor={D.success}
+              />
+            </>
+          )}
+          {alert.type === "rechazo_limite" && (
+            <>
+              <View style={styles.contextSep} />
+              <ContextRow
+                label="Estado"
+                value="Límite excedido"
+                valueColor={D.error}
+              />
+            </>
+          )}
         </View>
       )}
 

@@ -91,7 +91,7 @@ export class HaviChatService {
     try {
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-3.1-flash-lite-preview",
         systemInstruction: buildSystemPrompt(UC2_MOCK),
       });
 
@@ -199,7 +199,8 @@ export const haviService = new HaviChatService(true); // demo mode
 export type ChatAction =
   | { type: "set_budget"; categoria: string; limite: number }
   | { type: "initiate_portability" }
-  | { type: "report_fraud"; transaccion_id: string; comercio: string; monto: number };
+  | { type: "report_fraud"; transaccion_id: string; comercio: string; monto: number }
+  | { type: "move_funds"; amount: number };
 
 export interface HaviResponse {
   text: string;
@@ -243,7 +244,7 @@ function mapPipelineActions(actions: PipelineChatAction[]): {
       const limite = a.payload?.limit ?? 500;
       action = { type: "set_budget", categoria, limite };
       actionLabel = a.label;
-    } else if (!action && (a.action_id === "report_fraud" || a.action_id === "block_card")) {
+    } else if (!action && (a.action_id === "report_fraud" || a.action_id === "block_card" || a.action_id === "confirm_transaction")) {
       action = {
         type: "report_fraud",
         transaccion_id: a.payload?.transaccion_id ?? "txn-unknown",
@@ -251,6 +252,9 @@ function mapPipelineActions(actions: PipelineChatAction[]): {
         monto: a.payload?.monto ?? 0,
       };
       actionLabel = a.label ?? "No fui yo — bloquear tarjeta 🛡️";
+    } else if (!action && a.action_id === "move_funds_from_investment") {
+      action = { type: "move_funds", amount: a.payload?.amount ?? 0 };
+      actionLabel = a.label ?? "Mover fondos";
     } else {
       // Everything else becomes a suggestion pill
       suggestions.push(a.label);

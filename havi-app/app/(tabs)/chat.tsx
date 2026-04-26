@@ -183,6 +183,13 @@ export default function ChatScreen() {
     } else if (action.type === "report_fraud") {
       r = executeFraudReport(action.transaccion_id, action.comercio, action.monto);
       toastMsg = `⚠️ Cargo de ${action.comercio} bloqueado — disputa abierta`;
+    } else if (action.type === "move_funds") {
+      // Simulate API call for moving funds
+      r = {
+        text: `Listo, transferí $${action.amount.toLocaleString("es-MX")} de tu cuenta de inversión a tu cuenta principal. El saldo ya está disponible para usar.`,
+        suggestions: ["Ver mi saldo", "Intentar el pago de nuevo"]
+      };
+      toastMsg = `Fondo transferido correctamente`;
     } else {
       r = executePayrollPortability();
       toastMsg = "Solicitud de portabilidad de nómina enviada";

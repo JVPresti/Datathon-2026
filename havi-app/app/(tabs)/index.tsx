@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAlerts } from "../../src/hooks/useAlerts";
 import {
-  DEMO_USER,
+  DEMO_USERS,
   TRANSACCIONES_MOCK,
   formatMXN,
   timeAgo,
@@ -58,6 +58,7 @@ export default function HomeScreen() {
   const {
     isLoading: contextLoading,
     isConnected,
+    userId,
     uc2,
     uc3,
     ingreso_mensual,
@@ -65,7 +66,7 @@ export default function HomeScreen() {
     userName,
   } = useHaviContext();
 
-  const user = DEMO_USER;
+  const user = DEMO_USERS.find((u) => u.user_id === userId) || DEMO_USERS[0];
   const [showBalance, setShowBalance] = useState(true);
   const [showUC3, setShowUC3] = useState(false);
   const [uc3Payload, setUC3Payload] = useState<{ text: string; suggestions: string[] } | null>(null);
@@ -83,6 +84,12 @@ export default function HomeScreen() {
       return () => clearTimeout(t);
     }
   }, [urgentAlert]);
+
+  useEffect(() => {
+    // Cuando el usuario cambia, limpiamos los mensajes proactivos viejos
+    setShowUC3(false);
+    setUC3Payload(null);
+  }, [userId]);
 
   useEffect(() => {
     const t = setTimeout(() => {

@@ -8,7 +8,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Svg, { Circle, G, Text as SvgText } from "react-native-svg";
-import { DEMO_USER, formatMXN } from "../../src/data/mockData";
+import { DEMO_USERS, formatMXN } from "../../src/data/mockData";
+import { useHaviContext } from "../../src/hooks/useHaviContext";
 
 const D = {
   bg: "#000000",
@@ -75,8 +76,18 @@ const MENU = [
   { icon: "document-text-outline", label: "Términos y privacidad", sub: "Aviso de privacidad" },
 ];
 
+const UC_LABELS: Record<string, string> = {
+  "USR-15022": "Mix de casos (Default)",
+  "USR-05719": "Rechazo cubierto por inversión (UC1)",
+  "USR-03688": "Tensión financiera (UC2)",
+  "USR-07552": "Cashback perdido / Upselling (UC3)",
+  "USR-11034": "Prevención de fraude (UC4)"
+};
+
 export default function ProfileScreen() {
-  const user = DEMO_USER;
+  const { switchUser, userId } = useHaviContext();
+  // El profile siempre debe reflejar el usuario actual
+  const user = DEMO_USERS.find(u => u.user_id === userId) || DEMO_USERS[0];
   const router = useRouter();
   const [notifEnabled, setNotifEnabled] = useState(true);
 
@@ -135,6 +146,54 @@ export default function ProfileScreen() {
                 </View>
               </View>
             </View>
+          </View>
+        </View>
+
+        {/* Demo User Switcher */}
+        <View style={{ paddingHorizontal: 20, marginBottom: 14 }}>
+          <View style={{ backgroundColor: D.card, borderRadius: 16, overflow: "hidden", paddingVertical: 8 }}>
+            <Text style={{ color: D.textMuted, fontSize: 11, fontWeight: "600", marginLeft: 16, marginBottom: 8, marginTop: 4 }}>
+              CAMBIAR PERFIL (DEMO)
+            </Text>
+            {DEMO_USERS.map((u, idx) => {
+              const isSelected = u.user_id === user.user_id;
+              return (
+                <Pressable
+                  key={u.user_id}
+                  onPress={() => switchUser(u)}
+                  style={({ pressed }) => ({
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    backgroundColor: pressed ? D.cardAlt : (isSelected ? "rgba(48,209,88,0.05)" : "transparent"),
+                    borderBottomWidth: idx < DEMO_USERS.length - 1 ? StyleSheet.hairlineWidth : 0,
+                    borderBottomColor: D.sep,
+                    gap: 12,
+                  })}
+                >
+                  <View style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 15,
+                    backgroundColor: isSelected ? D.success : D.surface,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    {isSelected && <Ionicons name="checkmark" size={16} color="#000" />}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: isSelected ? D.success : D.text, fontSize: 14, fontWeight: "500" }}>
+                      {u.nombre} {u.apellido}
+                    </Text>
+                    <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>{u.user_id}</Text>
+                    <Text style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, marginTop: 2 }}>
+                      {UC_LABELS[u.user_id] || ""}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 

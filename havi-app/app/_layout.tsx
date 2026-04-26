@@ -8,6 +8,7 @@ import { StyleSheet } from "react-native";
 import { ToastProvider } from "../src/hooks/useToast";
 import { ToastContainer } from "../components/ui/Toast";
 import { HaviContextProvider, useHaviContext } from "../src/hooks/useHaviContext";
+import { ALERTAS_MOCK } from "../src/data/mockData";
 import { useEffect } from "react";
 
 /**
@@ -15,14 +16,21 @@ import { useEffect } from "react";
  * When the pipeline loads real alerts, it replaces the mock alerts in the store.
  */
 function PipelineAlertsSync() {
-  const { pipelineAlerts, isConnected } = useHaviContext();
+  const { pipelineAlerts, isConnected, userId } = useHaviContext();
   const { resetAlerts } = useAlerts();
 
   useEffect(() => {
     if (isConnected && pipelineAlerts.length > 0) {
       resetAlerts(pipelineAlerts);
+    } else {
+      const filtered = ALERTAS_MOCK.filter(a => {
+        if (userId === "USR-15022") return true; // Default user sees all for demo purposes
+        const targetUserId = a.uc1_context?.user_id || a.uc3_context?.user_id || a.uc4_context?.user_id;
+        return targetUserId === userId;
+      });
+      resetAlerts(filtered);
     }
-  }, [isConnected, pipelineAlerts, resetAlerts]);
+  }, [isConnected, pipelineAlerts, resetAlerts, userId]);
 
   return null;
 }

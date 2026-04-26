@@ -162,3 +162,7 @@ export function shouldFireUC3(): boolean {
 export function markUC3Fired(): void {
   _uc3FiredThisSession = true;
 }
+
+export function resetUC3Fired(): void {
+  _uc3FiredThisSession = false;
+}

@@ -276,6 +276,11 @@ def _build_fallback_response(context: dict, user_message: str) -> dict:
         })
         return {"text": text, "actions": actions}
 
+    # ── Actions Follow-up: Mover fondos ───────────────────────
+    if any(k in msg for k in ["mover", "fondos", "transferir", "inversion"]):
+        text = "¡Listo! Transferí los fondos de tu cuenta de inversión a tu cuenta principal. El saldo ya está disponible para usar."
+        return {"text": text, "actions": []}
+
     # ── Default: contextual pero no genérico ─────────────────
     parts = []
     if zona:
@@ -316,7 +321,7 @@ def generate_havi_response(
     user_id: str,
     context: dict,
     user_message: str,
-    model_name: str = "gemini-2.5-flash-lite",
+    model_name: str = "gemini-3.1-flash-lite-preview",
 ) -> dict:
     """
     Genera la respuesta de Havi.

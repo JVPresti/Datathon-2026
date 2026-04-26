@@ -132,7 +132,7 @@ def chat_endpoint(request: ChatRequest):
         user_id=request.user_id,
         context=context,
         user_message=request.message,
-        model_name="gemini-3.1-flash-lite",
+        model_name="gemini-3.1-flash-lite-preview",
     )
 
     elapsed = time.perf_counter() - t_start

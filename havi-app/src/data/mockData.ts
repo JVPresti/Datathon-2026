@@ -13,32 +13,95 @@ import {
   Transaccion,
 } from "../types";
 
-// ---- USUARIO DE DEMO ---------------------------------------
-// USR-15022: usuario real del dataset con los 4 UCs activos
-// UC1: rechazo saldo_insuficiente TXN-0000802042 ($972 supermercado)
-// UC2: zona Crítico, empeorando, déficit estimado en 7.6 días
-// UC3: $59.94/mes cashback perdido, score propensión 67, nómina domiciliada
-// UC4: 1 conversación histórica (soporte_técnico), 4 turnos
-export const DEMO_USER: HeyUser = {
-  user_id: "USR-15022",
-  nombre: "Valentina",
-  apellido: "Morales",
-  canal_preferido: "app_android",
-  balance_actual: 3_043.42,
-  ingreso_mensual: 13_500,
-  zona_riesgo: "Crítico",
-  score_riesgo: 1.246,
-  tendencia_riesgo: "Empeorando",
-  gasto_acumulado_mes: 5_970.76,
-  gasto_estimado_fin_mes: 12_339.57,
-  tiene_hey_pro: false,
-  avatar_color: "#FF5A1F",
-};
+// ---- USUARIOS DE DEMO (Representativos por UC) ---------------
+export const DEMO_USERS: HeyUser[] = [
+  {
+    user_id: "USR-15022",
+    nombre: "Valentina",
+    apellido: "Morales",
+    canal_preferido: "app_android",
+    balance_actual: 3043.42,
+    ingreso_mensual: 13500,
+    zona_riesgo: "Crítico",
+    score_riesgo: 1.246,
+    tendencia_riesgo: "Empeorando",
+    gasto_acumulado_mes: 5970.76,
+    gasto_estimado_fin_mes: 12339.57,
+    tiene_hey_pro: false,
+    avatar_color: "#FF5A1F",
+  },
+  {
+    user_id: "USR-05719",
+    nombre: "Sofía",
+    apellido: "Ríos",
+    canal_preferido: "app_ios",
+    balance_actual: 1540.00,
+    ingreso_mensual: 51000,
+    zona_riesgo: "Saludable",
+    score_riesgo: 0.8,
+    tendencia_riesgo: "Estable",
+    gasto_acumulado_mes: 18000.00,
+    gasto_estimado_fin_mes: 35000.00,
+    tiene_hey_pro: true,
+    avatar_color: "#00d4aa",
+  },
+  {
+    user_id: "USR-03688",
+    nombre: "Mariana",
+    apellido: "Garza",
+    canal_preferido: "app_android",
+    balance_actual: 4500.00,
+    ingreso_mensual: 9000,
+    zona_riesgo: "Precaución",
+    score_riesgo: 1.05,
+    tendencia_riesgo: "Estable",
+    gasto_acumulado_mes: 4000.00,
+    gasto_estimado_fin_mes: 8500.00,
+    tiene_hey_pro: true,
+    avatar_color: "#4f9eff",
+  },
+  {
+    user_id: "USR-07552",
+    nombre: "Fernanda",
+    apellido: "López",
+    canal_preferido: "app_ios",
+    balance_actual: 12000.00,
+    ingreso_mensual: 43000,
+    zona_riesgo: "Saludable",
+    score_riesgo: 0.6,
+    tendencia_riesgo: "Mejorando",
+    gasto_acumulado_mes: 25000.00,
+    gasto_estimado_fin_mes: 38000.00,
+    tiene_hey_pro: false,
+    avatar_color: "#f5a623",
+  },
+  {
+    user_id: "USR-11034",
+    nombre: "Camila",
+    apellido: "Reyes",
+    canal_preferido: "app_android",
+    balance_actual: 28000.00,
+    ingreso_mensual: 39000,
+    zona_riesgo: "Saludable",
+    score_riesgo: 0.75,
+    tendencia_riesgo: "Estable",
+    gasto_acumulado_mes: 12000.00,
+    gasto_estimado_fin_mes: 29000.00,
+    tiene_hey_pro: false,
+    avatar_color: "#ff6b6b",
+  }
+];
+
+export let DEMO_USER: HeyUser = DEMO_USERS[0];
+
+export function setDemoUser(user: HeyUser) {
+  DEMO_USER = user;
+}
 
 // ---- UC1 CONTEXT -------------------------------------------
 // Rechazo real: TXN-0000802042, $972.39 en supermercado, 2025-06-06
 export const UC1_MOCK: UC1Context = {
-  user_id: "USR-15022",
+  user_id: "USR-05719",
   transaccion_id: "TXN-0000802042",
   situacion: "rechazo_por_saldo",
   motivo: "saldo_insuficiente",
@@ -47,7 +110,7 @@ export const UC1_MOCK: UC1Context = {
   ciudad_transaccion: "CDMX - Miguel Hidalgo",
   fecha_hora: "2025-06-06 12:50:29",
   es_internacional: false,
-  nombre_usuario: "Valentina",
+  nombre_usuario: "Sofía",
   saldo_actual_producto_origen: 3_043.42,
   monto_faltante: 972.39,
   tiene_alternativo: true,
@@ -84,8 +147,8 @@ export const UC2_MOCK: UC2Context = {
 // ---- UC3 CONTEXT -------------------------------------------
 // Datos reales USR-15022: $59.94/mes cashback, nómina ya domiciliada → 1 paso
 export const UC3_MOCK: UC3Context = {
-  user_id: "USR-15022",
-  nombre_usuario: "Valentina",
+  user_id: "USR-07552",
+  nombre_usuario: "Fernanda",
   cashback_perdido_mes: 59.94,
   cashback_anual_estimado: 719.28,
   top_categoria_perdida: "supermercado",
@@ -102,19 +165,19 @@ export const UC3_MOCK: UC3Context = {
 // USR-15022: intent histórico soporte_tecnico, 4 turnos conversacionales
 // (sin transacción atípica activa — se mantiene el ejemplo de fraude para demo)
 export const UC4_MOCK: UC4Context = {
-  user_id: "USR-15022",
-  transaccion_id: "TXN-0000802042",
+  user_id: "USR-11034",
+  transaccion_id: "TXN-003",
   producto_id: "PRD-00000001",
-  monto: 972.39,
-  comercio: "Supermercado",
-  ciudad_transaccion: "CDMX - Miguel Hidalgo",
-  fecha_hora: "2025-06-06 12:50:29",
-  hora_del_dia: 12,
-  es_internacional: false,
-  es_nocturna: false,
-  anomaly_score: 0.4,
-  canal_alerta: "chat",
-  sla_respuesta_seg: 600,
+  monto: 2150.00,
+  comercio: "Amazon US",
+  ciudad_transaccion: "Seattle, WA",
+  fecha_hora: "2025-08-24 03:14:00",
+  hora_del_dia: 3,
+  es_internacional: true,
+  es_nocturna: true,
+  anomaly_score: 0.92,
+  canal_alerta: "app_push",
+  sla_respuesta_seg: 300,
 };
 
 // ---- TRANSACCIONES -----------------------------------------

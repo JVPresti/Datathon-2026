@@ -20,14 +20,9 @@ import {
   PipelineAlert,
   PipelineRecommendation,
 } from "../services/apiClient";
-import {
-  HaviAlert,
-  UC2Context,
-  UC3Context,
-  ZonaRiesgo,
-  TendenciaRiesgo,
-} from "../types";
-import { DEMO_USER, UC2_MOCK, UC3_MOCK } from "../data/mockData";
+import { resetUC3Fired } from "../services/upsellingService";
+import { TendenciaRiesgo, ZonaRiesgo, HaviAlert, UC2Context, UC3Context, HeyUser } from "../types";
+import { DEMO_USER, DEMO_USERS, setDemoUser, UC2_MOCK, UC3_MOCK } from "../data/mockData";
 
 // ── Context shape ────────────────────────────────────────────
 
@@ -43,6 +38,7 @@ export interface HaviContextData {
   /** Alerts derived from UC1 + UC4 pipeline data */
   pipelineAlerts: HaviAlert[];
   refetch: () => void;
+  switchUser: (user: HeyUser) => void;
 }
 
 const HaviCtx = createContext<HaviContextData | null>(null);
@@ -275,8 +271,20 @@ export function HaviContextProvider({ children }: { children: ReactNode }) {
   const [ingreso_mensual, setIngresoMensual] = useState(DEMO_USER.ingreso_mensual);
   const [tiene_hey_pro, setTieneHeyPro] = useState(DEMO_USER.tiene_hey_pro);
 
-  const userId = DEMO_USER.user_id;
-  const userName = DEMO_USER.nombre;
+  const [activeUser, setActiveUser] = useState<HeyUser>(DEMO_USER);
+  const userId = activeUser.user_id;
+  const userName = activeUser.nombre;
+
+  const switchUser = useCallback((user: HeyUser) => {
+    setDemoUser(user);
+    setActiveUser(user);
+    setIngresoMensual(user.ingreso_mensual);
+    setTieneHeyPro(user.tiene_hey_pro);
+    setUC2(UC2_MOCK);
+    setUC3(UC3_MOCK);
+    setPipelineAlerts([]);
+    resetUC3Fired();
+  }, []);
 
   const fetchContext = useCallback(async () => {
     setIsLoading(true);
@@ -341,6 +349,7 @@ export function HaviContextProvider({ children }: { children: ReactNode }) {
         uc3,
         pipelineAlerts,
         refetch: fetchContext,
+        switchUser,
       }}
     >
       {children}
