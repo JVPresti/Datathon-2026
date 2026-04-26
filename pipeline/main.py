@@ -10,8 +10,11 @@ Arquitectura (ARQUITECTURA_PIPELINE.md):
 
 from contextlib import asynccontextmanager
 from datetime import datetime
+import json
+import time
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from data_loader import DL
 from context_builder import build_context
@@ -34,6 +37,14 @@ app = FastAPI(
     description="Pipeline de orquestación de Havi con Gemini y datos reales de Hey Banco.",
     version="2.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -70,41 +81,53 @@ def chat_endpoint(request: ChatRequest):
 
     Flujo:
     1. Valida que el user_id exista en los datos reales.
-    2. Llama a context_builder.build_context() para armar UC1-UC4 en tiempo real.
-    3. Llama a models_loader.generate_havi_response() que inyecta el contexto en Gemini.
-    4. Devuelve la respuesta y el contexto utilizado.
+    2. Ensambla contexto UC1-UC4 real en tiempo real.
+    3. Filtra UCs relevantes por keywords del mensaje.
+    4. Llama a Gemini (con fallback contextual si Gemini falla).
+    5. Devuelve respuesta + acciones sugeridas.
     """
+    t_start = time.perf_counter()
+
     # 1. Validar usuario
-    if user_id := request.user_id:
-        if user_id not in DL.clientes_idx:
-            raise HTTPException(status_code=404, detail=f"Usuario '{user_id}' no encontrado.")
+    if request.user_id not in DL.clientes_idx:
+        raise HTTPException(status_code=404, detail=f"Usuario '{request.user_id}' no encontrado.")
 
     # 2. Ensamblar contexto real UC1-UC4
     full_context = build_context(request.user_id)
 
-    # 3. Filtrar contexto por intención para optimizar (conforme a solicitud)
+    # 3. Seleccionar UCs relevantes por intención del mensaje
     msg = request.message.lower()
-    context = {
+    context: dict = {
         "user_profile": full_context["user_profile"],
-        "uc4": full_context["uc4"]
+        "uc4": full_context["uc4"],
     }
-    
-    # Determinar qué UCs son relevantes
-    if any(k in msg for k in ["pago", "rechazo", "netflix", "comprar", "no pasó", "tarjeta"]):
-        context["uc1"] = full_context["uc1"]
-    if any(k in msg for k in ["fin de mes", "gasto", "liquidez", "ahorro", "cuanto tengo", "proyeccion"]):
-        context["uc2"] = full_context["uc2"]
-    if any(k in msg for k in ["beneficio", "hey pro", "ganar", "puntos", "cashback", "pro"]):
-        context["uc3"] = full_context["uc3"]
-    if any(k in msg for k in ["fraude", "no reconozco", "extraño", "sospechoso", "seguridad", "bloque"]):
-        context["uc1"] = full_context["uc1"] # Atípicas están en UC1
 
-    # Si no se detectó nada específico, enviamos UC1 y UC2 por defecto (más comunes)
+    if any(k in msg for k in ["pago", "rechazo", "netflix", "comprar", "no pasó", "tarjeta", "cargo"]):
+        context["uc1"] = full_context["uc1"]
+    if any(k in msg for k in ["fin de mes", "gasto", "liquidez", "ahorro", "cuanto", "proyecc", "queda", "mes"]):
+        context["uc2"] = full_context["uc2"]
+    if any(k in msg for k in ["beneficio", "hey pro", "ganar", "puntos", "cashback", "pro", "activ"]):
+        context["uc3"] = full_context["uc3"]
+    if any(k in msg for k in ["fraude", "no reconozco", "extraño", "sospechoso", "seguridad", "bloque", "atípic"]):
+        context["uc1"] = full_context["uc1"]
+
+    # Default: incluir UC1 + UC2 si ningún intent fue detectado
     if len(context) <= 2:
         context["uc1"] = full_context["uc1"]
         context["uc2"] = full_context["uc2"]
 
-    # 4. Llamar a Gemini
+    # Debug: contexto que recibe el orquestador / Gemini (después del filtrado por intención)
+    print("\n" + "=" * 80)
+    print(f">>> [/chat] CONTEXTO ENVIADO A HAVI | user_id={request.user_id}")
+    print(f">>> mensaje_usuario: {request.message!r}")
+    print(">>> keys en context:", list(context.keys()))
+    try:
+        print(json.dumps(context, indent=2, ensure_ascii=False, default=str))
+    except TypeError as e:
+        print(f">>> (json.dumps falló: {e}) context repr truncado:", repr(context)[:2000])
+    print("=" * 80 + "\n")
+
+    # 4. Generar respuesta (Gemini o fallback contextual)
     havi_res = generate_havi_response(
         user_id=request.user_id,
         context=context,
@@ -112,7 +135,9 @@ def chat_endpoint(request: ChatRequest):
         model_name="gemini-2.5-flash-lite",
     )
 
-    # 4. Retornar respuesta
+    elapsed = time.perf_counter() - t_start
+    print(f"[/chat] {request.user_id} — total {elapsed:.2f}s")
+
     return ChatResponse(
         response=havi_res.get("text", ""),
         actions=havi_res.get("actions", []),

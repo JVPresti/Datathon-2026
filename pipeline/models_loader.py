@@ -1,20 +1,20 @@
 import os
 import json
+import time
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
 load_dotenv(override=True)
 
-# Inicializar cliente de Gemini
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     client = genai.Client(api_key=api_key)
 else:
-    client = genai.Client() # Asume que está en el ambiente o fallará
+    client = genai.Client()
 
-# Prompt base del sistema para Havi
+# ── System prompt ────────────────────────────────────────────
+
 HAVI_SYSTEM_PROMPT = """
 Eres Havi, el asistente financiero virtual proactivo y empático de Hey Banco.
 Tu objetivo es ayudar a los usuarios con sus finanzas, basándote en su perfil (gemelo digital), alertas de riesgo (UC1) y oportunidades (UC3).
@@ -36,20 +36,194 @@ Acciones técnicas y sus PAYLOADS sugeridos:
 - confirm_transaction: Validar cargo. Payload: {"transaction_id": "string", "amount": float}
 
 Instrucciones:
-1. Responde de forma concisa, amigable y proactiva.
-2. UTILIZA FORMATO MARKDOWN en el campo "text" (negritas, listas, etc.) para mejorar la legibilidad.
-3. Si hay alertas en UC1 con iso_is_anomaly=true o iso_anomaly_score alto, trátalas con mayor urgencia y sugiere 'confirm_transaction' o 'block_card_temporarily'.
-4. Si ml_alerta_liquidez es true, avisa al usuario sobre el riesgo de déficit y sugiere 'move_funds_from_investment' (calcula el amount necesario según el rechazo o déficit) o 'set_category_limit'.
-5. Si detectas que el usuario pierde cashback significativo (UC3), sugiere 'activate_hey_pro' incluyendo el monto estimado en el payload.
-6. No menciones términos técnicos como 'IsoForest' o 'JSON' en el campo "text".
-7. Si no hay acciones relevantes, deja el array "actions" vacío [].
+1. Responde de forma concisa, amigable y proactiva. Máximo 3-4 oraciones.
+2. USA FORMATO MARKDOWN en el campo "text" (negritas, listas).
+3. Si hay alertas UC1 con iso_is_anomaly=true, trátalas con urgencia y sugiere 'confirm_transaction'.
+4. Si ml_alerta_liquidez es true, sugiere 'move_funds_from_investment' o 'set_category_limit'.
+5. Si el usuario pierde cashback (UC3), sugiere 'activate_hey_pro' con el monto en el payload.
+6. No menciones términos técnicos como 'IsoForest', 'JSON', 'UC1', 'UC2', 'UC3', 'UC4', 'ML'.
+7. Si no hay acciones relevantes, deja "actions": [].
 """
 
+
+def _trim_context(context: dict) -> dict:
+    """
+    Reduce el tamaño del contexto antes de enviarlo a Gemini.
+    Conserva toda la información útil pero elimina verbosidad innecesaria.
+    """
+    trimmed = {}
+
+    # user_profile: solo campos clave
+    if "user_profile" in context:
+        p = context["user_profile"]
+        trimmed["user_profile"] = {
+            "es_hey_pro": p.get("es_hey_pro"),
+            "ingreso_mensual_mxn": p.get("ingreso_mensual_mxn"),
+            "n_rechazos_30d": p.get("n_rechazos_30d"),
+            "productos_activos": p.get("productos_activos", [])[:3],
+        }
+
+    # UC1: solo la alerta más urgente
+    if "uc1" in context:
+        alerts = context["uc1"].get("alerts", [])
+        trimmed["uc1"] = {"alerts": alerts[:1]}
+
+    # UC2: métricas clave solamente
+    if "uc2" in context:
+        m = context["uc2"].get("metrics", {})
+        trimmed["uc2"] = {
+            "persona": context["uc2"].get("persona"),
+            "key_traits": context["uc2"].get("key_traits", [])[:3],
+            "metrics": {
+                "zona_riesgo": m.get("zona_riesgo"),
+                "tendencia_riesgo": m.get("tendencia_riesgo"),
+                "top_categoria": m.get("top_categoria"),
+                "gasto_total": m.get("gasto_total"),
+                "dias_hasta_deficit": m.get("dias_hasta_deficit"),
+                "ingreso_restante_estimado": m.get("ingreso_restante_estimado"),
+                "ml_alerta_liquidez": m.get("ml_alerta_liquidez"),
+                "ml_nivel_riesgo": m.get("ml_nivel_riesgo"),
+                "ml_prob_deficit": m.get("ml_prob_deficit"),
+            },
+        }
+
+    # UC3: solo top 1 recomendación
+    if "uc3" in context:
+        recs = context["uc3"].get("recommendations", [])
+        trimmed["uc3"] = {"recommendations": recs[:1]}
+
+    # UC4: solo 2 turnos más recientes + señales clave
+    if "uc4" in context:
+        uc4 = context["uc4"]
+        trimmed["uc4"] = {
+            "intent_top": uc4.get("intent_top"),
+            "menciona_fraude": uc4.get("menciona_fraude"),
+            "menciona_cashback": uc4.get("menciona_cashback"),
+            "iso_txn_is_anomaly": uc4.get("iso_txn_is_anomaly"),
+            "alerta_fraude_alta": uc4.get("alerta_fraude_alta"),
+            "recent_turns": uc4.get("recent_turns", [])[-2:],
+        }
+
+    return trimmed
+
+
+def _build_fallback_response(context: dict, user_message: str) -> dict:
+    """
+    Respuesta contextual basada en reglas cuando Gemini no está disponible.
+    Usa datos reales de UC1-UC4 para NO ser genérica.
+    """
+    msg = user_message.lower()
+    profile = context.get("user_profile", {})
+    uc1 = context.get("uc1", {})
+    uc2 = context.get("uc2", {})
+    uc3 = context.get("uc3", {})
+    uc4 = context.get("uc4", {})
+
+    alerts = uc1.get("alerts", [])
+    metrics = uc2.get("metrics", {})
+    recs = uc3.get("recommendations", [])
+    zona = metrics.get("zona_riesgo", "")
+    tendencia = metrics.get("tendencia_riesgo", "")
+    top_cat = metrics.get("top_categoria", "")
+    ingreso_restante = metrics.get("ingreso_restante_estimado") or 0
+    dias_deficit = metrics.get("dias_hasta_deficit")
+    ml_alerta = metrics.get("ml_alerta_liquidez", False)
+    actions = []
+
+    # ── UC4: fraude / cargo no reconocido ────────────────────
+    if uc4.get("alerta_fraude_alta") or (
+        uc4.get("iso_txn_is_anomaly")
+        and any(k in msg for k in ["fraude", "no reconozco", "extraño", "sospech", "cargo raro"])
+    ):
+        text = (
+            "Detecté una transacción que **sale de tu patrón habitual**. "
+            "Te recomiendo revisarla de inmediato para proteger tu cuenta."
+        )
+        actions.append({"label": "Revisar cargo", "action_id": "confirm_transaction", "payload": {}})
+        return {"text": text, "actions": actions}
+
+    # ── UC1: rechazo de pago ──────────────────────────────────
+    if alerts and any(k in msg for k in ["pago", "cargo", "rechaz", "tarjeta", "no pasó", "no cargó"]):
+        a = alerts[0]
+        ctx_a = a.get("context", {})
+        monto = ctx_a.get("monto", 0)
+        motivo = ctx_a.get("motivo", "").replace("_", " ")
+        saldo_alt = ctx_a.get("saldo_inversion_disponible", 0)
+        text = f"Veo que tuviste un cargo rechazado por **${monto:,.2f} MXN** ({motivo}). "
+        if saldo_alt > monto:
+            text += f"Tienes **${saldo_alt:,.0f}** disponibles en inversión. ¿Lo movemos a tu cuenta?"
+            actions.append({
+                "label": "Mover fondos",
+                "action_id": "move_funds_from_investment",
+                "payload": {"amount": round(monto, 2), "currency": "MXN"},
+            })
+        else:
+            text += "¿Quieres que revisemos tus opciones de pago?"
+        return {"text": text, "actions": actions}
+
+    # ── UC2: análisis de gastos / liquidez ────────────────────
+    if any(k in msg for k in ["gasto", "mes", "ahorro", "liquidez", "cuanto", "fin de mes", "queda", "proyecc"]):
+        if ml_alerta or zona in ("Precaucion", "Precaución", "Critica", "Crítico"):
+            text = f"Tu zona de riesgo es **{zona}** con tendencia **{tendencia}**. "
+            if dias_deficit is not None:
+                text += f"El modelo proyecta un posible déficit en ~**{dias_deficit:.0f} días**. "
+            if top_cat:
+                text += f"Tu mayor gasto es en **{top_cat}** — considera ponerle un límite."
+                actions.append({
+                    "label": f"Limitar {top_cat}",
+                    "action_id": "set_category_limit",
+                    "payload": {"category": top_cat, "limit": 500.0},
+                })
+        else:
+            text = f"Tus finanzas están en zona **{zona if zona else 'Saludable'}** ({tendencia}). "
+            if ingreso_restante > 0:
+                text += f"Te queda un estimado de **${ingreso_restante:,.0f} MXN** disponible. "
+            if top_cat:
+                text += f"Mayor gasto: **{top_cat}**."
+        actions.append({"label": "Ver proyección", "action_id": "view_financial_forecast", "payload": {}})
+        return {"text": text, "actions": actions}
+
+    # ── UC3: Hey Pro / cashback ───────────────────────────────
+    if recs and any(k in msg for k in ["pro", "cashback", "beneficio", "ganar", "puntos", "activ"]):
+        rec = recs[0]
+        cashback = rec.get("cashback_perdido_mes", 0)
+        text = (
+            f"Con tus compras actuales estás dejando de ganar **${cashback:,.2f} MXN/mes** en cashback. "
+            f"Al año serían **${cashback * 12:,.2f} MXN**. Activar Hey Pro solo requiere domiciliar tu nómina."
+        )
+        actions.append({
+            "label": "Activar Hey Pro",
+            "action_id": "activate_hey_pro",
+            "payload": {"estimated_cashback": round(cashback, 2)},
+        })
+        return {"text": text, "actions": actions}
+
+    # ── Default: contextual pero no genérico ─────────────────
+    parts = []
+    if zona:
+        parts.append(f"Tus finanzas están en zona **{zona}**")
+    if top_cat:
+        parts.append(f"tu mayor gasto es en **{top_cat}**")
+    if recs:
+        cashback = recs[0].get("cashback_perdido_mes", 0)
+        if cashback > 50:
+            parts.append(f"podrías ganar **${cashback:,.0f}/mes** en cashback con Hey Pro")
+
+    intro = (". ".join(parts) + ". ") if parts else ""
+    text = intro + "Estoy aquí para ayudarte — puedo analizar tus gastos, revisar alertas o buscar oportunidades de ahorro. ¿Qué quieres explorar?"
+
+    if ml_alerta:
+        actions.append({
+            "label": "Ver mi situación",
+            "action_id": "view_financial_forecast",
+            "payload": {},
+        })
+    return {"text": text, "actions": actions}
+
+
 def build_prompt_with_context(user_message: str, context: dict) -> str:
-    """Ensambla el prompt final inyectando el contexto JSON"""
     context_str = json.dumps(context, indent=2, ensure_ascii=False)
-    
-    prompt = f"""
+    return f"""
 --- CONTEXTO DEL USUARIO ---
 {context_str}
 ---------------------------
@@ -58,52 +232,53 @@ Mensaje del usuario: "{user_message}"
 
 RESPONDE ÚNICAMENTE EN FORMATO JSON como se indicó en las instrucciones del sistema.
 """
-    return prompt
 
-def generate_havi_response(user_id: str, context: dict, user_message: str, model_name: str = "gemini-2.5-flash-lite") -> dict:
-    """
-    Llama a la API de Gemini para generar la respuesta de Havi.
-    Retorna un diccionario con {'text': ..., 'actions': ...}
-    """
-    
-    prompt = build_prompt_with_context(user_message, context)
-    
-    # ── [DEBUG] TODO LO QUE SE ENVÍA A GEMINI ──────────────────────────────
-    print("\n" + "="*80)
-    print(">>> [SYSTEM INSTRUCTION] <<<")
-    print(HAVI_SYSTEM_PROMPT)
-    print("\n>>> [USER PROMPT + CONTEXT] <<<")
-    print(prompt)
-    print("="*80 + "\n")
-    # ────────────────────────────────────────────────────────────────────────
 
+def generate_havi_response(
+    user_id: str,
+    context: dict,
+    user_message: str,
+    model_name: str = "gemini-2.5-flash-lite",
+) -> dict:
+    """
+    Genera la respuesta de Havi.
+    1. Intenta Gemini con contexto trimado.
+    2. Si Gemini falla, devuelve respuesta contextual basada en reglas (no genérica).
+    """
+    trimmed = _trim_context(context)
+    prompt = build_prompt_with_context(user_message, trimmed)
+
+    t0 = time.perf_counter()
     try:
         response = client.models.generate_content(
             model=model_name,
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=HAVI_SYSTEM_PROMPT,
-                temperature=0.4,
-                response_mime_type="application/json"
+                temperature=0.3,
+                response_mime_type="application/json",
             ),
         )
-        
-        # Intentar parsear el JSON de la respuesta
+        elapsed = time.perf_counter() - t0
+        print(f"[Gemini] OK {model_name} — {elapsed:.2f}s | user={user_id}")
+
         try:
             data = json.loads(response.text)
             return {
-                "text": data.get("text", "Lo siento, tuve un problema procesando mi respuesta."),
-                "actions": data.get("actions", [])
+                "text": data.get("text", ""),
+                "actions": data.get("actions", []),
             }
-        except:
-            # Fallback si no es JSON válido
-            return {
-                "text": response.text,
-                "actions": []
-            }
-            
+        except Exception:
+            return {"text": response.text, "actions": []}
+
     except Exception as e:
-        return {
-            "text": f"Error interno en Havi (Gemini API): {str(e)}",
-            "actions": []
-        }
+        elapsed = time.perf_counter() - t0
+        err_str = str(e)
+        print(f"[Gemini] ERROR {model_name} — {elapsed:.2f}s | {err_str[:120]}")
+
+        # Si la key expiró o es inválida, indícalo con log claro
+        if "API_KEY_INVALID" in err_str or "API key expired" in err_str or "INVALID_ARGUMENT" in err_str:
+            print("[Gemini] ⚠️  API key inválida o expirada. Usando respuesta contextual de fallback.")
+
+        # Devuelve respuesta contextual real usando el contexto UC1-UC4
+        return _build_fallback_response(context, user_message)

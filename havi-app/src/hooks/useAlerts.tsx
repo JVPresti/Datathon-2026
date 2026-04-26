@@ -15,6 +15,8 @@ interface AlertStore {
   markAsRead: (id: string) => void;
   markAsActioned: (id: string) => void;
   addAlert: (alert: HaviAlert) => void;
+  /** Replace the entire alert list (used by HaviContextProvider to inject real pipeline alerts) */
+  resetAlerts: (newAlerts: HaviAlert[]) => void;
 }
 
 const AlertContext = createContext<AlertStore | null>(null);
@@ -53,9 +55,13 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const resetAlerts = useCallback((newAlerts: HaviAlert[]) => {
+    setAlerts(newAlerts);
+  }, []);
+
   return (
     <AlertContext.Provider
-      value={{ alerts, activeAlert, unreadCount, showAlert, dismissAlert, markAsRead, markAsActioned, addAlert }}
+      value={{ alerts, activeAlert, unreadCount, showAlert, dismissAlert, markAsRead, markAsActioned, addAlert, resetAlerts }}
     >
       {children}
     </AlertContext.Provider>

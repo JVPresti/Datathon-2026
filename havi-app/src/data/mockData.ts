@@ -14,95 +14,105 @@ import {
 } from "../types";
 
 // ---- USUARIO DE DEMO ---------------------------------------
+// USR-15022: usuario real del dataset con los 4 UCs activos
+// UC1: rechazo saldo_insuficiente TXN-0000802042 ($972 supermercado)
+// UC2: zona Crítico, empeorando, déficit estimado en 7.6 días
+// UC3: $59.94/mes cashback perdido, score propensión 67, nómina domiciliada
+// UC4: 1 conversación histórica (soporte_técnico), 4 turnos
 export const DEMO_USER: HeyUser = {
-  user_id: "USR-00001",
+  user_id: "USR-15022",
   nombre: "Valentina",
   apellido: "Morales",
   canal_preferido: "app_android",
-  balance_actual: 18_420.5,
-  ingreso_mensual: 24_000,
-  zona_riesgo: "Precaucion",
-  score_riesgo: 0.62,
+  balance_actual: 3_043.42,
+  ingreso_mensual: 13_500,
+  zona_riesgo: "Crítico",
+  score_riesgo: 1.246,
   tendencia_riesgo: "Empeorando",
-  gasto_acumulado_mes: 14_320,
-  gasto_estimado_fin_mes: 26_800,
+  gasto_acumulado_mes: 5_970.76,
+  gasto_estimado_fin_mes: 12_339.57,
   tiene_hey_pro: false,
   avatar_color: "#FF5A1F",
 };
 
 // ---- UC1 CONTEXT -------------------------------------------
+// Rechazo real: TXN-0000802042, $972.39 en supermercado, 2025-06-06
 export const UC1_MOCK: UC1Context = {
-  user_id: "USR-00001",
-  transaccion_id: "TXN-0000000050",
+  user_id: "USR-15022",
+  transaccion_id: "TXN-0000802042",
   situacion: "rechazo_por_saldo",
   motivo: "saldo_insuficiente",
-  monto_rechazado: 349.0,
-  comercio: "NewsDigital MX",
-  ciudad_transaccion: "CDMX - Benito Juárez",
-  fecha_hora: "2025-08-23 20:37:31",
+  monto_rechazado: 972.39,
+  comercio: "Supermercado",
+  ciudad_transaccion: "CDMX - Miguel Hidalgo",
+  fecha_hora: "2025-06-06 12:50:29",
   es_internacional: false,
   nombre_usuario: "Valentina",
-  saldo_actual_producto_origen: 0.0,
-  monto_faltante: 349.0,
+  saldo_actual_producto_origen: 3_043.42,
+  monto_faltante: 972.39,
   tiene_alternativo: true,
   producto_alternativo: "tarjeta_credito_hey",
   producto_alternativo_id: "PRD-00000002",
-  monto_disponible_alternativo: 88_790.4,
+  monto_disponible_alternativo: 15_000.0,
   es_cronico: false,
   canal_preferido: "app_android",
 };
 
 // ---- UC2 CONTEXT (solo para Havi, NO mostrar al usuario) ---
+// Datos reales USR-15022: zona Crítico, déficit en 7.6 días
 export const UC2_MOCK: UC2Context = {
-  user_id: "USR-00001",
+  user_id: "USR-15022",
   nombre_usuario: "Valentina",
-  zona_riesgo: "Precaucion",
-  score_riesgo: 0.62,
+  zona_riesgo: "Crítico",
+  score_riesgo: 1.246,
   tendencia_riesgo: "Empeorando",
-  delta_score_mensual: 0.14,
-  gasto_acumulado_mes: 14_320,
-  gasto_estimado_fin_mes: 26_800,
-  mensualidades_pendientes: 3_200,
-  ingreso_mensual: 24_000,
-  deficit_proyectado: -5_000,
+  delta_score_mensual: 0.47,
+  gasto_acumulado_mes: 5_970.76,
+  gasto_estimado_fin_mes: 12_339.57,
+  mensualidades_pendientes: 4_485.82,
+  ingreso_mensual: 13_500,
+  deficit_proyectado: -3_325.39,
   dias_al_corte: 8,
-  categoria_problema: "restaurante",
+  categoria_problema: "supermercado",
   comparativa_mes_anterior: {
-    gasto_real_mes_anterior: 18_200,
-    gasto_estimado_fin_mes: 26_800,
-    variacion_pct: 47.25,
+    gasto_real_mes_anterior: 5_993.65,
+    gasto_estimado_fin_mes: 12_339.57,
+    variacion_pct: 105.87,
   },
 };
 
 // ---- UC3 CONTEXT -------------------------------------------
+// Datos reales USR-15022: $59.94/mes cashback, nómina ya domiciliada → 1 paso
 export const UC3_MOCK: UC3Context = {
-  user_id: "USR-00001",
+  user_id: "USR-15022",
   nombre_usuario: "Valentina",
-  cashback_perdido_mes: 387.5,
-  cashback_anual_estimado: 4_650,
-  top_categoria_perdida: "tecnologia",
-  monto_top_categoria: 12_800,
+  cashback_perdido_mes: 59.94,
+  cashback_anual_estimado: 719.28,
+  top_categoria_perdida: "supermercado",
+  monto_top_categoria: 5_994.0,
   segmento: "A",
-  ya_tiene_nomina: false,
-  pasos_activacion: 3,
-  requisito_activacion: "Domiciliar nómina en Hey Banco",
-  score_propension: 0.87,
-  dias_desde_ultimo_login: 1,
+  ya_tiene_nomina: true,
+  pasos_activacion: 1,
+  requisito_activacion: "Activar Hey Pro (nómina ya domiciliada)",
+  score_propension: 0.67,
+  dias_desde_ultimo_login: 4,
 };
 
 // ---- UC4 CONTEXT -------------------------------------------
+// USR-15022: intent histórico soporte_tecnico, 4 turnos conversacionales
+// (sin transacción atípica activa — se mantiene el ejemplo de fraude para demo)
 export const UC4_MOCK: UC4Context = {
-  user_id: "USR-00001",
-  transaccion_id: "TXN-0000004821",
+  user_id: "USR-15022",
+  transaccion_id: "TXN-0000802042",
   producto_id: "PRD-00000001",
-  monto: 2_150.0,
-  comercio: "Amazon US",
-  ciudad_transaccion: "Seattle, WA",
-  fecha_hora: "2025-08-24 03:14:00",
-  hora_del_dia: 3,
-  es_internacional: true,
-  es_nocturna: true,
-  anomaly_score: 7.0,
+  monto: 972.39,
+  comercio: "Supermercado",
+  ciudad_transaccion: "CDMX - Miguel Hidalgo",
+  fecha_hora: "2025-06-06 12:50:29",
+  hora_del_dia: 12,
+  es_internacional: false,
+  es_nocturna: false,
+  anomaly_score: 0.4,
   canal_alerta: "chat",
   sla_respuesta_seg: 600,
 };

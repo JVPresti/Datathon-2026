@@ -1,7 +1,7 @@
 // ============================================================
-// HAVI — Gemini 2.5 Flash Service
-// El gemelo digital (UC2) se inyecta como contexto del sistema
-// NUNCA se expone al usuario
+// HAVI — Chat Service
+// Primary path: pipeline POST /chat (Gemini + UC1-UC4 context)
+// Fallback: local demo responses when pipeline is unavailable
 // ============================================================
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -20,6 +20,7 @@ import {
   initiatePayrollPortability,
   PayrollPortabilityResult,
 } from "./upsellingService";
+import { pipelineClient, PipelineChatAction } from "./apiClient";
 
 // ⚠️ En producción esto va en variables de entorno
 // Para el prototipo se configura desde la app
@@ -90,7 +91,7 @@ export class HaviChatService {
     try {
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash-lite",
         systemInstruction: buildSystemPrompt(UC2_MOCK),
       });
 
@@ -199,12 +200,87 @@ export interface HaviResponse {
   actionLabel?: string;
 }
 
+// ---- Detect pipeline-level errors (Gemini down, key expired, etc.) ----
+
+function isPipelineError(text: string): boolean {
+  if (!text) return true;
+  const errorMarkers = [
+    "Error interno en Havi",
+    "API key expired",
+    "INVALID_ARGUMENT",
+    "API_KEY_INVALID",
+    "Error interno",
+    "generativelanguage.googleapis.com",
+  ];
+  return errorMarkers.some((m) => text.includes(m));
+}
+
+// ---- Pipeline action_id → App ChatAction mapping -----------
+
+function mapPipelineActions(actions: PipelineChatAction[]): {
+  suggestions: string[];
+  action?: ChatAction;
+  actionLabel?: string;
+} {
+  const suggestions: string[] = [];
+  let action: ChatAction | undefined;
+  let actionLabel: string | undefined;
+
+  for (const a of actions) {
+    if (!action && (a.action_id === "activate_hey_pro" || a.action_id === "upselling_pro")) {
+      action = { type: "initiate_portability" };
+      actionLabel = a.label;
+    } else if (!action && a.action_id === "set_category_limit") {
+      const categoria = a.payload?.category ?? "general";
+      const limite = a.payload?.limit ?? 500;
+      action = { type: "set_budget", categoria, limite };
+      actionLabel = a.label;
+    } else {
+      // Everything else becomes a suggestion pill
+      suggestions.push(a.label);
+    }
+  }
+
+  // Guarantee at least 3 suggestion pills
+  if (suggestions.length < 3) {
+    const fallbacks = ["¿Cómo voy este mes?", "Ver mis alertas", "Consejos de ahorro"];
+    for (const fb of fallbacks) {
+      if (!suggestions.includes(fb)) suggestions.push(fb);
+      if (suggestions.length >= 3) break;
+    }
+  }
+
+  return { suggestions: suggestions.slice(0, 4), action, actionLabel };
+}
+
 // ---- Wrapper con soporte UC2/UC3 ----------------------------
 export async function sendHaviMessage(
   userMessage: string,
   transacciones?: Transaccion[]
 ): Promise<HaviResponse> {
-  // UC2: intent de finanzas → respuesta con datos reales calculados
+  // ── PRIMARY: pipeline POST /chat ──────────────────────────
+  try {
+    const pipelineRes = await pipelineClient.sendChat(DEMO_USER.user_id, userMessage);
+
+    // Detect Gemini errors forwarded as 200 OK from pipeline
+    if (isPipelineError(pipelineRes.response)) {
+      console.warn("[HaviService] Pipeline returned Gemini error — using local fallback");
+      throw new Error("pipeline_gemini_error");
+    }
+
+    const { suggestions, action, actionLabel } = mapPipelineActions(pipelineRes.actions);
+    console.info("[HaviService] ✓ Pipeline response received");
+    return {
+      text: pipelineRes.response,
+      suggestions,
+      action,
+      actionLabel,
+    };
+  } catch (pipelineError) {
+    console.warn("[HaviService] Pipeline unavailable, using local fallback:", pipelineError);
+  }
+
+  // ── FALLBACK: local UC2 intent detection ──────────────────
   if (detectarIntentFinanzas(userMessage)) {
     const payload = generarContextoUC2(transacciones);
     const uc2Response = generarRespuestaUC2(payload);
@@ -222,10 +298,8 @@ export async function sendHaviMessage(
     };
   }
 
-  // Delegación al servicio existente
-  const result = await haviService.sendMessage(userMessage, {
-    transacciones,
-  });
+  // ── FINAL FALLBACK: demo responses ────────────────────────
+  const result = await haviService.sendMessage(userMessage, { transacciones });
   return { text: result.text, suggestions: result.suggestions };
 }
 

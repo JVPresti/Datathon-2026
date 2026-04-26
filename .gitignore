@@ -32,3 +32,4 @@ Thumbs.db
 # Outputs intermedios opcionales (descomentar si crece)
 # outputs/tmp/
 # outputs/*.parquet
+.env

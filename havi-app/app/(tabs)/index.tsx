@@ -4,7 +4,7 @@
 // ============================================================
 
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -12,8 +12,6 @@ import { useAlerts } from "../../src/hooks/useAlerts";
 import {
   DEMO_USER,
   TRANSACCIONES_MOCK,
-  UC2_MOCK,
-  UC3_MOCK,
   formatMXN,
   timeAgo,
 } from "../../src/data/mockData";
@@ -26,6 +24,7 @@ import {
 import { executePayrollPortability } from "../../src/services/haviService";
 import { MarkdownText } from "../../src/utils/markdown";
 import { useToast } from "../../src/hooks/useToast";
+import { useHaviContext } from "../../src/hooks/useHaviContext";
 
 // Hey Banco palette: neutral dark, no accent color
 const D = {
@@ -42,9 +41,6 @@ const D = {
   error: "#FF453A",
 };
 
-// UC2 data for Digital Twin card
-const uc2 = UC2_MOCK;
-
 const CAT_ICONS: Record<string, string> = {
   restaurante: "🍽️",
   supermercado: "🛒",
@@ -59,34 +55,60 @@ export default function HomeScreen() {
   const router = useRouter();
   const { alerts, showAlert, unreadCount } = useAlerts();
   const { showToast } = useToast();
+  const {
+    isLoading: contextLoading,
+    isConnected,
+    uc2,
+    uc3,
+    ingreso_mensual,
+    tiene_hey_pro,
+    userName,
+  } = useHaviContext();
+
   const user = DEMO_USER;
   const [showBalance, setShowBalance] = useState(true);
   const [showUC3, setShowUC3] = useState(false);
   const [uc3Payload, setUC3Payload] = useState<{ text: string; suggestions: string[] } | null>(null);
 
   const lastTxns = TRANSACCIONES_MOCK.slice(0, 4);
-  const spendPct = Math.min((user.gasto_acumulado_mes / user.ingreso_mensual) * 100, 100);
   const urgentAlert = alerts.find((a) => !a.leida && a.priority === "alta");
+
+  // Use real ingreso from pipeline context (falls back to DEMO_USER value)
+  const ingresoDisplay = ingreso_mensual || user.ingreso_mensual;
+  const gastoDisplay = uc2.gasto_acumulado_mes;
 
   useEffect(() => {
     if (urgentAlert) {
       const t = setTimeout(() => showAlert(urgentAlert), 1500);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [urgentAlert]);
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (shouldFireUC3()) {
+      // Use real UC3 data if pipeline is connected, else compute from mocks
+      const cashbackLost = uc3?.cashback_perdido_mes ?? 0;
+      const shouldShow = !tiene_hey_pro && (isConnected ? cashbackLost > 0 : shouldFireUC3());
+      if (shouldShow) {
         markUC3Fired();
-        const ctx = generarContextoUC3(TRANSACCIONES_MOCK);
-        const msg = generarMensajeProactivoUC3(ctx);
-        setUC3Payload(msg);
+        if (isConnected && uc3) {
+          setUC3Payload({
+            text:
+              `${userName}, una cosa antes de que sigas 💡 ` +
+              `Con tus compras de este mes habrías ganado **$${cashbackLost.toFixed(2)}** en cashback con Hey Pro. ` +
+              `Al año son **$${(cashbackLost * 12).toFixed(2)}** de regreso a tu bolsillo. Solo necesitas domiciliar tu nómina aquí.`,
+            suggestions: ["Sí, quiero activarlo", "¿Cuánto cuesta Hey Pro?", "Ahora no, gracias"],
+          });
+        } else {
+          const ctx = generarContextoUC3(TRANSACCIONES_MOCK);
+          const msg = generarMensajeProactivoUC3(ctx);
+          setUC3Payload(msg);
+        }
         setShowUC3(true);
       }
     }, 2200);
     return () => clearTimeout(t);
-  }, []);
+  }, [isConnected, uc3, tiene_hey_pro, userName]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: D.bg }}>
@@ -104,11 +126,21 @@ export default function HomeScreen() {
           paddingTop: 12,
           paddingBottom: 4,
         }}>
-          <View>
-            <Text style={{ color: D.textMuted, fontSize: 12 }}>{getGreeting()}</Text>
-            <Text style={{ color: D.text, fontSize: 22, fontWeight: "700", marginTop: 1 }}>
-              {user.nombre}
-            </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View>
+              <Text style={{ color: D.textMuted, fontSize: 12 }}>{getGreeting()}</Text>
+              <Text style={{ color: D.text, fontSize: 22, fontWeight: "700", marginTop: 1 }}>
+                {userName}
+              </Text>
+            </View>
+            {/* Pipeline connection indicator */}
+            {!contextLoading && (
+              <View style={{
+                width: 7, height: 7, borderRadius: 3.5,
+                backgroundColor: isConnected ? D.success : D.textMuted,
+                marginTop: 2,
+              }} />
+            )}
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
             <Pressable
@@ -192,14 +224,14 @@ export default function HomeScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Ingresos</Text>
                 <Text style={{ color: D.success, fontSize: 15, fontWeight: "600" }}>
-                  {showBalance ? formatMXN(user.ingreso_mensual) : "••••"}
+                  {showBalance ? formatMXN(ingresoDisplay) : "••••"}
                 </Text>
               </View>
               <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: D.sep }} />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Gastos del mes</Text>
                 <Text style={{ color: D.text, fontSize: 15, fontWeight: "600" }}>
-                  {showBalance ? formatMXN(user.gasto_acumulado_mes) : "••••"}
+                  {showBalance ? formatMXN(gastoDisplay) : "••••"}
                 </Text>
               </View>
             </View>
@@ -309,6 +341,8 @@ export default function HomeScreen() {
                   if (a.id === "havi") router.push("/(tabs)/chat");
                   else if (a.id === "alertas") router.push("/(tabs)/alerts");
                   else if (a.id === "movimientos") router.push("/(tabs)/movements");
+                  else if (a.id === "transferir") router.push("/(tabs)/transferir");
+                  else if (a.id === "pagar") router.push("/(tabs)/pagos");
                 }}
               />
             ))}
@@ -396,7 +430,11 @@ export default function HomeScreen() {
             <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 0.9, textTransform: "uppercase", flex: 1 }}>
               Gemelo Digital
             </Text>
-            <Text style={{ color: D.textMuted, fontSize: 12 }}>Simular →</Text>
+            {contextLoading ? (
+              <ActivityIndicator size="small" color={D.textMuted} />
+            ) : (
+              <Text style={{ color: D.textMuted, fontSize: 12 }}>Simular →</Text>
+            )}
           </View>
           {/* Stats row */}
           <View style={{ flexDirection: "row", paddingHorizontal: 16, paddingVertical: 14, gap: 0 }}>
@@ -411,16 +449,24 @@ export default function HomeScreen() {
             </View>
             <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: D.sep }} />
             <View style={{ flex: 1, paddingLeft: 16 }}>
-              <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 4 }}>Déficit estimado</Text>
-              <Text style={{ color: D.error, fontSize: 18, fontWeight: "700" }}>
-                {showBalance ? `-${formatMXN(Math.abs(uc2.deficit_proyectado))}` : "••••"}
+              <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 4 }}>
+                {uc2.deficit_proyectado < 0 ? "Déficit estimado" : "Ingreso restante"}
+              </Text>
+              <Text style={{
+                color: uc2.deficit_proyectado < 0 ? D.error : D.success,
+                fontSize: 18,
+                fontWeight: "700",
+              }}>
+                {showBalance
+                  ? (uc2.deficit_proyectado < 0 ? "-" : "+") + formatMXN(Math.abs(uc2.deficit_proyectado))
+                  : "••••"}
               </Text>
               <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>
-                Corte en {uc2.dias_al_corte} días
+                {uc2.dias_al_corte > 0 ? `Corte en ${uc2.dias_al_corte} días` : "Zona de riesgo"}
               </Text>
             </View>
           </View>
-          {/* Havi message */}
+          {/* Havi insight */}
           <View style={{
             marginHorizontal: 12,
             marginBottom: 12,
@@ -429,9 +475,24 @@ export default function HomeScreen() {
             backgroundColor: D.surface,
             borderRadius: 10,
           }}>
-            <Text style={{ color: D.textSub, fontSize: 12, lineHeight: 17 }}>
-              Si sigues gastando en <Text style={{ color: D.warning, fontWeight: "600" }}>{uc2.categoria_problema}</Text> al mismo ritmo, te faltarán fondos para las mensualidades. Toca para simular.
-            </Text>
+            {contextLoading ? (
+              <Text style={{ color: D.textMuted, fontSize: 12 }}>Cargando tu gemelo digital…</Text>
+            ) : (
+              <Text style={{ color: D.textSub, fontSize: 12, lineHeight: 17 }}>
+                {isConnected
+                  ? `Tu zona de riesgo es `
+                  : `Si sigues gastando en `}
+                <Text style={{
+                  color: uc2.zona_riesgo === "Saludable" ? D.success : D.warning,
+                  fontWeight: "600",
+                }}>
+                  {isConnected ? uc2.zona_riesgo : uc2.categoria_problema}
+                </Text>
+                {isConnected
+                  ? `. Tendencia: ${uc2.tendencia_riesgo}. Toca para simular.`
+                  : ` al mismo ritmo, te faltarán fondos. Toca para simular.`}
+              </Text>
+            )}
           </View>
         </Pressable>
       </ScrollView>
@@ -450,7 +511,7 @@ const QUICK_ACTIONS = [
   { id: "transferir", icon: "swap-horizontal-outline", label: "Transferir" },
   { id: "pagar", icon: "receipt-outline", label: "Pagar" },
   { id: "movimientos", icon: "bar-chart-outline", label: "Historial" },
-  { id: "alertas", icon: "shield-checkmark-outline", label: "Alertas" },
+  { id: "havi", icon: "sparkles-outline", label: "Havi" },
 ];
 
 function QuickAction({ icon, label, onPress }: { icon: string; label: string; onPress?: () => void }) {
@@ -475,5 +536,3 @@ function QuickAction({ icon, label, onPress }: { icon: string; label: string; on
   );
 }
 
-// Need StyleSheet for hairlineWidth
-import { StyleSheet } from "react-native";
