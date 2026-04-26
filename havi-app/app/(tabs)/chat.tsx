@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MarkdownText } from "../../src/utils/markdown";
 import { useAlerts } from "../../src/hooks/useAlerts";
 import {
   haviService,
@@ -64,67 +65,6 @@ const makeWelcome = (): ChatMessage => ({
   timestamp: new Date().toISOString(),
   suggestions: INITIAL_PILLS.slice(0, 3).map((p) => p.label),
 });
-
-// ── Markdown renderer ────────────────────────────────────────
-function MarkdownText({ text, style }: { text: string; style?: object }) {
-  const lines = text.split("\n");
-  return (
-    <Text style={style}>
-      {lines.map((line, li) => {
-        const isBullet = line.startsWith("- ") || line.startsWith("• ");
-        const content = isBullet ? line.slice(2) : line;
-        return (
-          <Text key={li}>
-            {li > 0 && "\n"}
-            {isBullet && "• "}
-            {parseInline(content)}
-          </Text>
-        );
-      })}
-    </Text>
-  );
-}
-
-function parseInline(str: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
-  const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
-  let last = 0;
-  let m;
-  while ((m = regex.exec(str)) !== null) {
-    if (m.index > last) parts.push(str.slice(last, m.index));
-    const tok = m[0];
-    if (tok.startsWith("**")) {
-      parts.push(
-        <Text key={m.index} style={{ fontWeight: "700", color: "#FFFFFF" }}>
-          {tok.slice(2, -2)}
-        </Text>
-      );
-    } else if (tok.startsWith("*")) {
-      parts.push(
-        <Text key={m.index} style={{ fontStyle: "italic" }}>
-          {tok.slice(1, -1)}
-        </Text>
-      );
-    } else if (tok.startsWith("`")) {
-      parts.push(
-        <Text
-          key={m.index}
-          style={{
-            fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-            fontSize: 12,
-            backgroundColor: "rgba(255,255,255,0.10)",
-            color: "#FFFFFF",
-          }}
-        >
-          {tok.slice(1, -1)}
-        </Text>
-      );
-    }
-    last = m.index + tok.length;
-  }
-  if (last < str.length) parts.push(str.slice(last));
-  return parts;
-}
 
 // ── Component ────────────────────────────────────────────────
 export default function ChatScreen() {
@@ -294,44 +234,46 @@ export default function ChatScreen() {
           {messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} onSend={sendMessage} dotAnim={dotAnim} />
           ))}
-        </ScrollView>
 
-        {/* ── Bottom bar ── */}
-        <View style={styles.inputArea}>
-          {/* Pending action */}
+          {/* ── Inline action buttons (like Hey Banco "Asesor de aclaraciones") ── */}
           {pendingAction && !isLoading && (
-            <View style={{ marginHorizontal: 16, marginTop: 8, marginBottom: 4, flexDirection: "row", gap: 8 }}>
+            <View style={{ alignSelf: "flex-start", marginLeft: 36, gap: 8, marginTop: 2 }}>
               <Pressable
                 onPress={() => executeAction(pendingAction.action)}
                 style={({ pressed }) => ({
-                  flex: 1,
                   backgroundColor: pressed ? "#E5E5E5" : "#FFFFFF",
-                  borderRadius: 12,
-                  paddingVertical: 12,
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  paddingHorizontal: 20,
                   alignItems: "center",
+                  minWidth: 220,
                 })}
               >
-                <Text style={{ color: "#000000", fontSize: 14, fontWeight: "700" }}>
-                  ✓ {pendingAction.label}
+                <Text style={{ color: "#000000", fontSize: 14, fontWeight: "600" }}>
+                  {pendingAction.label}
                 </Text>
               </Pressable>
               <Pressable
                 onPress={() => setPendingAction(null)}
                 style={({ pressed }) => ({
-                  paddingHorizontal: 14,
                   backgroundColor: pressed ? D.cardAlt : D.card,
-                  borderRadius: 12,
-                  paddingVertical: 12,
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  paddingHorizontal: 20,
                   alignItems: "center",
+                  minWidth: 220,
                   borderWidth: StyleSheet.hairlineWidth,
-                  borderColor: D.sep,
+                  borderColor: D.sepStrong,
                 })}
               >
-                <Text style={{ color: D.textSub, fontSize: 14 }}>No</Text>
+                <Text style={{ color: D.textSub, fontSize: 14 }}>No, gracias</Text>
               </Pressable>
             </View>
           )}
+        </ScrollView>
 
+        {/* ── Bottom bar ── */}
+        <View style={styles.inputArea}>
           {/* Pills */}
           {activePills.length > 0 && !isLoading && !pendingAction && (
             <ScrollView
@@ -569,26 +511,6 @@ function MessageBubble({
         </View>
       </View>
 
-      {message.suggestions && message.suggestions.length > 0 && (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7, marginTop: 8, marginLeft: 36 }}>
-          {message.suggestions.map((s, i) => (
-            <Pressable
-              key={i}
-              onPress={() => onSend(s)}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? D.cardAlt : D.card,
-                borderRadius: 14,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: D.sepStrong,
-              })}
-            >
-              <Text style={{ color: D.textSub, fontSize: 13 }}>{s}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
     </View>
   );
 }

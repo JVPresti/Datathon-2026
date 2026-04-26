@@ -23,6 +23,7 @@ import {
   generarMensajeProactivoUC3,
 } from "../../src/services/upsellingService";
 import { executePayrollPortability } from "../../src/services/haviService";
+import { MarkdownText } from "../../src/utils/markdown";
 
 // Hey Banco palette: neutral dark, no accent color
 const D = {
@@ -232,7 +233,10 @@ export default function HomeScreen() {
                 <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
                   Havi · Sugerencia
                 </Text>
-                <Text style={{ color: D.text, fontSize: 13, lineHeight: 19 }}>{uc3Payload.text}</Text>
+                <MarkdownText
+                  text={uc3Payload.text}
+                  style={{ color: D.text, fontSize: 13, lineHeight: 19 }}
+                />
               </View>
               <Pressable onPress={() => setShowUC3(false)} hitSlop={10}>
                 <Ionicons name="close" size={16} color={D.textMuted} />
@@ -269,21 +273,21 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── UC3 done toast ── */}
+        {/* ── UC3 done inline msg ── */}
         {uc3Done && (
           <View style={{
             marginHorizontal: 20,
             marginBottom: 16,
             padding: 14,
-            backgroundColor: "rgba(48,209,88,0.08)",
+            backgroundColor: D.card,
             borderRadius: 14,
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
           }}>
-            <Ionicons name="checkmark-circle" size={18} color={D.success} />
-            <Text style={{ color: D.success, fontSize: 13, fontWeight: "600" }}>
-              Solicitud enviada correctamente.
+            <Text style={{ color: D.text, fontSize: 15 }}>✦</Text>
+            <Text style={{ color: D.textSub, fontSize: 13, flex: 1 }}>
+              Listo, tu solicitud fue enviada. Havi te avisará en cuanto esté lista.
             </Text>
           </View>
         )}
