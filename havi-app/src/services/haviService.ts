@@ -167,10 +167,17 @@ export class HaviChatService {
         suggestions: ["Poner límite en restaurantes", "Ver otros gastos", "¿Cuánto tengo libre?"],
       };
     }
-    if (msg.includes("cargo") || msg.includes("alerta") || msg.includes("fraude")) {
+    if (msg.includes("cargo") || msg.includes("alerta") || msg.includes("fraude") || msg.includes("raro") || msg.includes("reconoc")) {
       return {
         text: `Detecté un cargo de $2,150 en Amazon US a las 3:14 AM desde Seattle. Ese horario y ubicación son inusuales para ti. ¿Lo reconoces? Si no fuiste tú, puedo bloquearlo ahora mismo 🛡️`,
-        suggestions: ["Sí, fui yo", "No fui yo — bloquear", "Ver detalles del cargo"],
+        suggestions: ["Sí, fui yo", "Ver detalles del cargo", "¿Qué pasa si bloqueo?"],
+        action: {
+          type: "report_fraud",
+          transaccion_id: "txn-amazon-us-001",
+          comercio: "Amazon US",
+          monto: 2150,
+        },
+        actionLabel: "No fui yo — bloquear tarjeta 🛡️",
       };
     }
 
@@ -191,7 +198,8 @@ export const haviService = new HaviChatService(true); // demo mode
 // ---- Tipos de acciones rápidas de chat ----------------------
 export type ChatAction =
   | { type: "set_budget"; categoria: string; limite: number }
-  | { type: "initiate_portability" };
+  | { type: "initiate_portability" }
+  | { type: "report_fraud"; transaccion_id: string; comercio: string; monto: number };
 
 export interface HaviResponse {
   text: string;
@@ -235,6 +243,14 @@ function mapPipelineActions(actions: PipelineChatAction[]): {
       const limite = a.payload?.limit ?? 500;
       action = { type: "set_budget", categoria, limite };
       actionLabel = a.label;
+    } else if (!action && (a.action_id === "report_fraud" || a.action_id === "block_card")) {
+      action = {
+        type: "report_fraud",
+        transaccion_id: a.payload?.transaccion_id ?? "txn-unknown",
+        comercio: a.payload?.comercio ?? "Comercio desconocido",
+        monto: a.payload?.monto ?? 0,
+      };
+      actionLabel = a.label ?? "No fui yo — bloquear tarjeta 🛡️";
     } else {
       // Everything else becomes a suggestion pill
       suggestions.push(a.label);
@@ -325,5 +341,18 @@ export function executePayrollPortability(): HaviResponse {
       "Ver beneficios de Hey Pro",
       "¿Cómo descargo mi CLABE?",
     ],
+  };
+}
+
+// ---- Ejecución de tool: reportFraud / block card ------------
+export function executeFraudReport(
+  transaccion_id: string,
+  comercio: string,
+  monto: number
+): HaviResponse {
+  // Simula el resultado de bloquear la tarjeta y abrir disputa
+  return {
+    text: `✅ Listo. Bloqueé el cargo de $${monto.toLocaleString("es-MX")} en **${comercio}** y abrí una disputa (ID: DISP-${transaccion_id.slice(-4).toUpperCase()}). Tu tarjeta está **bloqueada temporalmente** y recibirás una nueva en 3–5 días hábiles. Tu saldo no se verá afectado durante la investigación.`,
+    suggestions: ["¿Cuándo me regresan el dinero?", "¿Cómo rastrea mi disputa?", "Revisar mis cargos recientes"],
   };
 }

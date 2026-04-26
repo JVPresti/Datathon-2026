@@ -121,6 +121,41 @@ function mapPipelineAlertsToHaviAlerts(raw: PipelineAlert[]): HaviAlert[] {
       accionada: false,
       accion_primaria,
       accion_secundaria,
+      uc1_context: type.includes("rechazo") ? {
+        user_id: "",
+        transaccion_id: ctx.transaccion_id ?? "",
+        situacion: type as any,
+        motivo: ctx.motivo as any,
+        monto_rechazado: monto,
+        comercio: comercio,
+        ciudad_transaccion: "",
+        fecha_hora: fechaHora,
+        es_internacional: false,
+        nombre_usuario: "",
+        saldo_actual_producto_origen: 0,
+        monto_faltante: 0,
+        tiene_alternativo: !!ctx.producto_alternativo,
+        producto_alternativo: ctx.producto_alternativo ?? null,
+        producto_alternativo_id: null,
+        monto_disponible_alternativo: ctx.saldo_inversion_disponible ?? null,
+        es_cronico: false,
+        canal_preferido: ""
+      } : undefined,
+      uc4_context: type === "txn_atipica" ? {
+        user_id: "",
+        transaccion_id: ctx.transaccion_id ?? "",
+        producto_id: "",
+        monto: monto,
+        comercio: comercio,
+        ciudad_transaccion: "",
+        fecha_hora: fechaHora,
+        hora_del_dia: 0,
+        es_internacional: !!ctx.es_internacional,
+        es_nocturna: !!ctx.es_nocturna,
+        anomaly_score: 0,
+        canal_alerta: "chat",
+        sla_respuesta_seg: 0
+      } : undefined,
     };
   });
 }

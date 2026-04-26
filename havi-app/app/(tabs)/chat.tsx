@@ -1,6 +1,8 @@
 // ============================================================
 // HAVI CHAT — Copiloto financiero
 // Hey Banco design language + markdown + conversation history
+// Voice button integrated inside the input bubble
+// Supports ?initialPrompt=... param for use-case deep links
 // ============================================================
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
@@ -23,9 +25,9 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const HAVI_BUBBLE_MAX = SCREEN_W - 32 - 36;
 const USER_BUBBLE_MAX = SCREEN_W * 0.76;
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
 import { MarkdownText } from "../../src/utils/markdown";
-import { useAlerts } from "../../src/hooks/useAlerts";
 import { useToast } from "../../src/hooks/useToast";
 import {
   haviService,
@@ -33,6 +35,7 @@ import {
   sendHaviMessage,
   executeBudgetLimit,
   executePayrollPortability,
+  executeFraudReport,
   ChatAction,
 } from "../../src/services/haviService";
 import { ChatMessage } from "../../src/types";
@@ -75,7 +78,11 @@ const makeWelcome = (): ChatMessage => ({
 
 // ── Component ────────────────────────────────────────────────
 export default function ChatScreen() {
+  const insets = useSafeAreaInsets();
   const { showToast } = useToast();
+  // Support deep-linking from use-case cards on the dashboard
+  const { initialPrompt } = useLocalSearchParams<{ initialPrompt?: string }>();
+
   const [messages, setMessages] = useState<ChatMessage[]>([makeWelcome()]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -87,6 +94,7 @@ export default function ChatScreen() {
   const [showHistory, setShowHistory] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const dotAnim = useRef(new Animated.Value(0)).current;
+  const lastFiredPromptRef = useRef<string | null>(null);
 
   useEffect(() => {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
@@ -105,6 +113,27 @@ export default function ChatScreen() {
       dotAnim.setValue(0);
     }
   }, [isLoading]);
+
+  // Fire the initial prompt from a use-case card each time the screen gains focus
+  // with a NEW prompt value. Using useFocusEffect instead of useEffect because
+  // tab screens stay mounted — they never remount on navigation, so useEffect
+  // on [initialPrompt] only fires once and misses subsequent deeplinks.
+  useFocusEffect(
+    useCallback(() => {
+      if (initialPrompt && initialPrompt !== lastFiredPromptRef.current) {
+        lastFiredPromptRef.current = initialPrompt;
+        // Always start a fresh chat so context from previous sessions doesn't bleed in
+        setMessages([makeWelcome()]);
+        setActivePills(INITIAL_PILLS.slice(0, 4).map((p) => p.label));
+        setPendingAction(null);
+        setInput("");
+        haviService.clearHistory();
+        // Short delay so the welcome bubble renders before Havi starts responding
+        const t = setTimeout(() => sendMessage(initialPrompt), 750);
+        return () => clearTimeout(t);
+      }
+    }, [initialPrompt, sendMessage])
+  );
 
   // ── New Chat ──────────────────────────────────────────────
   const startNewChat = useCallback(() => {
@@ -145,12 +174,20 @@ export default function ChatScreen() {
 
   const executeAction = useCallback((action: ChatAction) => {
     setPendingAction(null);
-    const r = action.type === "set_budget"
-      ? executeBudgetLimit(action.categoria, action.limite)
-      : executePayrollPortability();
-    const toastMsg = action.type === "set_budget"
-      ? `Límite de ${action.categoria} configurado en $${action.limite}`
-      : "Solicitud de portabilidad de nómina enviada";
+    let r;
+    let toastMsg: string;
+
+    if (action.type === "set_budget") {
+      r = executeBudgetLimit(action.categoria, action.limite);
+      toastMsg = `Límite de ${action.categoria} configurado en $${action.limite}`;
+    } else if (action.type === "report_fraud") {
+      r = executeFraudReport(action.transaccion_id, action.comercio, action.monto);
+      toastMsg = `⚠️ Cargo de ${action.comercio} bloqueado — disputa abierta`;
+    } else {
+      r = executePayrollPortability();
+      toastMsg = "Solicitud de portabilidad de nómina enviada";
+    }
+
     showToast(toastMsg, "success");
     appendHavi(r.text, r.suggestions);
   }, [appendHavi, showToast]);
@@ -184,6 +221,8 @@ export default function ChatScreen() {
       setIsLoading(false);
     }
   }, [isLoading, appendHavi]);
+
+  const canSend = input.trim().length > 0 && !isLoading;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: D.bg }}>
@@ -239,7 +278,11 @@ export default function ChatScreen() {
         <ScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 8 }}
+          contentContainerStyle={{
+            padding: 16,
+            gap: 12,
+            paddingBottom: 20 + insets.bottom,
+          }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -247,7 +290,7 @@ export default function ChatScreen() {
             <MessageBubble key={msg.id} message={msg} onSend={sendMessage} dotAnim={dotAnim} />
           ))}
 
-          {/* ── Inline action buttons (like Hey Banco "Asesor de aclaraciones") ── */}
+          {/* ── Inline action buttons ── */}
           {pendingAction && !isLoading && (
             <View style={{ alignSelf: "flex-start", marginLeft: 36, gap: 8, marginTop: 2 }}>
               <Pressable
@@ -285,7 +328,7 @@ export default function ChatScreen() {
         </ScrollView>
 
         {/* ── Bottom bar ── */}
-        <View style={styles.inputArea}>
+        <View style={[styles.inputArea, { paddingBottom: Math.max(insets.bottom, 5) + 10 }]}>
           {/* Pills */}
           {activePills.length > 0 && !isLoading && !pendingAction && (
             <ScrollView
@@ -313,28 +356,47 @@ export default function ChatScreen() {
             </ScrollView>
           )}
 
-          {/* Text input */}
-          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
+          {/* Text input row — mic icon is INSIDE the bubble, send button outside */}
+          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 2 }}>
+            {/* Input bubble containing mic + text */}
             <View style={styles.textInputWrap}>
+              {/* Mic button — left side inside the bubble */}
+              <Pressable
+                onPress={() => showToast("Próximamente: chat de voz con Havi.", "info")}
+                accessibilityRole="button"
+                accessibilityLabel="Iniciar chat de voz con Havi"
+                hitSlop={8}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 2,
+                  paddingVertical: 2,
+                  opacity: pressed ? 0.5 : 0.65,
+                })}
+              >
+                <Ionicons name="mic-outline" size={19} color={D.textSub} />
+              </Pressable>
+
+              {/* Text field */}
               <TextInput
                 value={input}
                 onChangeText={setInput}
                 placeholder="Pregúntale a Havi..."
                 placeholderTextColor={D.textMuted}
-                style={{ color: D.text, fontSize: 15, padding: 0 }}
+                style={{ flex: 1, color: D.text, fontSize: 15, padding: 0 }}
                 multiline
                 onSubmitEditing={() => sendMessage(input)}
                 blurOnSubmit={false}
               />
             </View>
+
+            {/* Send button — outside the bubble */}
             <Pressable
               onPress={() => sendMessage(input)}
-              disabled={!input.trim() || isLoading}
+              disabled={!canSend}
               style={({ pressed }) => ({
                 width: 42,
                 height: 42,
                 borderRadius: 21,
-                backgroundColor: !input.trim() || isLoading ? D.card : pressed ? "#E5E5E5" : "#FFFFFF",
+                backgroundColor: !canSend ? D.card : pressed ? "#E5E5E5" : "#FFFFFF",
                 alignItems: "center",
                 justifyContent: "center",
               })}
@@ -342,7 +404,7 @@ export default function ChatScreen() {
               <Ionicons
                 name="arrow-up"
                 size={18}
-                color={!input.trim() || isLoading ? D.textMuted : "#000000"}
+                color={!canSend ? D.textMuted : "#000000"}
               />
             </Pressable>
           </View>
@@ -533,11 +595,13 @@ function MessageBubble({
       <View style={styles.haviAvatarSm}>
         <Text style={{ fontSize: 12, color: "#FFFFFF" }}>✦</Text>
       </View>
-      <View style={[styles.haviMsgBubble, { maxWidth: HAVI_BUBBLE_MAX }]}>
-        <MarkdownText
-          text={message.content}
-          style={{ color: "rgba(255,255,255,0.90)", fontSize: 15, lineHeight: 22 }}
-        />
+      <View style={{ flex: 1, maxWidth: HAVI_BUBBLE_MAX }}>
+        <View style={styles.haviMsgBubble}>
+          <MarkdownText
+            text={message.content}
+            style={{ color: "rgba(255,255,255,0.90)", fontSize: 15, lineHeight: 22 }}
+          />
+        </View>
       </View>
     </View>
   );
@@ -603,16 +667,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000",
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(255,255,255,0.08)",
-    paddingBottom: Platform.OS === "ios" ? 4 : 8,
   },
+  // Input bubble now holds mic + text field side by side
   textInputWrap: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     backgroundColor: "#1C1C1E",
     borderRadius: 21,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: Platform.OS === "ios" ? 11 : 8,
     minHeight: 42,
     maxHeight: 100,
-    justifyContent: "center",
   },
 });

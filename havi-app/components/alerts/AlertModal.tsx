@@ -53,6 +53,15 @@ export default function AlertModal() {
   if (!activeAlert) return null;
 
   const handlePrimary = () => {
+    // rechazo_limite primary is "Ver opciones" → open chat with context
+    if (activeAlert.type === "rechazo_limite" && activeAlert.accion_primaria?.type === "chat") {
+      dismissAlert();
+      router.push({
+        pathname: "/(tabs)/chat",
+        params: { initialPrompt: buildChatPrompt(activeAlert) },
+      });
+      return;
+    }
     const msg = getPrimaryToast(activeAlert);
     markAsActioned(activeAlert.id);
     dismissAlert();
@@ -66,7 +75,10 @@ export default function AlertModal() {
       showToast("Tarjeta bloqueada. Contáctanos si necesitas ayuda.", "warning");
     } else if (activeAlert.accion_secundaria?.type === "chat") {
       dismissAlert();
-      router.push("/(tabs)/chat");
+      router.push({
+        pathname: "/(tabs)/chat",
+        params: { initialPrompt: buildChatPrompt(activeAlert) },
+      });
     } else {
       dismissAlert();
     }
@@ -99,6 +111,38 @@ function getPrimaryToast(alert: HaviAlert): string | null {
       return "Solicitud de Hey Pro enviada. Havi te avisará.";
     default:
       return "Listo, acción realizada.";
+  }
+}
+
+/** Builds a contextual prompt so Havi knows the situation the moment the chat opens. */
+function buildChatPrompt(alert: HaviAlert): string {
+  const uc1 = alert.uc1_context;
+  const uc4 = alert.uc4_context;
+
+  switch (alert.type) {
+    case "rechazo_saldo": {
+      const monto = uc1?.monto_rechazado ?? 0;
+      const comercio = uc1?.comercio ?? "un comercio";
+      const altDisponible = uc1?.monto_disponible_alternativo
+        ? ` Tengo $${uc1.monto_disponible_alternativo.toLocaleString("es-MX")} disponibles en mi cuenta alternativa.`
+        : "";
+      return `Me rechazaron un pago de $${monto.toLocaleString("es-MX")} en ${comercio} por saldo insuficiente.${altDisponible} ¿Qué puedo hacer?`;
+    }
+    case "rechazo_limite": {
+      const monto = uc1?.monto_rechazado ?? 0;
+      const comercio = uc1?.comercio ?? "un comercio";
+      return `Me rechazaron un cargo de $${monto.toLocaleString("es-MX")} en ${comercio} por límite de crédito. ¿Cómo puedo resolverlo?`;
+    }
+    case "txn_atipica": {
+      const monto = uc4?.monto ?? 0;
+      const comercio = uc4?.comercio ?? "un comercio";
+      return `Hay un cargo que no reconozco: $${monto.toLocaleString("es-MX")} en ${comercio}. ¿Puede ser fraude?`;
+    }
+    case "cashback_proximo_perdido":
+    case "upselling_pro":
+      return "¿Cuánto cashback estoy perdiendo este mes por no tener Hey Pro? Quiero entender si me conviene activarlo.";
+    default:
+      return `Vi una alerta: "${alert.titulo}". ¿Puedes ayudarme?`;
   }
 }
 

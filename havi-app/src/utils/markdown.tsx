@@ -5,8 +5,8 @@ import { Text, Platform } from "react-native";
  * Renders markdown inline formatting: **bold**, *italic*, `code`, newlines.
  * Uses a FLAT array — no nested Text wrapping per-line, avoids RN render bugs.
  */
-export function MarkdownText({ text, style }: { text: string; style?: any }) {
-  return <Text style={style}>{buildNodes(text)}</Text>;
+export function MarkdownText({ text, style, numberOfLines }: { text: string; style?: any, numberOfLines?: number }) {
+  return <Text style={style} numberOfLines={numberOfLines}>{buildNodes(text)}</Text>;
 }
 
 function buildNodes(text: string): React.ReactNode[] {

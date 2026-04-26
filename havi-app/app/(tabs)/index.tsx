@@ -183,54 +183,61 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── Balance Card ── */}
+        {/* ── Balance Card — premium ── */}
         <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 }}>
           <View style={{
-            backgroundColor: D.card,
-            borderRadius: 20,
+            backgroundColor: "#161616",
+            borderRadius: 24,
             padding: 22,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: "rgba(255,255,255,0.09)",
           }}>
-            {/* Balance row */}
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-              <Text style={{ color: D.textMuted, fontSize: 12 }}>Saldo disponible</Text>
-              <Pressable
-                onPress={() => setShowBalance(!showBalance)}
-                hitSlop={12}
-              >
-                <Text style={{ color: D.textMuted, fontSize: 12 }}>
-                  {showBalance ? "Ocultar" : "Mostrar"}
-                </Text>
+            {/* Top label + toggle */}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <Text style={{ color: "rgba(255,255,255,0.38)", fontSize: 11, letterSpacing: 0.5, textTransform: "uppercase" }}>Saldo disponible</Text>
+              <Pressable onPress={() => setShowBalance(!showBalance)} hitSlop={12}>
+                <Ionicons name={showBalance ? "eye-off-outline" : "eye-outline"} size={16} color="rgba(255,255,255,0.30)" />
               </Pressable>
             </View>
 
             <Text style={{
               color: D.text,
-              fontSize: 38,
+              fontSize: 40,
               fontWeight: "700",
-              letterSpacing: -0.5,
-              marginBottom: 20,
+              letterSpacing: -1,
+              marginBottom: 22,
             }}>
-              {showBalance ? formatMXN(user.balance_actual) : "••••••"}
+              {showBalance ? formatMXN(user.balance_actual) : "•••••"}
             </Text>
 
-            {/* Income / Expenses */}
+            {/* Stats row */}
             <View style={{
               flexDirection: "row",
-              gap: 16,
-              paddingTop: 16,
-              borderTopWidth: StyleSheet.hairlineWidth,
-              borderTopColor: D.sep,
+              gap: 10,
             }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Ingresos</Text>
-                <Text style={{ color: D.success, fontSize: 15, fontWeight: "600" }}>
+              <View style={{
+                flex: 1, backgroundColor: "rgba(48,209,88,0.08)",
+                borderRadius: 12, padding: 12,
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: "rgba(48,209,88,0.18)",
+              }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 5 }}>
+                  <Ionicons name="arrow-down-outline" size={11} color={D.success} />
+                  <Text style={{ color: "rgba(255,255,255,0.35)", fontSize: 10 }}>Ingresos</Text>
+                </View>
+                <Text style={{ color: D.success, fontSize: 15, fontWeight: "700" }}>
                   {showBalance ? formatMXN(ingresoDisplay) : "••••"}
                 </Text>
               </View>
-              <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: D.sep }} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Gastos del mes</Text>
-                <Text style={{ color: D.text, fontSize: 15, fontWeight: "600" }}>
+              <View style={{
+                flex: 1, backgroundColor: "rgba(255,255,255,0.04)",
+                borderRadius: 12, padding: 12,
+              }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 5 }}>
+                  <Ionicons name="arrow-up-outline" size={11} color="rgba(255,255,255,0.40)" />
+                  <Text style={{ color: "rgba(255,255,255,0.35)", fontSize: 10 }}>Gastos del mes</Text>
+                </View>
+                <Text style={{ color: D.text, fontSize: 15, fontWeight: "700" }}>
                   {showBalance ? formatMXN(gastoDisplay) : "••••"}
                 </Text>
               </View>
@@ -246,85 +253,135 @@ export default function HomeScreen() {
               marginHorizontal: 20,
               marginBottom: 16,
               padding: 14,
-              backgroundColor: pressed ? "rgba(255,69,58,0.12)" : "rgba(255,69,58,0.08)",
-              borderRadius: 14,
+              backgroundColor: pressed ? "rgba(255,69,58,0.10)" : "rgba(255,69,58,0.06)",
+              borderRadius: 16,
               borderWidth: StyleSheet.hairlineWidth,
-              borderColor: "rgba(255,69,58,0.25)",
+              borderColor: "rgba(255,69,58,0.28)",
               flexDirection: "row",
               alignItems: "center",
               gap: 12,
+              overflow: "hidden",
             })}
           >
-            <Ionicons name="warning" size={16} color={D.error} />
+            <View style={{
+              width: 32, height: 32, borderRadius: 10,
+              backgroundColor: "rgba(255,69,58,0.12)",
+              alignItems: "center", justifyContent: "center",
+            }}>
+              <Ionicons name="warning" size={16} color={D.error} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: D.text, fontSize: 13, fontWeight: "600" }} numberOfLines={1}>
                 {urgentAlert.titulo}
               </Text>
-              <Text style={{ color: D.textSub, fontSize: 12, marginTop: 1 }} numberOfLines={1}>
-                {urgentAlert.mensaje}
-              </Text>
+              <MarkdownText
+                text={urgentAlert.mensaje}
+                style={{ color: "rgba(255,255,255,0.42)", fontSize: 12, marginTop: 2 }}
+                numberOfLines={1}
+              />
             </View>
-            <Ionicons name="chevron-forward" size={14} color={D.textMuted} />
+            <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.20)" />
           </Pressable>
         )}
 
-        {/* ── UC3 Banner proactivo ── */}
+        {/* ── UC3 Banner proactivo — premium ── */}
         {showUC3 && uc3Payload && (
           <View style={{
             marginHorizontal: 20,
             marginBottom: 16,
-            padding: 16,
-            backgroundColor: D.card,
+            backgroundColor: "#141414",
             borderRadius: 16,
+            overflow: "hidden",
             borderWidth: StyleSheet.hairlineWidth,
-            borderColor: "rgba(255,255,255,0.12)",
+            borderColor: "rgba(48,209,88,0.28)",
           }}>
-            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
-              <Text style={{ color: D.text, fontSize: 17 }}>✦</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
-                  Havi · Sugerencia
-                </Text>
-                <MarkdownText
-                  text={uc3Payload.text}
-                  style={{ color: D.text, fontSize: 13, lineHeight: 19 }}
-                />
+            {/* Top accent bar — mismo patrón que AlertCard */}
+            <View style={{ height: 2, backgroundColor: D.success, opacity: 0.70 }} />
+
+            <View style={{ padding: 14 }}>
+              {/* Header row */}
+              <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
+                <View style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  backgroundColor: "rgba(48,209,88,0.10)",
+                  alignItems: "center", justifyContent: "center",
+                }}>
+                  <Ionicons name="star-outline" size={17} color={D.success} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                    <Text style={{ color: D.text, fontSize: 14, fontWeight: "600", flex: 1 }}>
+                      Cashback Hey Pro
+                    </Text>
+                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: D.success }} />
+                  </View>
+                  <MarkdownText
+                    text={uc3Payload.text}
+                    style={{ color: "rgba(255,255,255,0.50)", fontSize: 13, lineHeight: 18 }}
+                  />
+                  <Text style={{ color: "rgba(255,255,255,0.22)", fontSize: 11, marginTop: 5 }}>
+                    Havi · Ahora
+                  </Text>
+                </View>
+                <Pressable onPress={() => setShowUC3(false)} hitSlop={10}>
+                  <Ionicons name="close" size={15} color="rgba(255,255,255,0.22)" />
+                </Pressable>
               </View>
-              <Pressable onPress={() => setShowUC3(false)} hitSlop={10}>
-                <Ionicons name="close" size={16} color={D.textMuted} />
-              </Pressable>
-            </View>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              <Pressable
-                onPress={() => {
-                  executePayrollPortability();
-                  setShowUC3(false);
-                  showToast("Solicitud de Hey Pro enviada. Havi te avisará pronto.", "success");
-                }}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  backgroundColor: pressed ? "#E5E5E5" : "#FFFFFF",
-                  borderRadius: 10,
-                  paddingVertical: 10,
-                  alignItems: "center",
-                })}
-              >
-                <Text style={{ color: "#000000", fontSize: 13, fontWeight: "700" }}>Activar</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setShowUC3(false)}
-                style={({ pressed }) => ({
-                  paddingHorizontal: 16,
-                  backgroundColor: pressed ? D.cardAlt : D.surface,
-                  borderRadius: 10,
-                  paddingVertical: 10,
-                  alignItems: "center",
-                  borderWidth: StyleSheet.hairlineWidth,
-                  borderColor: D.sep,
-                })}
-              >
-                <Text style={{ color: D.textSub, fontSize: 13 }}>Ahora no</Text>
-              </Pressable>
+
+              {/* Buttons */}
+              <View style={{
+                flexDirection: "row",
+                gap: 8,
+                marginTop: 12,
+                paddingTop: 12,
+                borderTopWidth: StyleSheet.hairlineWidth,
+                borderTopColor: "rgba(255,255,255,0.07)",
+              }}>
+                <Pressable
+                  onPress={() => {
+                    setShowUC3(false);
+                    router.push({
+                      pathname: "/(tabs)/chat",
+                      params: { initialPrompt: "Quiero activar Hey Pro. ¿Qué necesito hacer?" },
+                    });
+                  }}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    backgroundColor: pressed ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.06)",
+                    borderRadius: 10,
+                    paddingVertical: 9,
+                    alignItems: "center",
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: "rgba(255,255,255,0.10)",
+                  })}
+                >
+                  <Text style={{ color: D.text, fontSize: 13, fontWeight: "600" }}>Activar Hey Pro</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setShowUC3(false);
+                    router.push({
+                      pathname: "/(tabs)/chat",
+                      params: { initialPrompt: "¿Cuánto cashback estoy perdiendo este mes por no tener Hey Pro? Quiero activarlo." },
+                    });
+                  }}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    backgroundColor: pressed ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)",
+                    borderRadius: 10,
+                    paddingVertical: 9,
+                    alignItems: "center",
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: "rgba(255,255,255,0.09)",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    gap: 5,
+                  })}
+                >
+                  <Text style={{ color: "#FFFFFF", fontSize: 13 }}>✦</Text>
+                  <Text style={{ color: "rgba(255,255,255,0.60)", fontSize: 13, fontWeight: "500" }}>Havi</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
         )}
@@ -354,11 +411,17 @@ export default function HomeScreen() {
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <Text style={{ color: D.text, fontSize: 16, fontWeight: "700" }}>Últimos movimientos</Text>
             <Pressable onPress={() => router.push("/(tabs)/movements")}>
-              <Text style={{ color: D.textSub, fontSize: 13 }}>Ver todos</Text>
+              <Text style={{ color: "rgba(255,255,255,0.35)", fontSize: 13 }}>Ver todos</Text>
             </Pressable>
           </View>
 
-          <View style={{ backgroundColor: D.card, borderRadius: 16, overflow: "hidden" }}>
+          <View style={{
+            backgroundColor: "#141414",
+            borderRadius: 20,
+            overflow: "hidden",
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: "rgba(255,255,255,0.08)",
+          }}>
             {lastTxns.map((txn, idx) => {
               const icon = CAT_ICONS[txn.categoria] ?? CAT_ICONS.default;
               const isIncome = txn.tipo === "abono";
@@ -367,15 +430,15 @@ export default function HomeScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   paddingHorizontal: 16,
-                  paddingVertical: 13,
+                  paddingVertical: 14,
                   borderBottomWidth: idx < lastTxns.length - 1 ? StyleSheet.hairlineWidth : 0,
-                  borderBottomColor: D.sep,
+                  borderBottomColor: "rgba(255,255,255,0.06)",
                 }}>
                   <View style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    backgroundColor: D.surface,
+                    width: 38,
+                    height: 38,
+                    borderRadius: 12,
+                    backgroundColor: "rgba(255,255,255,0.05)",
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
@@ -391,11 +454,11 @@ export default function HomeScreen() {
                         <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: D.warning }} />
                       )}
                     </View>
-                    <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 1 }}>
+                    <Text style={{ color: "rgba(255,255,255,0.28)", fontSize: 11, marginTop: 2 }}>
                       {txn.categoria}
                     </Text>
                   </View>
-                  <Text style={{ color: isIncome ? D.success : D.text, fontSize: 14, fontWeight: "600" }}>
+                  <Text style={{ color: isIncome ? D.success : "rgba(255,255,255,0.80)", fontSize: 14, fontWeight: "600" }}>
                     {isIncome ? "+" : "-"}{formatMXN(txn.monto)}
                   </Text>
                 </View>
@@ -404,94 +467,121 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── UC2 Digital Twin Card ── */}
+        {/* ── UC2 Digital Twin Card — premium redesign ── */}
         <Pressable
-          onPress={() => router.push("/(tabs)/chat")}
+          onPress={() => router.push({
+            pathname: "/(tabs)/chat",
+           params: { initialPrompt: "¿Cómo voy a terminar el mes si sigo gastando al mismo ritmo? Dime qué puedo mejorar." },
+          })}
           style={({ pressed }) => ({
             marginHorizontal: 20,
-            marginTop: 12,
-            backgroundColor: pressed ? D.cardAlt : D.card,
-            borderRadius: 16,
+            marginTop: 16,
+            borderRadius: 20,
             overflow: "hidden",
+            opacity: pressed ? 0.88 : 1,
           })}
         >
-          {/* Header strip */}
+          {/* Dark gradient background */}
           <View style={{
-            paddingHorizontal: 16,
-            paddingTop: 14,
-            paddingBottom: 10,
-            borderBottomWidth: StyleSheet.hairlineWidth,
-            borderBottomColor: D.sep,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
+            backgroundColor: "#141414",
+            borderRadius: 20,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: "rgba(255,255,255,0.10)",
+            overflow: "hidden",
           }}>
-            <Text style={{ color: D.text, fontSize: 14 }}>✦</Text>
-            <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 0.9, textTransform: "uppercase", flex: 1 }}>
-              Gemelo Digital
-            </Text>
-            {contextLoading ? (
-              <ActivityIndicator size="small" color={D.textMuted} />
-            ) : (
-              <Text style={{ color: D.textMuted, fontSize: 12 }}>Simular →</Text>
-            )}
-          </View>
-          {/* Stats row */}
-          <View style={{ flexDirection: "row", paddingHorizontal: 16, paddingVertical: 14, gap: 0 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 4 }}>Proyección fin de mes</Text>
-              <Text style={{ color: uc2.gasto_estimado_fin_mes > uc2.ingreso_mensual ? D.warning : D.text, fontSize: 18, fontWeight: "700" }}>
-                {showBalance ? formatMXN(uc2.gasto_estimado_fin_mes) : "••••"}
-              </Text>
-              <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>
-                vs ingreso {showBalance ? formatMXN(uc2.ingreso_mensual) : "••••"}
-              </Text>
-            </View>
-            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: D.sep }} />
-            <View style={{ flex: 1, paddingLeft: 16 }}>
-              <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 4 }}>
-                {uc2.deficit_proyectado < 0 ? "Déficit estimado" : "Ingreso restante"}
-              </Text>
-              <Text style={{
-                color: uc2.deficit_proyectado < 0 ? D.error : D.success,
-                fontSize: 18,
-                fontWeight: "700",
-              }}>
-                {showBalance
-                  ? (uc2.deficit_proyectado < 0 ? "-" : "+") + formatMXN(Math.abs(uc2.deficit_proyectado))
-                  : "••••"}
-              </Text>
-              <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>
-                {uc2.dias_al_corte > 0 ? `Corte en ${uc2.dias_al_corte} días` : "Zona de riesgo"}
-              </Text>
-            </View>
-          </View>
-          {/* Havi insight */}
-          <View style={{
-            marginHorizontal: 12,
-            marginBottom: 12,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            backgroundColor: D.surface,
-            borderRadius: 10,
-          }}>
-            {contextLoading ? (
-              <Text style={{ color: D.textMuted, fontSize: 12 }}>Cargando tu gemelo digital…</Text>
-            ) : (
-              <Text style={{ color: D.textSub, fontSize: 12, lineHeight: 17 }}>
-                {isConnected
-                  ? `Tu zona de riesgo es `
-                  : `Si sigues gastando en `}
-                <Text style={{
-                  color: uc2.zona_riesgo === "Saludable" ? D.success : D.warning,
-                  fontWeight: "600",
+            {/* Top accent bar */}
+            <View style={{ height: 2, backgroundColor: uc2.deficit_proyectado < 0 ? D.warning : D.success, width: "100%", opacity: 0.8 }} />
+
+            {/* Header */}
+            <View style={{
+              paddingHorizontal: 18,
+              paddingTop: 16,
+              paddingBottom: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View style={{
+                  width: 28, height: 28, borderRadius: 8,
+                  backgroundColor: "rgba(255,255,255,0.07)",
+                  alignItems: "center", justifyContent: "center",
                 }}>
-                  {isConnected ? uc2.zona_riesgo : uc2.categoria_problema}
+                  <Text style={{ fontSize: 13 }}>✦</Text>
+                </View>
+                <Text style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, fontWeight: "700", letterSpacing: 1.1, textTransform: "uppercase" }}>
+                  Este mes
                 </Text>
-                {isConnected
-                  ? `. Tendencia: ${uc2.tendencia_riesgo}. Toca para simular.`
-                  : ` al mismo ritmo, te faltarán fondos. Toca para simular.`}
-              </Text>
+              </View>
+              {contextLoading
+                ? <ActivityIndicator size="small" color={D.textMuted} />
+                : <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <Text style={{ color: "rgba(255,255,255,0.35)", fontSize: 12 }}>Simula tu mes</Text>
+                    <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.25)" />
+                  </View>
+              }
+            </View>
+
+            {/* Stats — two columns */}
+            <View style={{ flexDirection: "row", paddingHorizontal: 18, paddingBottom: 16, gap: 12 }}>
+              <View style={{
+                flex: 1, backgroundColor: "rgba(255,255,255,0.04)",
+                borderRadius: 12, padding: 14,
+              }}>
+                <Text style={{ color: "rgba(255,255,255,0.40)", fontSize: 10, marginBottom: 6, letterSpacing: 0.3 }}>Proyección fin de mes</Text>
+                <Text style={{
+                  color: uc2.gasto_estimado_fin_mes > uc2.ingreso_mensual ? D.warning : D.text,
+                  fontSize: 20, fontWeight: "700", letterSpacing: -0.5,
+                }}>
+                  {showBalance ? formatMXN(uc2.gasto_estimado_fin_mes) : "••••"}
+                </Text>
+                <Text style={{ color: "rgba(255,255,255,0.28)", fontSize: 10, marginTop: 4 }}>
+                  vs {showBalance ? formatMXN(uc2.ingreso_mensual) : "••••"} ingreso
+                </Text>
+              </View>
+              <View style={{
+                flex: 1,
+                backgroundColor: uc2.deficit_proyectado < 0
+                  ? "rgba(255,69,58,0.08)" : "rgba(48,209,88,0.08)",
+                borderRadius: 12, padding: 14,
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: uc2.deficit_proyectado < 0
+                  ? "rgba(255,69,58,0.20)" : "rgba(48,209,88,0.20)",
+              }}>
+                <Text style={{ color: "rgba(255,255,255,0.40)", fontSize: 10, marginBottom: 6, letterSpacing: 0.3 }}>
+                  {uc2.deficit_proyectado < 0 ? "Déficit estimado" : "Restante"}
+                </Text>
+                <Text style={{
+                  color: uc2.deficit_proyectado < 0 ? D.error : D.success,
+                  fontSize: 20, fontWeight: "700", letterSpacing: -0.5,
+                }}>
+                  {showBalance
+                    ? (uc2.deficit_proyectado < 0 ? "-" : "+") + formatMXN(Math.abs(uc2.deficit_proyectado))
+                    : "••••"}
+                </Text>
+                <Text style={{ color: "rgba(255,255,255,0.28)", fontSize: 10, marginTop: 4 }}>
+                  {uc2.dias_al_corte > 0 ? `Corte en ${uc2.dias_al_corte} días` : "Zona de riesgo"}
+                </Text>
+              </View>
+            </View>
+
+            {/* Insight footer */}
+            {!contextLoading && (
+              <View style={{
+                marginHorizontal: 18, marginBottom: 16,
+                flexDirection: "row", alignItems: "center", gap: 8,
+              }}>
+                <Ionicons
+                  name={uc2.zona_riesgo === "Saludable" ? "checkmark-circle" : "alert-circle"}
+                  size={14}
+                  color={uc2.zona_riesgo === "Saludable" ? D.success : D.warning}
+                />
+                <Text style={{ color: "rgba(255,255,255,0.50)", fontSize: 12, lineHeight: 17, flex: 1 }}>
+                  {isConnected
+                    ? `Zona ${uc2.zona_riesgo} · Tendencia ${uc2.tendencia_riesgo}. Toca para simular.`
+                    : `Categoría problema: ${uc2.categoria_problema}. Toca para simular.`}
+                </Text>
+              </View>
             )}
           </View>
         </Pressable>
@@ -518,20 +608,22 @@ function QuickAction({ icon, label, onPress }: { icon: string; label: string; on
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({ alignItems: "center", opacity: pressed ? 0.6 : 1 })}
+      style={({ pressed }) => ({ alignItems: "center", opacity: pressed ? 0.55 : 1 })}
     >
       <View style={{
-        width: 52,
-        height: 52,
-        borderRadius: 16,
-        backgroundColor: D.card,
+        width: 56,
+        height: 56,
+        borderRadius: 18,
+        backgroundColor: "#161616",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 6,
+        marginBottom: 7,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "rgba(255,255,255,0.09)",
       }}>
-        <Ionicons name={icon as any} size={22} color="rgba(255,255,255,0.80)" />
+        <Ionicons name={icon as any} size={22} color="rgba(255,255,255,0.75)" />
       </View>
-      <Text style={{ color: D.textMuted, fontSize: 11 }}>{label}</Text>
+      <Text style={{ color: "rgba(255,255,255,0.42)", fontSize: 11, letterSpacing: 0.1 }}>{label}</Text>
     </Pressable>
   );
 }
