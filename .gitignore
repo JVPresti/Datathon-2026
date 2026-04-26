@@ -23,6 +23,9 @@ pipeline/.env
 # IDEs
 .vscode/
 .idea/
+
+# Cursor — Ralph Loop runtime state (scratchpad / done flag)
+.cursor/ralph/
 .DS_Store
 Thumbs.db
 

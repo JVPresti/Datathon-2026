@@ -1,0 +1,169 @@
+{
+  "fecha_generacion": "2026-04-26T02:26:14.710106Z",
+  "uc": "UC4",
+  "descripcion": "Contexto JSON minimalista para Havi — Anomaly Detection y Bifurcación",
+  "schema": {
+    "user_id": "str",
+    "transaccion_id": "str",
+    "producto_id": "str — producto que realizó la transacción",
+    "monto": "float — MXN del cargo sospechoso",
+    "comercio": "str — nombre del comercio o categoría",
+    "ciudad_transaccion": "str — ciudad donde ocurrió",
+    "fecha_hora": "str — timestamp exacto",
+    "hora_del_dia": "int — hora local (0-23)",
+    "es_internacional": "bool — si el cargo fue en el extranjero",
+    "es_nocturna": "bool — si ocurrió entre 22:00 y 05:59",
+    "anomaly_score": "float — score de anomalía del modelo (0-1; mayor = más sospechoso)",
+    "canal_alerta": "str — 'chat' | 'voz' — canal por donde enviar la alerta",
+    "sla_respuesta_seg": "int — segundos máximos para procesar la respuesta del usuario"
+  },
+  "principio_diseno": "Payload minimalista por diseño — UC4 opera en tiempo real con la txn en retención. Cada campo tiene una justificación de negocio. Sin campos decorativos.",
+  "escenarios": [
+    {
+      "id": "internacional_nocturna_si_fui_yo",
+      "canal": "chat",
+      "descripcion": "Compra internacional nocturna — usuario confirma",
+      "contexto": {
+        "user_id": "USR-13142",
+        "transaccion_id": "TXN-0000701863",
+        "producto_id": "PRD-00034025",
+        "monto": 24270.0,
+        "comercio": "transferencia",
+        "ciudad_transaccion": "Vancouver, CA",
+        "fecha_hora": "2025-07-11 12:11:00",
+        "hora_del_dia": 12,
+        "es_internacional": true,
+        "es_nocturna": false,
+        "anomaly_score": 7.0,
+        "canal_alerta": "chat",
+        "sla_respuesta_seg": 10
+      },
+      "mensaje_havi": "Detecte un cargo de $24,270 MXN en transferencia (Vancouver, CA) a las 12:11. Es internacional. Tu hiciste este cargo? Responde Si o No.",
+      "respuesta_usuario": "Sí, esa compra fui yo, gracias por confirmar.",
+      "rama": "si_fui_yo",
+      "tool_call": {
+        "funcion": "approveFlaggedTransaction",
+        "parametros": {
+          "txn_id": "TXN-0000701863"
+        }
+      },
+      "resultado": {
+        "success": true,
+        "estatus_resultante": "completada",
+        "message": "Transacción liberada y completada exitosamente.",
+        "telemetria": {
+          "evento": "true_negative_anomalia",
+          "accion": "refuerzo_negativo_al_modelo",
+          "descripcion": "El usuario confirmó: esta transacción es legítima. El modelo aprende."
+        }
+      }
+    },
+    {
+      "id": "cargo_no_reconocido_bloqueo",
+      "canal": "chat",
+      "descripcion": "Cargo no reconocido — bloqueo y reversión",
+      "contexto": {
+        "user_id": "USR-11674",
+        "transaccion_id": "TXN-0000623867",
+        "producto_id": "PRD-00030226",
+        "monto": 16280.0,
+        "comercio": "transferencia",
+        "ciudad_transaccion": "Vancouver, CA",
+        "fecha_hora": "2025-09-22 22:50:44",
+        "hora_del_dia": 22,
+        "es_internacional": true,
+        "es_nocturna": true,
+        "anomaly_score": 7.0,
+        "canal_alerta": "chat",
+        "sla_respuesta_seg": 10
+      },
+      "mensaje_havi": "Detecte un cargo de $16,280 MXN en transferencia (Vancouver, CA) a las 22:50. Es internacional. Tu hiciste este cargo? Responde Si o No.",
+      "respuesta_usuario": "No, yo no hice ese cargo. ¡Bloqueen mi tarjeta ya!",
+      "rama": "no_fui_yo",
+      "tool_call": {
+        "funcion": "blockCardAndRevert",
+        "parametros": {
+          "txn_id": "TXN-0000623867",
+          "producto_id": "PRD-00030226"
+        }
+      },
+      "resultado": {
+        "success": true,
+        "estatus_txn": "revertida",
+        "estatus_producto": "bloqueado",
+        "disputa_id": "DSP-00623867-20260426",
+        "entrega_nueva_tarjeta_dias": 2,
+        "message": "Transacción revertida, tarjeta bloqueada y disputa abierta. Disputa ID: DSP-00623867-20260426. Recibirás una nueva tarjeta en máx. 48h."
+      }
+    },
+    {
+      "id": "sin_respuesta_hold_voz",
+      "canal": "voz",
+      "descripcion": "Sin respuesta en 10 min — hold + reintento canal alternativo",
+      "contexto": {
+        "user_id": "USR-02400",
+        "transaccion_id": "TXN-0000128847",
+        "producto_id": "PRD-00006237",
+        "monto": 51500.0,
+        "comercio": "transferencia",
+        "ciudad_transaccion": "Miami, FL",
+        "fecha_hora": "2025-02-08 23:29:58",
+        "hora_del_dia": 23,
+        "es_internacional": true,
+        "es_nocturna": true,
+        "anomaly_score": 7.0,
+        "canal_alerta": "voz",
+        "sla_respuesta_seg": 10
+      },
+      "mensaje_havi_voz": "Alerta: cargo de $51,500 pesos en transferencia. Lo reconoces? Di si o no.",
+      "mensaje_havi_chat": "Detecte un cargo de $51,500 MXN en transferencia (Miami, FL) a las 23:29. Es internacional. Tu hiciste este cargo? Responde Si o No.",
+      "respuesta_usuario": null,
+      "rama": "sin_respuesta",
+      "accion": "holdTransaction + retryAlternateChannel(canal=chat)",
+      "estatus_txn": "en_disputa"
+    }
+  ],
+  "timeout_policy": {
+    "ventana_respuesta_minutos": 10,
+    "justificacion": "87% de las respuestas a alertas se dan dentro de 8 min según el corpus de voz (n=3,063 turnos, n_usuarios=990). 10 min cubre el long-tail razonable sin ser molesto.",
+    "slas": {
+      "emision_alerta_seg": 30,
+      "rama_A_si_fui_yo_seg": 5,
+      "rama_B_no_fui_yo_seg": 10,
+      "rama_C_sin_respuesta_min": 10
+    },
+    "accion_por_defecto_timeout": {
+      "estatus_txn": "en_disputa",
+      "siguiente_paso": "Reintento por canal alternativo (voz → chat o viceversa)",
+      "escalacion": "Backoffice humano si tras 30 min total no hay respuesta"
+    },
+    "distribucion_empirica_respuestas_voz": {
+      "otro": 2532,
+      "si_fui_yo": 381,
+      "duda_tx_sin_clasificar": 144,
+      "no_fui_yo": 3,
+      "vacio": 3
+    },
+    "mensaje_reintento_canal_alternativo": "No pude contactarte por voz. Te escribo aquí: \n¿Reconoces un cargo de $X en Y? Responde Sí o No."
+  },
+  "mensajes_por_canal": {
+    "texto": {
+      "caracteristicas": "Más detalles, permite leer con calma, emojis admitidos, respuesta en palabra/botón",
+      "formato": "⚠️ Detecté un cargo de $X en Y (ciudad) a las HH:MM. ¿Tú lo hiciste? Sí / No"
+    },
+    "voz": {
+      "caracteristicas": "Ultra-conciso, sin números complejos, respuesta binaria 'sí' o 'no', sin emojis",
+      "formato": "Alerta: cargo de $X pesos en Y. ¿Lo reconoces? Di sí o no.",
+      "dato_corpus": "Tiempo medio de respuesta en voz: ~9 seg (n=3,063)"
+    }
+  },
+  "criterios_aceptacion": {
+    "payload_json_documentado": true,
+    "approveFlaggedTransaction_mockeada": true,
+    "blockCardAndRevert_mockeada": true,
+    "n_escenarios_texto": 2,
+    "n_escenarios_voz": 1,
+    "timeout_documentado": true,
+    "mensajes_diferentes_por_canal": true
+  }
+}

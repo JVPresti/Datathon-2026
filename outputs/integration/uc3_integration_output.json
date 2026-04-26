@@ -1,0 +1,160 @@
+{
+  "fecha_generacion": "2026-04-26T02:26:43.063759Z",
+  "uc": "UC3",
+  "descripcion": "Contexto JSON para Havi — Upselling Inteligente (Hey Pro)",
+  "schema": {
+    "user_id": "str",
+    "nombre_usuario": "str",
+    "cashback_perdido_mes": "float — MXN no ganados el mes pasado por no tener Hey Pro",
+    "cashback_anual_estimado": "float — cashback_perdido_mes × 12",
+    "top_categoria_perdida": "str — categoría donde más cashback se perdió",
+    "monto_top_categoria": "float — gasto en la categoría top",
+    "segmento": "str — 'A' | 'B' | 'C'",
+    "ya_tiene_nomina": "bool — si la nómina ya está domiciliada en Hey",
+    "pasos_activacion": "int — 1 si tiene nómina, 3 si no la tiene",
+    "requisito_activacion": "str — descripción del paso principal requerido",
+    "score_propension": "float — proxy de propensión a adoptar Hey Pro (0-1)",
+    "dias_desde_ultimo_login": "int — recency de uso de la app"
+  },
+  "escenarios": [
+    {
+      "id": "segmento_A_con_nomina",
+      "descripcion": "Usuario Segmento A con nómina domiciliada — activación en 1 paso",
+      "contexto": {
+        "user_id": "USR-00618",
+        "nombre_usuario": "",
+        "cashback_perdido_mes": 1291.06,
+        "cashback_anual_estimado": 15492.72,
+        "top_categoria_perdida": "tecnologia",
+        "monto_top_categoria": 815.36,
+        "segmento": "A",
+        "ya_tiene_nomina": false,
+        "pasos_activacion": 3,
+        "requisito_activacion": "Domiciliar nómina en Hey, luego activar Hey Pro",
+        "score_propension": 1.0,
+        "dias_desde_ultimo_login": 10
+      },
+      "tool_call": {
+        "funcion": "initiatePayrollPortability",
+        "parametros": {
+          "user_id": "USR-00618"
+        },
+        "nota": "Si ya_tiene_nomina=True, se activa Hey Pro directamente sin portabilidad"
+      }
+    },
+    {
+      "id": "segmento_A_sin_nomina",
+      "descripcion": "Usuario Segmento A sin nómina — proceso de 3 pasos",
+      "contexto": {
+        "user_id": "USR-00192",
+        "nombre_usuario": "",
+        "cashback_perdido_mes": 360.77,
+        "cashback_anual_estimado": 4329.24,
+        "top_categoria_perdida": "hogar",
+        "monto_top_categoria": 284.57,
+        "segmento": "A",
+        "ya_tiene_nomina": false,
+        "pasos_activacion": 3,
+        "requisito_activacion": "Domiciliar nómina en Hey, luego activar Hey Pro",
+        "score_propension": 0.7729,
+        "dias_desde_ultimo_login": 0
+      },
+      "tool_call": {
+        "funcion": "initiatePayrollPortability",
+        "parametros": {
+          "user_id": "USR-00192"
+        }
+      },
+      "resultado": {
+        "success": true,
+        "estado": "iniciado",
+        "clabe_destino": "64618000000000192",
+        "instrucciones": "1. Proporciona esta CLABE a tu área de RH: 64618000000000192\n2. Solicita que tu siguiente nómina se deposite en Hey.\n3. Una vez recibida, activamos Hey Pro automáticamente y empiezas a ganar cashback.",
+        "sla_dias": 5,
+        "error_code": null
+      }
+    }
+  ],
+  "regla_salida_no": {
+    "trigger": "El usuario responde 'no', 'no gracias', 'ahorita no', 'no me interesa', o similar",
+    "accion_inmediata": "No ejecutar initiatePayrollPortability(). Marcar conversación como 'rechazada_upsell_hey_pro'.",
+    "cooldown_dias": 30,
+    "regla": "No volver a mostrar la misma oferta de Hey Pro a este usuario por 30 días.",
+    "excepciones": [
+      "Si el usuario pregunta sobre cashback o beneficios de Hey espontáneamente → sí responder.",
+      "Si el monto de cashback perdido supera $500 MXN en el mes siguiente → recalibrar y re-evaluar.",
+      "Segmento A con login en las últimas 24h → reintentar a los 14 días en vez de 30."
+    ],
+    "estado_resultante": "rechazada_upsell_hey_pro",
+    "mensaje_cierre": "Entendido, no hay problema. Cuando quieras conocer los beneficios de Hey Pro, solo pregúntame."
+  },
+  "conversaciones_reales_dataset": [
+    {
+      "user_id": "USR-09092",
+      "canal": "texto",
+      "input": "Me enteré de una promo \"Supercashback Pagos Gubernamentales\" pero el registro es por correo. Cómo puedo hacer para que me llegue un correo con esa promoción? ",
+      "output": "Claro que puedo ayudarte! Para participar en la promoción de \"Súpercashback Pagos Gubernamentales\", es necesario que tengas tu anualidad activa en tu Tarjeta de Crédito Hey Negocios. Una vez que tengas esto, deberías recibir un correo de registro. \n\nSi no has recibido el correo, te recomiendo que ve"
+    },
+    {
+      "user_id": "USR-08575",
+      "canal": "texto",
+      "input": "Pagar anualidad me da beneficios de tener más compras a crédito ?",
+      "output": "Claro que puedo ayudarte con eso. Pagar la anualidad de tu Tarjeta de Crédito Hey te da beneficios en forma de recompensas en efectivo: un 1% de regreso en todas tus compras y un 2% en compras con la tarjeta virtual en comercios como Amazon, Uber, Rappi, Netflix y Spotify. Sin embargo, pagar la anua"
+    },
+    {
+      "user_id": "USR-07656",
+      "canal": "texto",
+      "input": "La Anualidad opcional en la TDC ¿que beneficios da? ¿Y por qué a mi me aparece como pago únicamente \"Tres Meses\" en lugar de pago único ",
+      "output": "Lamento decirte que no tengo información acerca de la anualidad opcional en la TDC o sobre los detalles específicos de los pagos que aparecen en tu cuenta. Sin embargo, tengo información de los siguientes temas:\n\na) Tarjeta de Crédito Hey\nb) Tarjeta de Crédito Hey Garantizada\nc) Tarjeta de Crédito H"
+    },
+    {
+      "user_id": "USR-00134",
+      "canal": "texto",
+      "input": "En qué puedo usar mis recompensas",
+      "output": "¡Claro! Puedes utilizar tus recompensas de varias maneras. Las recompensas que obtienes con tu Tarjeta de Crédito Hey son dinero en efectivo que puedes usar como prefieras. Aquí te dejo algunas opciones:\n\n1. **Compras en línea**: Puedes hacer compras en línea utilizando la tarjeta virtual de recompe"
+    },
+    {
+      "user_id": "USR-13692",
+      "canal": "texto",
+      "input": "Cuál es el costo y beneficios de hacerme fan?",
+      "output": "Claro que sí! La suscripción Fan en Hey Banco tiene un costo de $50.00 pesos más IVA, es decir, un total de $58.00 pesos al mes. Puedes pagarla con tu tarjeta de débito o crédito.\n\nEn cuanto a los beneficios, al hacerte Fan obtienes varias ventajas interesantes:\n- Accedes a las tasas de inversión ex"
+    },
+    {
+      "user_id": "USR-13692",
+      "canal": "texto",
+      "input": "Cuáles son las tasas de inversión para miembros hey pro?",
+      "output": "Claro! Las tasas de inversión exclusivas para clientes Hey Pro son las siguientes:\n\n- A 7 días, la tasa anual es del 7%.\n- A 28 días, la tasa anual es del 7.50%.\n\nEstas tasas son más altas que las que se ofrecen a clientes que no son Hey Pro, quienes tienen una tasa del 4% anual tanto a 7 como a 28 "
+    },
+    {
+      "user_id": "USR-01984",
+      "canal": "texto",
+      "input": "Que me dices de las promociones y beneficios de la tarjeta hey edición pal norte?",
+      "output": "¡Claro! Con tu Tarjeta Hey Edición Tecate Pa’l Norte, disfrutas de varios beneficios exclusivos durante el festival, tales como:\n\n- Abono o boleto a 3, 5 y 7 Meses Sin Intereses.\n- Acceso exclusivo a la Terraza Hey con +1, que ofrece una vista privilegiada al escenario.\n- Participación en giveaways "
+    },
+    {
+      "user_id": "USR-06562",
+      "canal": "texto",
+      "input": "Beneficios de crédito automotriz",
+      "output": "Claro que sí! El Crédito de Auto Hey tiene varios beneficios que podrían interesarte:\n\n- Tasa de interés anual fija desde 12.49%, lo que te da certeza en tus pagos.\n- Enganche desde solo el 10%, para que puedas iniciar con menos dinero.\n- Plazos súper flexibles, desde 12 hasta 120 meses, para que el"
+    },
+    {
+      "user_id": "USR-01776",
+      "canal": "texto",
+      "input": "Hey pro",
+      "output": "¡Claro! Hey Pro es un estatus especial que puedes obtener en Hey Banco. Para convertirte en Cliente Hey Pro, necesitas hacer 6 compras al mes de al menos $100 pesos cada una o transferir tu nómina a Hey Banco. \n\nAl ser Cliente Hey Pro, disfrutarás de beneficios como una tasa del 7.50% de rendimiento"
+    },
+    {
+      "user_id": "USR-01776",
+      "canal": "texto",
+      "input": "Como me convierto en hey pro",
+      "output": "Para convertirte en Cliente Hey Pro, solo necesitas hacer 6 compras de al menos $100 pesos al mes o cambiar tu nómina a Hey Banco. Asegúrate de tener tu Cuenta Hey validada para poder acceder a este estatus.\n\nAdemás, cuando abres una Cuenta Hey, te dan el estatus de Cliente Hey Pro por 30 días, así "
+    }
+  ],
+  "criterios_aceptacion": {
+    "payload_json_con_schema": true,
+    "tool_initiatePayrollPortability_mockeada": true,
+    "n_escenarios": 2,
+    "regla_no_documentada": true,
+    "conversaciones_reales_incluidas": true
+  }
+}
