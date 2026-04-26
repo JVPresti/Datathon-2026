@@ -1,0 +1,65 @@
+[
+  {
+    "caso": "si_fui_yo",
+    "alerta_emitida": {
+      "transaccion_id": "TXN-0000701863",
+      "user_id": "USR-13142",
+      "producto_id": "PRD-00034025",
+      "monto": 24270.0,
+      "fecha_hora_tx": "2025-07-11T12:11:00",
+      "comercio_categoria_mcc": null,
+      "es_internacional": true,
+      "ciudad_transaccion": "Vancouver, CA",
+      "anomaly_score_reglas": 7.0,
+      "iso_anomaly_predicted": true,
+      "mensaje_push": "¿Hiciste un cargo de $24,270 MXN ahora? Si no, lo bloqueamos al instante."
+    },
+    "respuesta_usuario": "Sí, esa compra fui yo, gracias por confirmar.",
+    "rama_disparada": "si_fui_yo",
+    "accion_backend": "approveFlaggedTransaction(transaccion_id)",
+    "sla_objetivo_seg": 5,
+    "estatus_resultante": "completada"
+  },
+  {
+    "caso": "no_fui_yo",
+    "alerta_emitida": {
+      "transaccion_id": "TXN-0000623867",
+      "user_id": "USR-11674",
+      "producto_id": "PRD-00030226",
+      "monto": 16280.0,
+      "fecha_hora_tx": "2025-09-22T22:50:44",
+      "comercio_categoria_mcc": null,
+      "es_internacional": true,
+      "ciudad_transaccion": "Vancouver, CA",
+      "anomaly_score_reglas": 7.0,
+      "iso_anomaly_predicted": true,
+      "mensaje_push": "¿Hiciste un cargo de $16,280 MXN ahora? Si no, lo bloqueamos al instante."
+    },
+    "respuesta_usuario": "No, yo no hice ese cargo. ¡Bloqueen mi tarjeta ya!",
+    "rama_disparada": "no_fui_yo",
+    "accion_backend": "blockCardAndRevert(producto_id, transaccion_id) + openDispute()",
+    "sla_objetivo_seg": 10,
+    "estatus_resultante": "revertida"
+  },
+  {
+    "caso": "sin_respuesta",
+    "alerta_emitida": {
+      "transaccion_id": "TXN-0000128847",
+      "user_id": "USR-02400",
+      "producto_id": "PRD-00006237",
+      "monto": 51500.0,
+      "fecha_hora_tx": "2025-02-08T23:29:58",
+      "comercio_categoria_mcc": null,
+      "es_internacional": true,
+      "ciudad_transaccion": "Miami, FL",
+      "anomaly_score_reglas": 7.0,
+      "iso_anomaly_predicted": true,
+      "mensaje_push": "¿Hiciste un cargo de $51,500 MXN ahora? Si no, lo bloqueamos al instante."
+    },
+    "respuesta_usuario": null,
+    "rama_disparada": "sin_respuesta",
+    "accion_backend": "holdTransaction(transaccion_id) + retryAlternateChannel(user_id) tras 10 min",
+    "sla_objetivo_seg": 600,
+    "estatus_resultante": "en_disputa"
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "fecha_evaluacion": "2026-04-25T23:54:01.747994+00:00",
+  "n_rechazos_total": 7034,
+  "n_rechazos_saldo": 3050,
+  "n_rechazos_limite": 3008,
+  "n_triggers_activados": 5726,
+  "cobertura_pct": 81.4,
+  "latencia_us": {
+    "p50": 1641.3,
+    "p95": 2033.4099999999999,
+    "p99": 2751.4889999999996,
+    "max": 3686.4
+  },
+  "cumple_sla_p95_100ms": true,
+  "breakdown_no_disparo": {
+    "TRIGGER": 5746,
+    "motivo_fuera_de_alcance": 976,
+    "sin_producto_alternativo_que_cubra": 271,
+    "monto_bajo_umbral": 41
+  },
+  "breakdown_motivo_disparo": {
+    "saldo_insuficiente": 2884,
+    "limite_excedido": 2842
+  },
+  "parametros": {
+    "MONTO_MINIMO_MXN": 50.0,
+    "VENTANA_FRECUENCIA_H": 24,
+    "MOTIVOS_VALIDOS": [
+      "limite_excedido",
+      "saldo_insuficiente"
+    ],
+    "PRIORIDAD_PRODUCTO": {
+      "cuenta_debito": 1,
+      "inversion_hey": 2,
+      "tarjeta_credito_hey": 3,
+      "cuenta_ahorro": 4,
+      "credito_nomina": 5,
+      "credito_personal": 6
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "fecha_evaluacion": "2026-04-25T23:59:55.677007+00:00",
+  "n_candidatos_total": 7680,
+  "segmentos": {
+    "A": 82,
+    "B": 205,
+    "C": 7393
+  },
+  "segmento_A_detalles": {
+    "pct_con_nomina_domiciliada": 0.0,
+    "n_con_login_24h": 9,
+    "n_con_login_semana": 36,
+    "n_subset_premium_zero_friction": 0
+  },
+  "prioridad_envio": {
+    "baja": 7439,
+    "media": 232,
+    "alta": 9
+  },
+  "roi": {
+    "supuestos": {
+      "revenue_mensual_hey_pro_mxn": 99.0,
+      "tasa_conversion_estimada": 0.2
+    },
+    "segmento_A_total": {
+      "n_convertidos": 16,
+      "revenue_mensual_mxn": 1584.0,
+      "revenue_anual_mxn": 19008.0
+    },
+    "subset_premium": {
+      "n_convertidos": 0,
+      "revenue_mensual_mxn": 0.0,
+      "revenue_anual_mxn": 0.0
+    },
+    "sensibilidad_revenue_mensual_anual_mxn": {
+      "49": 9408,
+      "99": 19008,
+      "149": 28608
+    }
+  },
+  "parametros": {
+    "UMBRAL_CASHBACK_ALTO": 300.0,
+    "UMBRAL_CASHBACK_MEDIO": 100.0,
+    "UMBRAL_PROPENSION_ALTA": 70.0,
+    "UMBRAL_DIAS_LOGIN_ALTA": 1,
+    "UMBRAL_DIAS_LOGIN_MEDIA": 7
+  },
+  "criterios_aceptacion": {
+    "tamano_segmentos_documentado": true,
+    "pct_A_con_nomina_calculado": true,
+    "roi_estimado_con_supuestos_explicitos": true,
+    "regla_timing_implementada": true
+  }
+}

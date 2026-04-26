@@ -1,0 +1,77 @@
+{
+  "fecha_evaluacion": "2026-04-26T00:04:58.613910+00:00",
+  "n_turnos_voz": 3063,
+  "n_usuarios_voz": 990,
+  "n_conversaciones_voz": 1246,
+  "turnos_por_conv_voz": {
+    "media": 2.458266452648475,
+    "mediana": 3.0,
+    "p95": 5.0
+  },
+  "longitud_caracteres": {
+    "input_media": 57.772445315050604,
+    "output_media": 285.7446947437153
+  },
+  "distribucion_ramas_voz": {
+    "otro": 2532,
+    "si_fui_yo": 381,
+    "duda_tx_sin_clasificar": 144,
+    "no_fui_yo": 3,
+    "vacio": 3
+  },
+  "distribucion_ramas_chat_sample": {
+    "otro": 4178,
+    "si_fui_yo": 548,
+    "duda_tx_sin_clasificar": 229,
+    "no_fui_yo": 45
+  },
+  "ejemplos": {
+    "si_fui_yo": [
+      {
+        "user_id": "USR-00877",
+        "input": " ¿  Sabe si  todavía  puedo  ir a  hacer  depósitos a  Banregio ?"
+      },
+      {
+        "user_id": "USR-00877",
+        "input": " Oye ,  ¿  me  podrías  decir  cuánto  es  el  cashback si  contrato  la  anualidad ?"
+      },
+      {
+        "user_id": "USR-08006",
+        "input": " que si  me  puedes  informar  cual  es  el  monto maximo  de  depositos  que  se  pueden  hacer a  mi  cuenta"
+      }
+    ],
+    "no_fui_yo": [
+      {
+        "user_id": "USR-08763",
+        "input": " en  la  tarjeta  por  robo y  extravio"
+      },
+      {
+        "user_id": "USR-05505",
+        "input": " que  debo  de  hacer  para  reportar  mi  tarjeta  por  robo  austravio"
+      },
+      {
+        "user_id": "USR-04170",
+        "input": " reportar  mi  tarjeta  por  robo  tarjeta  fisica"
+      }
+    ],
+    "duda_tx": [
+      {
+        "user_id": "USR-14634",
+        "input": " estoy  ingresando a  mi  cuenta y  no  veo  los  saldos  lo  saldo  no  veo  ningun  saldo  ni  siquiera  cuando  me  transfiero  nsfiero  en  cuenta  de  ahorros o  en  mi  apartado  de  ahorrastado"
+      },
+      {
+        "user_id": "USR-14421",
+        "input": " se  me  realizo  un  cargo"
+      },
+      {
+        "user_id": "USR-04632",
+        "input": " revisar  una  compra a  meses  interees  intereses  de  unos  boletos"
+      }
+    ]
+  },
+  "sla_recomendado_basado_en_corpus": {
+    "rama_A_si_fui_yo_sla_seg": 5,
+    "rama_B_no_fui_yo_sla_seg": 10,
+    "rama_C_sin_respuesta_min": 10
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "fecha_evaluacion": "2026-04-25T23:57:40.672060+00:00",
+  "features_usadas": [
+    "delta_score_mensual",
+    "feat_dem_edad",
+    "feat_dem_ingreso_log",
+    "feat_dem_score_buro",
+    "feat_dem_ingreso_cuartil",
+    "feat_eng_es_hey_pro",
+    "feat_eng_nomina_domiciliada",
+    "feat_eng_recibe_remesas",
+    "feat_eng_satisfaccion",
+    "feat_eng_dias_desde_ultimo_login",
+    "feat_port_n_productos_activos",
+    "feat_time_weekend_ratio",
+    "feat_time_nocturnal_ratio",
+    "feat_risk_n_rechazos_anual",
+    "feat_risk_n_rechazos_30d",
+    "feat_risk_n_disputas",
+    "feat_risk_pct_atipicas",
+    "feat_risk_pct_reintento",
+    "gasto_discrecional_pct",
+    "pct_ingreso_comprometido",
+    "dias_al_corte"
+  ],
+  "n_train": 12020,
+  "n_test": 3005,
+  "tasa_positiva_total": 0.0026622296173044926,
+  "modelos": {
+    "logistic_regression": {
+      "auc_roc": 0.9981648314981648,
+      "precision": 0.4117647058823529,
+      "recall": 0.875,
+      "f1": 0.56
+    },
+    "random_forest": {
+      "auc_roc": 0.9999582916249583,
+      "precision_default": 1.0,
+      "recall_default": 0.25,
+      "f1_default": 0.4,
+      "threshold_optimo": 0.2,
+      "precision_threshold_opt": 1.0,
+      "recall_threshold_opt": 0.875,
+      "f1_threshold_opt": 0.9333333333333333
+    }
+  },
+  "criterios_aceptacion": {
+    "auc_rf_gt_0.70": true,
+    "recall_rf_gt_0.75": true
+  },
+  "feature_importance_top10": {
+    "feat_dem_ingreso_log": 0.301,
+    "pct_ingreso_comprometido": 0.2443,
+    "feat_dem_ingreso_cuartil": 0.1664,
+    "delta_score_mensual": 0.0678,
+    "feat_dem_score_buro": 0.0376,
+    "gasto_discrecional_pct": 0.0315,
+    "feat_risk_pct_reintento": 0.0293,
+    "feat_eng_dias_desde_ultimo_login": 0.0257,
+    "feat_time_weekend_ratio": 0.0183,
+    "feat_risk_n_rechazos_anual": 0.0174
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.05,
+      "precision": 0.8,
+      "recall": 1.0,
+      "f1": 0.8889,
+      "n_alertas": 10
+    },
+    {
+      "threshold": 0.1,
+      "precision": 0.8889,
+      "recall": 1.0,
+      "f1": 0.9412,
+      "n_alertas": 9
+    },
+    {
+      "threshold": 0.15,
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1": 0.875,
+      "n_alertas": 8
+    },
+    {
+      "threshold": 0.2,
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.9333,
+      "n_alertas": 7
+    },
+    {
+      "threshold": 0.25,
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.9333,
+      "n_alertas": 7
+    },
+    {
+      "threshold": 0.3,
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.9333,
+      "n_alertas": 7
+    },
+    {
+      "threshold": 0.35,
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.9333,
+      "n_alertas": 7
+    },
+    {
+      "threshold": 0.4,
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.8571,
+      "n_alertas": 6
+    },
+    {
+      "threshold": 0.45,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6667,
+      "n_alertas": 4
+    },
+    {
+      "threshold": 0.5,
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "n_alertas": 2
+    },
+    {
+      "threshold": 0.55,
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "n_alertas": 2
+    },
+    {
+      "threshold": 0.6,
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "n_alertas": 2
+    },
+    {
+      "threshold": 0.65,
+      "precision": 1.0,
+      "recall": 0.125,
+      "f1": 0.2222,
+      "n_alertas": 1
+    },
+    {
+      "threshold": 0.7,
+      "precision": 1.0,
+      "recall": 0.125,
+      "f1": 0.2222,
+      "n_alertas": 1
+    },
+    {
+      "threshold": 0.75,
+      "precision": 1.0,
+      "recall": 0.125,
+      "f1": 0.2222,
+      "n_alertas": 1
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_alertas": 0
+    },
+    {
+      "threshold": 0.85,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_alertas": 0
+    },
+    {
+      "threshold": 0.9,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_alertas": 0
+    },
+    {
+      "threshold": 0.95,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "n_alertas": 0
+    }
+  ]
+}

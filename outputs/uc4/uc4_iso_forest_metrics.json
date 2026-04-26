@@ -1,0 +1,103 @@
+{
+  "fecha_evaluacion": "2026-04-26T00:01:42.936099+00:00",
+  "features_modelo": [
+    "z_monto",
+    "z_hora",
+    "es_internacional",
+    "ciudad_nueva",
+    "intento_numero",
+    "sig_internacional",
+    "sig_hora_atipica",
+    "sig_ciudad_nueva",
+    "sig_monto_extremo",
+    "sig_reintento",
+    "perfil_pct_internacional",
+    "perfil_n_txn",
+    "perfil_monto_std",
+    "perfil_hora_std"
+  ],
+  "split": {
+    "fecha_corte": "2025-10-01T00:00:00",
+    "n_train": 242983,
+    "n_test": 26983,
+    "tasa_patron_atipico_test": 0.05266278768113256
+  },
+  "modelo": {
+    "tipo": "IsolationForest",
+    "contamination": 0.05,
+    "n_estimators": 200,
+    "precision": 0.061254612546125464,
+    "recall": 0.05840957072484166,
+    "f1": 0.05979827089337176,
+    "auc_roc_score": 0.4846621213391778,
+    "n_anomalias_detectadas": 1355
+  },
+  "reglas_baseline": {
+    "umbral_anomaly_score": 5,
+    "precision": 0.0625,
+    "recall": 0.05277973258268825,
+    "f1": 0.05723006486074018,
+    "n_anomalias_detectadas": 1200
+  },
+  "comparativa_fp": {
+    "fp_rate_modelo": 0.04976136452546749,
+    "fp_rate_reglas": 0.04401064079492997,
+    "reduccion_fp_pct": -13.06666666666667
+  },
+  "threshold_sweep": [
+    {
+      "percentil_score": 0.85,
+      "threshold": 0.5064,
+      "precision": 0.0529,
+      "recall": 0.1506,
+      "f1": 0.0783,
+      "n_alertas": 4048
+    },
+    {
+      "percentil_score": 0.9,
+      "threshold": 0.5511,
+      "precision": 0.0559,
+      "recall": 0.1063,
+      "f1": 0.0733,
+      "n_alertas": 2699
+    },
+    {
+      "percentil_score": 0.93,
+      "threshold": 0.5762,
+      "precision": 0.0603,
+      "recall": 0.0802,
+      "f1": 0.0689,
+      "n_alertas": 1889
+    },
+    {
+      "percentil_score": 0.95,
+      "threshold": 0.6033,
+      "precision": 0.0615,
+      "recall": 0.0584,
+      "f1": 0.0599,
+      "n_alertas": 1350
+    },
+    {
+      "percentil_score": 0.97,
+      "threshold": 0.6265,
+      "precision": 0.0642,
+      "recall": 0.0366,
+      "f1": 0.0466,
+      "n_alertas": 810
+    },
+    {
+      "percentil_score": 0.99,
+      "threshold": 0.6505,
+      "precision": 0.063,
+      "recall": 0.012,
+      "f1": 0.0201,
+      "n_alertas": 270
+    }
+  ],
+  "criterios_aceptacion": {
+    "precision_gt_0.7_vs_patron": false,
+    "reduccion_fp_reportada": true,
+    "modelo_persistido": true
+  },
+  "limitacion": "patron_uso_atipico es etiqueta sintética del dataset, no fraude real. Métricas son pseudo-validación."
+}
