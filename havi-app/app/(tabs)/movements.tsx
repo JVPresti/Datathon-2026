@@ -1,31 +1,27 @@
 // ============================================================
-// MOVEMENTS — Obsidian Intelligence dark mode
+// MOVEMENTS — Hey Banco neutral dark
 // ============================================================
 
 import React, { useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { TRANSACCIONES_MOCK, formatMXN, timeAgo } from "../../src/data/mockData";
 import { Transaccion } from "../../src/types";
 
 const D = {
-  bg: "#07090E",
-  surface: "#0F1318",
-  card: "#161B27",
-  cardAlt: "#1C2235",
-  border: "rgba(255,255,255,0.07)",
-  borderAccent: "rgba(6,182,212,0.18)",
-  text: "#EFF6FF",
-  textSub: "rgba(239,246,255,0.55)",
-  textMuted: "rgba(239,246,255,0.30)",
-  accent: "#06B6D4",
-  accentDeep: "#0891B2",
-  success: "#4ADE80",
-  warning: "#FBBF24",
-  error: "#F87171",
+  bg: "#000000",
+  surface: "#111111",
+  card: "#1C1C1E",
+  cardAlt: "#2C2C2E",
+  sep: "rgba(255,255,255,0.08)",
+  text: "#FFFFFF",
+  textSub: "rgba(255,255,255,0.55)",
+  textMuted: "rgba(255,255,255,0.30)",
+  success: "#30D158",
+  warning: "#FF9F0A",
+  error: "#FF453A",
 };
 
 type Filter = "todos" | "cargo" | "abono";
@@ -58,26 +54,24 @@ export default function MovementsScreen() {
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: D.border,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: D.sep,
       }}>
         <Pressable
           onPress={() => router.back()}
           style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 12,
-            backgroundColor: pressed ? D.cardAlt : D.card,
+            width: 34,
+            height: 34,
+            borderRadius: 17,
+            backgroundColor: pressed ? D.card : "transparent",
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: 1,
-            borderColor: D.border,
           })}
         >
-          <Ionicons name="chevron-back" size={18} color={D.textSub} />
+          <Ionicons name="chevron-back" size={20} color={D.textSub} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: D.text, fontSize: 20, fontWeight: "800" }}>Movimientos</Text>
+          <Text style={{ color: D.text, fontSize: 20, fontWeight: "700" }}>Movimientos</Text>
           <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 1 }}>
             {filtered.length} transacciones
           </Text>
@@ -90,49 +84,33 @@ export default function MovementsScreen() {
             gap: 5,
             paddingHorizontal: 12,
             paddingVertical: 7,
-            backgroundColor: pressed ? "rgba(6,182,212,0.15)" : "rgba(6,182,212,0.08)",
+            backgroundColor: pressed ? D.cardAlt : D.card,
             borderRadius: 10,
-            borderWidth: 1,
-            borderColor: D.borderAccent,
           })}
         >
-          <Text style={{ fontSize: 11 }}>✦</Text>
-          <Text style={{ color: D.accent, fontSize: 12, fontWeight: "700" }}>Analizar</Text>
+          <Text style={{ color: D.text, fontSize: 12 }}>✦</Text>
+          <Text style={{ color: D.textSub, fontSize: 13 }}>Analizar</Text>
         </Pressable>
       </View>
 
-      {/* Balance summary row */}
-      <View style={{ flexDirection: "row", paddingHorizontal: 20, paddingVertical: 14, gap: 10 }}>
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(74,222,128,0.06)",
-          borderRadius: 14,
-          padding: 14,
-          borderWidth: 1,
-          borderColor: "rgba(74,222,128,0.10)",
-        }}>
-          <Text style={{ color: D.textMuted, fontSize: 11 }}>Abonos</Text>
-          <Text style={{ color: D.success, fontSize: 15, fontWeight: "700", marginTop: 3 }}>
+      {/* Summary */}
+      <View style={{ flexDirection: "row", paddingHorizontal: 20, paddingVertical: 12, gap: 10 }}>
+        <View style={{ flex: 1, backgroundColor: D.card, borderRadius: 12, padding: 14 }}>
+          <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Abonos</Text>
+          <Text style={{ color: D.success, fontSize: 15, fontWeight: "600" }}>
             +{formatMXN(totalAbonos)}
           </Text>
         </View>
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(248,113,113,0.05)",
-          borderRadius: 14,
-          padding: 14,
-          borderWidth: 1,
-          borderColor: "rgba(248,113,113,0.08)",
-        }}>
-          <Text style={{ color: D.textMuted, fontSize: 11 }}>Cargos</Text>
-          <Text style={{ color: D.error, fontSize: 15, fontWeight: "700", marginTop: 3 }}>
+        <View style={{ flex: 1, backgroundColor: D.card, borderRadius: 12, padding: 14 }}>
+          <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Cargos</Text>
+          <Text style={{ color: D.text, fontSize: 15, fontWeight: "600" }}>
             -{formatMXN(totalCargos)}
           </Text>
         </View>
       </View>
 
       {/* Filter pills */}
-      <View style={{ flexDirection: "row", paddingHorizontal: 20, gap: 8, marginBottom: 14 }}>
+      <View style={{ flexDirection: "row", paddingHorizontal: 20, gap: 8, marginBottom: 12 }}>
         {(["todos", "cargo", "abono"] as Filter[]).map((f) => {
           const active = filter === f;
           const labels: Record<Filter, string> = { todos: "Todos", cargo: "Cargos", abono: "Abonos" };
@@ -140,19 +118,17 @@ export default function MovementsScreen() {
             <Pressable
               key={f}
               onPress={() => setFilter(f)}
-              style={({ pressed }) => ({
+              style={{
                 paddingHorizontal: 16,
                 paddingVertical: 7,
-                borderRadius: 20,
-                backgroundColor: active ? D.accent : pressed ? D.cardAlt : D.card,
-                borderWidth: 1,
-                borderColor: active ? D.accent : D.border,
-              })}
+                borderRadius: 18,
+                backgroundColor: active ? "#FFFFFF" : D.card,
+              }}
             >
               <Text style={{
                 fontSize: 13,
-                fontWeight: active ? "700" : "500",
-                color: active ? "#fff" : D.textSub,
+                fontWeight: active ? "600" : "400",
+                color: active ? "#000000" : D.textSub,
               }}>
                 {labels[f]}
               </Text>
@@ -161,24 +137,16 @@ export default function MovementsScreen() {
         })}
       </View>
 
-      {/* Transaction list */}
+      {/* List */}
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{
-          backgroundColor: D.card,
-          borderRadius: 20,
-          borderWidth: 1,
-          borderColor: D.border,
-          overflow: "hidden",
-        }}>
+        <View style={{ backgroundColor: D.card, borderRadius: 16, overflow: "hidden" }}>
           {filtered.length === 0 ? (
             <View style={{ alignItems: "center", paddingVertical: 40 }}>
-              <Text style={{ color: D.textMuted, fontSize: 14 }}>
-                Sin movimientos en este período
-              </Text>
+              <Text style={{ color: D.textMuted, fontSize: 14 }}>Sin movimientos</Text>
             </View>
           ) : (
             filtered.map((txn, idx) => (
@@ -194,56 +162,46 @@ export default function MovementsScreen() {
 function TxnRow({ txn, isLast }: { txn: Transaccion; isLast: boolean }) {
   const icon = CAT_ICONS[txn.categoria] ?? CAT_ICONS.default;
   const isIncome = txn.tipo === "abono";
-
   return (
     <View style={{
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 16,
       paddingVertical: 13,
-      borderBottomWidth: isLast ? 0 : 1,
-      borderBottomColor: D.border,
+      borderBottomWidth: isLast ? 0 : StyleSheet.hairlineWidth,
+      borderBottomColor: "rgba(255,255,255,0.08)",
     }}>
       <View style={{
-        width: 38,
-        height: 38,
-        borderRadius: 11,
-        backgroundColor: txn.es_anomala ? "rgba(251,191,36,0.07)" : D.surface,
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        backgroundColor: "#111111",
         alignItems: "center",
         justifyContent: "center",
         marginRight: 12,
-        borderWidth: txn.es_anomala ? 1 : 0,
-        borderColor: "rgba(251,191,36,0.18)",
       }}>
         <Text style={{ fontSize: 17 }}>{icon}</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-          <Text style={{ color: D.text, fontSize: 13, fontWeight: "600" }} numberOfLines={1}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text style={{ color: "#FFFFFF", fontSize: 13, fontWeight: "500" }} numberOfLines={1}>
             {txn.comercio}
           </Text>
           {txn.es_anomala && (
-            <View style={{
-              width: 6,
-              height: 6,
-              borderRadius: 3,
-              backgroundColor: D.warning,
-            }} />
+            <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: "#FF9F0A" }} />
           )}
         </View>
-        <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>
+        <Text style={{ color: "rgba(255,255,255,0.30)", fontSize: 11, marginTop: 1 }}>
           {txn.categoria} · {timeAgo(txn.fecha)}
         </Text>
       </View>
-      <View style={{ alignItems: "flex-end" }}>
-        <Text style={{
-          color: isIncome ? D.success : D.text,
-          fontSize: 14,
-          fontWeight: "700",
-        }}>
-          {isIncome ? "+" : "-"}{formatMXN(txn.monto)}
-        </Text>
-      </View>
+      <Text style={{
+        color: isIncome ? "#30D158" : "#FFFFFF",
+        fontSize: 14,
+        fontWeight: "600",
+      }}>
+        {isIncome ? "+" : "-"}{formatMXN(txn.monto)}
+      </Text>
     </View>
   );
 }

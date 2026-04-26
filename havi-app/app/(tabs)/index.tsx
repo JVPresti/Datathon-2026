@@ -1,17 +1,10 @@
 // ============================================================
-// HOME — Dashboard principal — Obsidian Intelligence dark mode
-// Filosofía: solo datos críticos, jerarquía clara, HAVI proactivo
+// HOME — Dashboard principal
+// Hey Banco design language: neutral black, flat cards, white text
 // ============================================================
 
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  Animated,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -31,25 +24,22 @@ import {
 } from "../../src/services/upsellingService";
 import { executePayrollPortability } from "../../src/services/haviService";
 
+// Hey Banco palette: neutral dark, no accent color
 const D = {
-  bg: "#07090E",
-  surface: "#0F1318",
-  card: "#161B27",
-  cardAlt: "#1C2235",
-  border: "rgba(255,255,255,0.07)",
-  borderAccent: "rgba(6,182,212,0.2)",
-  text: "#EFF6FF",
-  textSub: "rgba(239,246,255,0.55)",
-  textMuted: "rgba(239,246,255,0.30)",
-  accent: "#06B6D4",
-  accentDeep: "#0891B2",
-  accentGlow: "rgba(6,182,212,0.12)",
-  success: "#4ADE80",
-  warning: "#FBBF24",
-  error: "#F87171",
+  bg: "#000000",
+  surface: "#111111",
+  card: "#1C1C1E",
+  cardAlt: "#2C2C2E",
+  sep: "rgba(255,255,255,0.08)",
+  text: "#FFFFFF",
+  textSub: "rgba(255,255,255,0.55)",
+  textMuted: "rgba(255,255,255,0.30)",
+  success: "#30D158",
+  warning: "#FF9F0A",
+  error: "#FF453A",
 };
 
-const CATEGORIA_ICONS: Record<string, string> = {
+const CAT_ICONS: Record<string, string> = {
   restaurante: "🍽️",
   supermercado: "🛒",
   transporte: "🚌",
@@ -70,11 +60,11 @@ export default function HomeScreen() {
 
   const lastTxns = TRANSACCIONES_MOCK.slice(0, 4);
   const spendPct = Math.min((user.gasto_acumulado_mes / user.ingreso_mensual) * 100, 100);
+  const urgentAlert = alerts.find((a) => !a.leida && a.priority === "alta");
 
   useEffect(() => {
-    const urgente = alerts.find((a) => !a.leida && a.priority === "alta");
-    if (urgente) {
-      const t = setTimeout(() => showAlert(urgente), 1500);
+    if (urgentAlert) {
+      const t = setTimeout(() => showAlert(urgentAlert), 1500);
       return () => clearTimeout(t);
     }
   }, []);
@@ -92,14 +82,6 @@ export default function HomeScreen() {
     return () => clearTimeout(t);
   }, []);
 
-  const handleUC3Accept = () => {
-    executePayrollPortability();
-    setShowUC3(false);
-    setUC3Done(true);
-  };
-
-  const urgentAlert = alerts.find((a) => !a.leida && a.priority === "alta");
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: D.bg }}>
       <ScrollView
@@ -114,35 +96,31 @@ export default function HomeScreen() {
           justifyContent: "space-between",
           paddingHorizontal: 20,
           paddingTop: 12,
-          paddingBottom: 20,
+          paddingBottom: 4,
         }}>
           <View>
-            <Text style={{ color: D.textMuted, fontSize: 12, letterSpacing: 0.5 }}>
-              {getGreeting()}
-            </Text>
-            <Text style={{ color: D.text, fontSize: 22, fontWeight: "700", marginTop: 2 }}>
-              {user.nombre} 👋
+            <Text style={{ color: D.textMuted, fontSize: 12 }}>{getGreeting()}</Text>
+            <Text style={{ color: D.text, fontSize: 22, fontWeight: "700", marginTop: 1 }}>
+              {user.nombre}
             </Text>
           </View>
           <Pressable
             onPress={() => router.push("/(tabs)/alerts")}
             style={({ pressed }) => ({
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: pressed ? D.cardAlt : D.card,
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              backgroundColor: pressed ? D.card : "transparent",
               alignItems: "center",
               justifyContent: "center",
-              borderWidth: 1,
-              borderColor: D.border,
             })}
           >
-            <Ionicons name="notifications-outline" size={19} color={D.textSub} />
+            <Ionicons name="notifications-outline" size={22} color={D.textSub} />
             {unreadCount > 0 && (
               <View style={{
                 position: "absolute",
-                top: 8,
-                right: 8,
+                top: 7,
+                right: 7,
                 width: 7,
                 height: 7,
                 borderRadius: 3.5,
@@ -152,128 +130,79 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* ── Balance Hero Card ── */}
-        <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
-          <LinearGradient
-            colors={["#121C2E", "#0D1520"]}
-            style={{
-              borderRadius: 24,
-              padding: 24,
-              borderWidth: 1,
-              borderColor: D.borderAccent,
-              overflow: "hidden",
-            }}
-          >
-            {/* Glow top-right */}
-            <View style={{
-              position: "absolute",
-              top: -40,
-              right: -20,
-              width: 120,
-              height: 120,
-              borderRadius: 60,
-              backgroundColor: "rgba(6,182,212,0.08)",
-            }} />
-
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <Text style={{ color: D.textMuted, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase" }}>
-                Saldo disponible
-              </Text>
-              <Pressable onPress={() => setShowBalance(!showBalance)}>
-                <Ionicons
-                  name={showBalance ? "eye-outline" : "eye-off-outline"}
-                  size={16}
-                  color={D.textMuted}
-                />
+        {/* ── Balance Card ── */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 }}>
+          <View style={{
+            backgroundColor: D.card,
+            borderRadius: 20,
+            padding: 22,
+          }}>
+            {/* Balance row */}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+              <Text style={{ color: D.textMuted, fontSize: 12 }}>Saldo disponible</Text>
+              <Pressable
+                onPress={() => setShowBalance(!showBalance)}
+                hitSlop={12}
+              >
+                <Text style={{ color: D.textMuted, fontSize: 12 }}>
+                  {showBalance ? "Ocultar" : "Mostrar"}
+                </Text>
               </Pressable>
             </View>
 
             <Text style={{
               color: D.text,
-              fontSize: 40,
-              fontWeight: "800",
-              letterSpacing: -1,
+              fontSize: 38,
+              fontWeight: "700",
+              letterSpacing: -0.5,
               marginBottom: 20,
             }}>
               {showBalance ? formatMXN(user.balance_actual) : "••••••"}
             </Text>
 
-            {/* Income / Expense row */}
+            {/* Income / Expenses */}
             <View style={{
               flexDirection: "row",
-              gap: 20,
+              gap: 16,
               paddingTop: 16,
-              borderTopWidth: 1,
-              borderTopColor: "rgba(255,255,255,0.06)",
+              borderTopWidth: StyleSheet.hairlineWidth,
+              borderTopColor: D.sep,
             }}>
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <View style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    backgroundColor: "rgba(74,222,128,0.15)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                    <Ionicons name="arrow-down" size={11} color={D.success} />
-                  </View>
-                  <Text style={{ color: D.textMuted, fontSize: 11 }}>Ingresos</Text>
-                </View>
-                <Text style={{ color: D.success, fontSize: 16, fontWeight: "700" }}>
+                <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Ingresos</Text>
+                <Text style={{ color: D.success, fontSize: 15, fontWeight: "600" }}>
                   {showBalance ? formatMXN(user.ingreso_mensual) : "••••"}
                 </Text>
               </View>
-              <View style={{ width: 1, backgroundColor: "rgba(255,255,255,0.06)" }} />
+              <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: D.sep }} />
               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <View style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    backgroundColor: "rgba(248,113,113,0.12)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                    <Ionicons name="arrow-up" size={11} color={D.error} />
-                  </View>
-                  <Text style={{ color: D.textMuted, fontSize: 11 }}>Gastos</Text>
-                </View>
-                <Text style={{ color: D.text, fontSize: 16, fontWeight: "700" }}>
+                <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 3 }}>Gastos del mes</Text>
+                <Text style={{ color: D.text, fontSize: 15, fontWeight: "600" }}>
                   {showBalance ? formatMXN(user.gasto_acumulado_mes) : "••••"}
                 </Text>
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </View>
 
         {/* ── Alerta urgente inline ── */}
         {urgentAlert && (
           <Pressable
-            onPress={() => { showAlert(urgentAlert); }}
+            onPress={() => showAlert(urgentAlert)}
             style={({ pressed }) => ({
               marginHorizontal: 20,
-              marginBottom: 20,
+              marginBottom: 16,
               padding: 14,
-              backgroundColor: pressed ? "rgba(248,113,113,0.10)" : "rgba(248,113,113,0.07)",
-              borderRadius: 16,
-              borderWidth: 1,
-              borderColor: "rgba(248,113,113,0.18)",
+              backgroundColor: pressed ? "rgba(255,69,58,0.12)" : "rgba(255,69,58,0.08)",
+              borderRadius: 14,
+              borderWidth: StyleSheet.hairlineWidth,
+              borderColor: "rgba(255,69,58,0.25)",
               flexDirection: "row",
               alignItems: "center",
               gap: 12,
             })}
           >
-            <View style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              backgroundColor: "rgba(248,113,113,0.12)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Ionicons name="warning" size={16} color={D.error} />
-            </View>
+            <Ionicons name="warning" size={16} color={D.error} />
             <View style={{ flex: 1 }}>
               <Text style={{ color: D.text, fontSize: 13, fontWeight: "600" }} numberOfLines={1}>
                 {urgentAlert.titulo}
@@ -286,66 +215,52 @@ export default function HomeScreen() {
           </Pressable>
         )}
 
-        {/* ── HAVI Proactive Banner (UC3) ── */}
+        {/* ── UC3 Banner proactivo ── */}
         {showUC3 && uc3Payload && (
           <View style={{
             marginHorizontal: 20,
-            marginBottom: 20,
+            marginBottom: 16,
             padding: 16,
             backgroundColor: D.card,
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: D.borderAccent,
+            borderRadius: 16,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: "rgba(255,255,255,0.12)",
           }}>
             <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
-              <LinearGradient
-                colors={["#06B6D4", "#818CF8"]}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Text style={{ fontSize: 12 }}>✦</Text>
-              </LinearGradient>
+              <Text style={{ color: D.text, fontSize: 17 }}>✦</Text>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: D.accent, fontSize: 10, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
+                <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
                   Havi · Sugerencia
                 </Text>
-                <Text style={{ color: D.text, fontSize: 13, lineHeight: 19 }}>
-                  {uc3Payload.text}
-                </Text>
+                <Text style={{ color: D.text, fontSize: 13, lineHeight: 19 }}>{uc3Payload.text}</Text>
               </View>
-              <Pressable onPress={() => setShowUC3(false)}>
+              <Pressable onPress={() => setShowUC3(false)} hitSlop={10}>
                 <Ionicons name="close" size={16} color={D.textMuted} />
               </Pressable>
             </View>
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Pressable
-                onPress={handleUC3Accept}
+                onPress={() => { executePayrollPortability(); setShowUC3(false); setUC3Done(true); }}
                 style={({ pressed }) => ({
                   flex: 1,
-                  backgroundColor: pressed ? D.accentDeep : D.accent,
-                  borderRadius: 12,
+                  backgroundColor: pressed ? "#E5E5E5" : "#FFFFFF",
+                  borderRadius: 10,
                   paddingVertical: 10,
                   alignItems: "center",
                 })}
               >
-                <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>Activar</Text>
+                <Text style={{ color: "#000000", fontSize: 13, fontWeight: "700" }}>Activar</Text>
               </Pressable>
               <Pressable
                 onPress={() => setShowUC3(false)}
                 style={({ pressed }) => ({
                   paddingHorizontal: 16,
                   backgroundColor: pressed ? D.cardAlt : D.surface,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   paddingVertical: 10,
                   alignItems: "center",
-                  borderWidth: 1,
-                  borderColor: D.border,
+                  borderWidth: StyleSheet.hairlineWidth,
+                  borderColor: D.sep,
                 })}
               >
                 <Text style={{ color: D.textSub, fontSize: 13 }}>Ahora no</Text>
@@ -358,19 +273,17 @@ export default function HomeScreen() {
         {uc3Done && (
           <View style={{
             marginHorizontal: 20,
-            marginBottom: 20,
+            marginBottom: 16,
             padding: 14,
-            backgroundColor: "rgba(74,222,128,0.08)",
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: "rgba(74,222,128,0.18)",
+            backgroundColor: "rgba(48,209,88,0.08)",
+            borderRadius: 14,
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
           }}>
-            <Ionicons name="checkmark-circle" size={20} color={D.success} />
-            <Text style={{ color: D.success, fontSize: 13, fontWeight: "600", flex: 1 }}>
-              ¡Solicitud enviada! Havi la procesará pronto.
+            <Ionicons name="checkmark-circle" size={18} color={D.success} />
+            <Text style={{ color: D.success, fontSize: 13, fontWeight: "600" }}>
+              Solicitud enviada correctamente.
             </Text>
           </View>
         )}
@@ -383,7 +296,6 @@ export default function HomeScreen() {
                 key={a.id}
                 icon={a.icon}
                 label={a.label}
-                accent={a.accent}
                 onPress={() => {
                   if (a.id === "havi") router.push("/(tabs)/chat");
                   else if (a.id === "alertas") router.push("/(tabs)/alerts");
@@ -396,68 +308,51 @@ export default function HomeScreen() {
 
         {/* ── Últimos movimientos ── */}
         <View style={{ paddingHorizontal: 20 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <Text style={{ color: D.text, fontSize: 16, fontWeight: "700" }}>
-              Últimos movimientos
-            </Text>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <Text style={{ color: D.text, fontSize: 16, fontWeight: "700" }}>Últimos movimientos</Text>
             <Pressable onPress={() => router.push("/(tabs)/movements")}>
-              <Text style={{ color: D.accent, fontSize: 13, fontWeight: "600" }}>Ver todos</Text>
+              <Text style={{ color: D.textSub, fontSize: 13 }}>Ver todos</Text>
             </Pressable>
           </View>
 
-          <View style={{
-            backgroundColor: D.card,
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: D.border,
-            overflow: "hidden",
-          }}>
+          <View style={{ backgroundColor: D.card, borderRadius: 16, overflow: "hidden" }}>
             {lastTxns.map((txn, idx) => {
-              const icon = CATEGORIA_ICONS[txn.categoria] ?? CATEGORIA_ICONS.default;
+              const icon = CAT_ICONS[txn.categoria] ?? CAT_ICONS.default;
               const isIncome = txn.tipo === "abono";
               return (
-                <View
-                  key={txn.id}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    paddingHorizontal: 16,
-                    paddingVertical: 13,
-                    borderBottomWidth: idx < lastTxns.length - 1 ? 1 : 0,
-                    borderBottomColor: D.border,
-                  }}
-                >
+                <View key={txn.id} style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: 16,
+                  paddingVertical: 13,
+                  borderBottomWidth: idx < lastTxns.length - 1 ? StyleSheet.hairlineWidth : 0,
+                  borderBottomColor: D.sep,
+                }}>
                   <View style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 11,
-                    backgroundColor: txn.es_anomala ? "rgba(248,113,113,0.08)" : D.surface,
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: D.surface,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
-                    borderWidth: txn.es_anomala ? 1 : 0,
-                    borderColor: "rgba(248,113,113,0.2)",
                   }}>
                     <Text style={{ fontSize: 17 }}>{icon}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                      <Text style={{ color: D.text, fontSize: 13, fontWeight: "600" }} numberOfLines={1}>
+                      <Text style={{ color: D.text, fontSize: 13, fontWeight: "500" }} numberOfLines={1}>
                         {txn.comercio}
                       </Text>
                       {txn.es_anomala && (
-                        <Ionicons name="warning" size={11} color={D.warning} />
+                        <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: D.warning }} />
                       )}
                     </View>
                     <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 1 }}>
-                      {txn.categoria} · {timeAgo(txn.fecha)}
+                      {txn.categoria}
                     </Text>
                   </View>
-                  <Text style={{
-                    color: isIncome ? D.success : D.text,
-                    fontSize: 14,
-                    fontWeight: "700",
-                  }}>
+                  <Text style={{ color: isIncome ? D.success : D.text, fontSize: 14, fontWeight: "600" }}>
                     {isIncome ? "+" : "-"}{formatMXN(txn.monto)}
                   </Text>
                 </View>
@@ -466,51 +361,34 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── Havi insight strip ── */}
+        {/* ── Havi insight ── */}
         <Pressable
           onPress={() => router.push("/(tabs)/chat")}
           style={({ pressed }) => ({
             marginHorizontal: 20,
-            marginTop: 16,
+            marginTop: 12,
             padding: 14,
             backgroundColor: pressed ? D.cardAlt : D.card,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: D.borderAccent,
+            borderRadius: 14,
             flexDirection: "row",
             alignItems: "center",
             gap: 10,
           })}
         >
-          <LinearGradient
-            colors={["#06B6D4", "#818CF8"]}
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 15,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ fontSize: 12 }}>✦</Text>
-          </LinearGradient>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: D.text, fontSize: 13, lineHeight: 18 }}>
-              Llevas{" "}
-              <Text style={{ color: D.warning, fontWeight: "700" }}>
-                {spendPct.toFixed(0)}%
-              </Text>
-              {" "}de tus ingresos gastados este mes
+          <Text style={{ color: D.text, fontSize: 16 }}>✦</Text>
+          <Text style={{ color: D.textSub, fontSize: 13, flex: 1 }}>
+            Llevas{" "}
+            <Text style={{ color: spendPct > 80 ? D.warning : D.text, fontWeight: "600" }}>
+              {spendPct.toFixed(0)}%
             </Text>
-          </View>
-          <Text style={{ color: D.accent, fontSize: 12, fontWeight: "600" }}>Analizar →</Text>
+            {" "}de tus ingresos gastados este mes
+          </Text>
+          <Text style={{ color: D.textMuted, fontSize: 12 }}>Analizar →</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-// ── Helpers ──────────────────────────────────────────────────
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -520,44 +398,33 @@ function getGreeting() {
 }
 
 const QUICK_ACTIONS = [
-  { id: "transferir", icon: "swap-horizontal-outline", label: "Transferir", accent: "#06B6D4" },
-  { id: "pagar", icon: "receipt-outline", label: "Pagar", accent: "#4ADE80" },
-  { id: "movimientos", icon: "bar-chart-outline", label: "Historial", accent: "#FBBF24" },
-  { id: "alertas", icon: "shield-checkmark-outline", label: "Alertas", accent: "#F87171" },
+  { id: "transferir", icon: "swap-horizontal-outline", label: "Transferir" },
+  { id: "pagar", icon: "receipt-outline", label: "Pagar" },
+  { id: "movimientos", icon: "bar-chart-outline", label: "Historial" },
+  { id: "alertas", icon: "shield-checkmark-outline", label: "Alertas" },
 ];
 
-function QuickAction({
-  icon,
-  label,
-  accent,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  accent: string;
-  onPress?: () => void;
-}) {
+function QuickAction({ icon, label, onPress }: { icon: string; label: string; onPress?: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({ alignItems: "center", opacity: pressed ? 0.7 : 1 })}
+      style={({ pressed }) => ({ alignItems: "center", opacity: pressed ? 0.6 : 1 })}
     >
       <View style={{
-        width: 54,
-        height: 54,
+        width: 52,
+        height: 52,
         borderRadius: 16,
-        backgroundColor: `${accent}12`,
+        backgroundColor: D.card,
         alignItems: "center",
         justifyContent: "center",
-        borderWidth: 1,
-        borderColor: `${accent}20`,
-        marginBottom: 7,
+        marginBottom: 6,
       }}>
-        <Ionicons name={icon as any} size={22} color={accent} />
+        <Ionicons name={icon as any} size={22} color="rgba(255,255,255,0.80)" />
       </View>
-      <Text style={{ color: "rgba(239,246,255,0.45)", fontSize: 11, fontWeight: "500" }}>
-        {label}
-      </Text>
+      <Text style={{ color: D.textMuted, fontSize: 11 }}>{label}</Text>
     </Pressable>
   );
 }
+
+// Need StyleSheet for hairlineWidth
+import { StyleSheet } from "react-native";

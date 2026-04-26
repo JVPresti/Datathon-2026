@@ -11,6 +11,7 @@ import {
   Pressable,
   Animated,
   Dimensions,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAlerts } from "../../src/hooks/useAlerts";
@@ -105,14 +106,14 @@ function AlertContent({
   return (
     <View
       style={{
-        backgroundColor: "#111520",
+        backgroundColor: "#111111",
         borderTopLeftRadius: 28,
         borderTopRightRadius: 28,
         paddingHorizontal: 24,
         paddingTop: 12,
         paddingBottom: 40,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.08)",
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: "rgba(255,255,255,0.10)",
       }}
     >
       {/* Handle bar */}
@@ -340,12 +341,12 @@ function getAlertConfig(alert: HaviAlert) {
     default:
       return {
         icon: "notifications",
-        iconColor: "#FF5A1F",
-        iconBg: "rgba(255,90,31,0.15)",
+        iconColor: "#FFFFFF",
+        iconBg: "rgba(255,255,255,0.08)",
         badge: "HAVI",
-        badgeBg: "rgba(255,90,31,0.15)",
-        badgeColor: "#FF5A1F",
-        primaryBg: "#FF5A1F",
+        badgeBg: "rgba(255,255,255,0.08)",
+        badgeColor: "#FFFFFF",
+        primaryBg: "#FFFFFF",
       };
   }
 }

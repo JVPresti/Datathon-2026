@@ -1,27 +1,13 @@
-// ============================================================
-// GradientButton — Dark mode — Obsidian Intelligence
-// ============================================================
-
 import React from "react";
 import { Pressable, Text, ViewStyle, TextStyle, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
-type GradientVariant = "cyan" | "purple" | "blue" | "green" | "rose" | "orange" | "mono";
-
-const GRADIENTS: Record<GradientVariant, [string, string, ...string[]]> = {
-  cyan: ["#06B6D4", "#0891B2"],
-  purple: ["#818CF8", "#6366F1"],
-  blue: ["#3B82F6", "#2563EB"],
-  green: ["#4ADE80", "#16A34A"],
-  rose: ["#F87171", "#DC2626"],
-  orange: ["#FBBF24", "#D97706"],
-  mono: ["#374151", "#1F2937"],
-};
+// In the Hey Banco design language, primary CTAs are white on black — no gradients.
+type Variant = "primary" | "secondary" | "danger";
 
 interface GradientButtonProps {
   label: string;
   onPress: () => void;
-  variant?: GradientVariant;
+  variant?: Variant;
   disabled?: boolean;
   size?: "sm" | "md" | "lg";
   style?: ViewStyle;
@@ -31,7 +17,7 @@ interface GradientButtonProps {
 export function GradientButton({
   label,
   onPress,
-  variant = "cyan",
+  variant = "primary",
   disabled = false,
   size = "md",
   style,
@@ -40,42 +26,32 @@ export function GradientButton({
   const padding = size === "sm" ? 10 : size === "lg" ? 18 : 14;
   const fontSize = size === "sm" ? 13 : size === "lg" ? 17 : 15;
 
+  const bg = variant === "primary" ? "#FFFFFF" : variant === "danger" ? "#FF453A" : "#1C1C1E";
+  const color = variant === "primary" ? "#000000" : "#FFFFFF";
+
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [
         styles.wrapper,
+        { backgroundColor: bg, paddingVertical: padding },
         style,
-        pressed && { opacity: 0.80, transform: [{ scale: 0.97 }] },
+        pressed && { opacity: 0.80 },
         disabled && { opacity: 0.35 },
       ]}
     >
-      <LinearGradient
-        colors={GRADIENTS[variant]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.gradient, { paddingVertical: padding }]}
-      >
-        <Text style={[styles.label, { fontSize }, textStyle]}>{label}</Text>
-      </LinearGradient>
+      <Text style={[styles.label, { fontSize, color }, textStyle]}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  gradient: {
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
   },
-  label: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    letterSpacing: 0.3,
-  },
+  label: { fontWeight: "600", letterSpacing: 0.2 },
 });
