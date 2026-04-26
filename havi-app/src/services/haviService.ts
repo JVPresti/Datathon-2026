@@ -59,12 +59,12 @@ Nombre del usuario: ${DEMO_USER.nombre}`;
 
 // ---- PILLS DE SUGERENCIA INICIALES -------------------------
 export const INITIAL_PILLS: SuggestionPill[] = [
-  { id: "p1", label: "¿Cómo voy este mes?", prompt: "¿Cómo voy con mis gastos este mes?" },
-  { id: "p2", label: "Mis últimas compras", prompt: "Muéstrame mis últimas transacciones" },
-  { id: "p3", label: "¿Qué es Hey Pro?", prompt: "¿Qué beneficios tiene Hey Pro para mí?" },
-  { id: "p4", label: "Ahorrar más", prompt: "¿Cómo puedo ahorrar más este mes?" },
-  { id: "p5", label: "Mis gastos por categoría", prompt: "¿En qué categorías gasto más?" },
-  { id: "p6", label: "Alerta de cargo", prompt: "Tengo una duda sobre un cargo en mi cuenta" },
+  { id: "p1", label: "Simular fin de mes", prompt: "Corre una simulación de mi gemelo digital y dime cómo terminaré el mes si sigo gastando igual" },
+  { id: "p2", label: "¿Cómo voy este mes?", prompt: "¿Cómo voy con mis gastos este mes?" },
+  { id: "p3", label: "¿Cuánto perdí sin Hey Pro?", prompt: "¿Cuánto cashback perdí este mes por no tener Hey Pro activo?" },
+  { id: "p4", label: "Hay un cargo raro", prompt: "Vi un cargo que no reconozco en mi cuenta, ¿puede ser fraude?" },
+  { id: "p5", label: "Mis gastos por categoría", prompt: "¿En qué categorías gasto más este mes?" },
+  { id: "p6", label: "Activar Hey Pro", prompt: "¿Cómo activo Hey Pro y qué necesito?" },
 ];
 
 // ---- GEMINI CHAT SERVICE -----------------------------------

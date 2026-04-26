@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAlerts } from "../../src/hooks/useAlerts";
+import { useToast } from "../../src/hooks/useToast";
 import { HaviAlert } from "../../src/types";
 import { formatMXN } from "../../src/data/mockData";
 import { useRouter } from "expo-router";
@@ -37,6 +38,7 @@ const D = {
 
 export default function AlertModal() {
   const { activeAlert, dismissAlert, markAsActioned } = useAlerts();
+  const { showToast } = useToast();
   const slideAnim = useRef(new Animated.Value(height)).current;
   const router = useRouter();
 
@@ -50,26 +52,62 @@ export default function AlertModal() {
 
   if (!activeAlert) return null;
 
-  const handlePrimary = () => { markAsActioned(activeAlert.id); dismissAlert(); };
+  const handlePrimary = () => {
+    const msg = getPrimaryToast(activeAlert);
+    markAsActioned(activeAlert.id);
+    dismissAlert();
+    if (msg) showToast(msg, "success");
+  };
+
   const handleSecondary = () => {
-    if (activeAlert.accion_secundaria?.type === "chat") { dismissAlert(); router.push("/(tabs)/chat"); }
-    else { markAsActioned(activeAlert.id); dismissAlert(); }
+    if (activeAlert.type === "txn_atipica") {
+      markAsActioned(activeAlert.id);
+      dismissAlert();
+      showToast("Tarjeta bloqueada. Contáctanos si necesitas ayuda.", "warning");
+    } else if (activeAlert.accion_secundaria?.type === "chat") {
+      dismissAlert();
+      router.push("/(tabs)/chat");
+    } else {
+      dismissAlert();
+    }
   };
 
   return (
     <Modal transparent visible={!!activeAlert} animationType="none" statusBarTranslucent>
       <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.65)" }} onPress={dismissAlert} />
       <Animated.View style={{ position: "absolute", bottom: 0, left: 0, right: 0, transform: [{ translateY: slideAnim }] }}>
-        <AlertContent alert={activeAlert} onPrimary={handlePrimary} onSecondary={handleSecondary} onDismiss={dismissAlert} />
+        <AlertContent
+          alert={activeAlert}
+          onPrimary={handlePrimary}
+          onSecondary={handleSecondary}
+          onDismiss={dismissAlert}
+        />
       </Animated.View>
     </Modal>
   );
+}
+
+function getPrimaryToast(alert: HaviAlert): string | null {
+  switch (alert.type) {
+    case "txn_atipica":
+      return "Compra liberada. Todo en orden.";
+    case "rechazo_saldo":
+    case "rechazo_limite":
+      return "Pago reintentado con tarjeta de crédito Hey.";
+    case "upselling_pro":
+    case "cashback_proximo_perdido":
+      return "Solicitud de Hey Pro enviada. Havi te avisará.";
+    default:
+      return "Listo, acción realizada.";
+  }
 }
 
 function AlertContent({
   alert, onPrimary, onSecondary, onDismiss,
 }: { alert: HaviAlert; onPrimary: () => void; onSecondary: () => void; onDismiss: () => void }) {
   const cfg = getAlertConfig(alert);
+  // UC4 security: secondary action (block) is destructive/danger
+  const isUC4 = alert.type === "txn_atipica";
 
   return (
     <View style={styles.sheet}>
@@ -82,12 +120,8 @@ function AlertContent({
           <Ionicons name={cfg.icon as any} size={22} color={cfg.iconColor} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: D.textMuted, fontSize: 11, fontWeight: "600", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 3 }}>
-            {cfg.label}
-          </Text>
-          <Text style={{ color: D.text, fontSize: 17, fontWeight: "700" }}>
-            {alert.titulo}
-          </Text>
+          <Text style={styles.label}>{cfg.label}</Text>
+          <Text style={styles.title}>{alert.titulo}</Text>
         </View>
         <Pressable onPress={onDismiss} hitSlop={14}>
           <Ionicons name="close" size={18} color={D.textMuted} />
@@ -112,7 +146,16 @@ function AlertContent({
           <View style={styles.contextSep} />
           <ContextRow label="Monto" value={formatMXN(alert.uc4_context.monto)} valueColor={D.error} />
           <View style={styles.contextSep} />
-          <ContextRow label="Ciudad" value={alert.uc4_context.ciudad_transaccion.split(",")[0]} />
+          <ContextRow
+            label="Ciudad"
+            value={`${alert.uc4_context.ciudad_transaccion.split(",")[0]}${alert.uc4_context.es_internacional ? " 🌍" : ""}`}
+          />
+          <View style={styles.contextSep} />
+          <ContextRow
+            label="Hora"
+            value={`${alert.uc4_context.hora_del_dia}:14 AM${alert.uc4_context.es_nocturna ? " · Horario inusual" : ""}`}
+            valueColor={alert.uc4_context.es_nocturna ? D.warning : undefined}
+          />
         </View>
       )}
 
@@ -120,12 +163,17 @@ function AlertContent({
       {alert.uc1_context && (
         <View style={styles.contextCard}>
           <ContextRow
-            label="Disponible en"
-            value={alert.uc1_context.producto_alternativo?.replace(/_/g, " ") ?? "—"}
+            label="Comercio"
+            value={alert.uc1_context.comercio}
           />
           <View style={styles.contextSep} />
           <ContextRow
-            label="Saldo disponible"
+            label="Alternativa disponible"
+            value={alert.uc1_context.producto_alternativo?.replace(/_/g, " ").replace(/hey/i, "Hey") ?? "—"}
+          />
+          <View style={styles.contextSep} />
+          <ContextRow
+            label="Límite disponible"
             value={formatMXN(alert.uc1_context.monto_disponible_alternativo ?? 0)}
             valueColor={D.success}
           />
@@ -137,19 +185,23 @@ function AlertContent({
         {alert.accion_primaria && (
           <Pressable
             onPress={onPrimary}
-            style={({ pressed }) => [styles.btnPrimary, cfg.isDanger && styles.btnDanger, pressed && { opacity: 0.85 }]}
+            style={({ pressed }) => [styles.btnPrimary, pressed && { opacity: 0.85 }]}
           >
-            <Text style={[styles.btnPrimaryText, cfg.isDanger && { color: "#FFFFFF" }]}>
-              {alert.accion_primaria.label}
-            </Text>
+            <Text style={styles.btnPrimaryText}>{alert.accion_primaria.label}</Text>
           </Pressable>
         )}
         {alert.accion_secundaria && (
           <Pressable
             onPress={onSecondary}
-            style={({ pressed }) => [styles.btnSecondary, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [
+              styles.btnSecondary,
+              isUC4 && styles.btnDanger,
+              pressed && { opacity: 0.7 },
+            ]}
           >
-            <Text style={styles.btnSecondaryText}>{alert.accion_secundaria.label}</Text>
+            <Text style={[styles.btnSecondaryText, isUC4 && { color: D.error }]}>
+              {alert.accion_secundaria.label}
+            </Text>
           </Pressable>
         )}
       </View>
@@ -169,15 +221,15 @@ function ContextRow({ label, value, valueColor }: { label: string; value: string
 function getAlertConfig(alert: HaviAlert) {
   switch (alert.type) {
     case "txn_atipica":
-      return { icon: "shield", iconColor: D.error, iconBg: "rgba(255,69,58,0.10)", label: "Seguridad", isDanger: true };
+      return { icon: "shield", iconColor: D.error, iconBg: "rgba(255,69,58,0.12)", label: "Seguridad · UC4" };
     case "rechazo_saldo":
     case "rechazo_limite":
-      return { icon: "card-outline", iconColor: D.warning, iconBg: "rgba(255,159,10,0.10)", label: "Pago rechazado", isDanger: false };
+      return { icon: "card-outline", iconColor: D.warning, iconBg: "rgba(255,159,10,0.12)", label: "Copiloto financiero · UC1" };
     case "cashback_proximo_perdido":
     case "upselling_pro":
-      return { icon: "star-outline", iconColor: D.text, iconBg: D.card, label: "Oportunidad", isDanger: false };
+      return { icon: "star-outline", iconColor: D.text, iconBg: D.card, label: "Upselling · UC3" };
     default:
-      return { icon: "notifications-outline", iconColor: D.text, iconBg: D.card, label: "Havi", isDanger: false };
+      return { icon: "notifications-outline", iconColor: D.text, iconBg: D.card, label: "Havi" };
   }
 }
 
@@ -207,6 +259,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  label: {
+    color: D.textMuted,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginBottom: 3,
+  },
+  title: { color: D.text, fontSize: 17, fontWeight: "700" },
   haviMsgCard: {
     backgroundColor: D.card,
     borderRadius: 16,
@@ -240,7 +301,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnPrimaryText: { color: "#000000", fontSize: 15, fontWeight: "700" },
-  btnDanger: { backgroundColor: D.error },
   btnSecondary: {
     backgroundColor: D.card,
     borderRadius: 14,
@@ -248,6 +308,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: D.sep,
+  },
+  btnDanger: {
+    borderColor: "rgba(255,69,58,0.25)",
+    backgroundColor: "rgba(255,69,58,0.06)",
   },
   btnSecondaryText: { color: D.textSub, fontSize: 15, fontWeight: "500" },
 });

@@ -12,6 +12,7 @@ import { useAlerts } from "../../src/hooks/useAlerts";
 import {
   DEMO_USER,
   TRANSACCIONES_MOCK,
+  UC2_MOCK,
   UC3_MOCK,
   formatMXN,
   timeAgo,
@@ -24,6 +25,7 @@ import {
 } from "../../src/services/upsellingService";
 import { executePayrollPortability } from "../../src/services/haviService";
 import { MarkdownText } from "../../src/utils/markdown";
+import { useToast } from "../../src/hooks/useToast";
 
 // Hey Banco palette: neutral dark, no accent color
 const D = {
@@ -40,6 +42,9 @@ const D = {
   error: "#FF453A",
 };
 
+// UC2 data for Digital Twin card
+const uc2 = UC2_MOCK;
+
 const CAT_ICONS: Record<string, string> = {
   restaurante: "🍽️",
   supermercado: "🛒",
@@ -53,11 +58,11 @@ const CAT_ICONS: Record<string, string> = {
 export default function HomeScreen() {
   const router = useRouter();
   const { alerts, showAlert, unreadCount } = useAlerts();
+  const { showToast } = useToast();
   const user = DEMO_USER;
   const [showBalance, setShowBalance] = useState(true);
   const [showUC3, setShowUC3] = useState(false);
   const [uc3Payload, setUC3Payload] = useState<{ text: string; suggestions: string[] } | null>(null);
-  const [uc3Done, setUC3Done] = useState(false);
 
   const lastTxns = TRANSACCIONES_MOCK.slice(0, 4);
   const spendPct = Math.min((user.gasto_acumulado_mes / user.ingreso_mensual) * 100, 100);
@@ -244,7 +249,11 @@ export default function HomeScreen() {
             </View>
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Pressable
-                onPress={() => { executePayrollPortability(); setShowUC3(false); setUC3Done(true); }}
+                onPress={() => {
+                  executePayrollPortability();
+                  setShowUC3(false);
+                  showToast("Solicitud de Hey Pro enviada. Havi te avisará pronto.", "success");
+                }}
                 style={({ pressed }) => ({
                   flex: 1,
                   backgroundColor: pressed ? "#E5E5E5" : "#FFFFFF",
@@ -270,25 +279,6 @@ export default function HomeScreen() {
                 <Text style={{ color: D.textSub, fontSize: 13 }}>Ahora no</Text>
               </Pressable>
             </View>
-          </View>
-        )}
-
-        {/* ── UC3 done inline msg ── */}
-        {uc3Done && (
-          <View style={{
-            marginHorizontal: 20,
-            marginBottom: 16,
-            padding: 14,
-            backgroundColor: D.card,
-            borderRadius: 14,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-          }}>
-            <Text style={{ color: D.text, fontSize: 15 }}>✦</Text>
-            <Text style={{ color: D.textSub, fontSize: 13, flex: 1 }}>
-              Listo, tu solicitud fue enviada. Havi te avisará en cuanto esté lista.
-            </Text>
           </View>
         )}
 
@@ -365,29 +355,69 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── Havi insight ── */}
+        {/* ── UC2 Digital Twin Card ── */}
         <Pressable
           onPress={() => router.push("/(tabs)/chat")}
           style={({ pressed }) => ({
             marginHorizontal: 20,
             marginTop: 12,
-            padding: 14,
             backgroundColor: pressed ? D.cardAlt : D.card,
-            borderRadius: 14,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
+            borderRadius: 16,
+            overflow: "hidden",
           })}
         >
-          <Text style={{ color: D.text, fontSize: 16 }}>✦</Text>
-          <Text style={{ color: D.textSub, fontSize: 13, flex: 1 }}>
-            Llevas{" "}
-            <Text style={{ color: spendPct > 80 ? D.warning : D.text, fontWeight: "600" }}>
-              {spendPct.toFixed(0)}%
+          {/* Header strip */}
+          <View style={{
+            paddingHorizontal: 16,
+            paddingTop: 14,
+            paddingBottom: 10,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: D.sep,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          }}>
+            <Text style={{ color: D.text, fontSize: 14 }}>✦</Text>
+            <Text style={{ color: D.textMuted, fontSize: 10, fontWeight: "700", letterSpacing: 0.9, textTransform: "uppercase", flex: 1 }}>
+              Gemelo Digital · UC2
             </Text>
-            {" "}de tus ingresos gastados este mes
-          </Text>
-          <Text style={{ color: D.textMuted, fontSize: 12 }}>Analizar →</Text>
+            <Text style={{ color: D.textMuted, fontSize: 12 }}>Simular →</Text>
+          </View>
+          {/* Stats row */}
+          <View style={{ flexDirection: "row", paddingHorizontal: 16, paddingVertical: 14, gap: 0 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 4 }}>Proyección fin de mes</Text>
+              <Text style={{ color: uc2.gasto_estimado_fin_mes > uc2.ingreso_mensual ? D.warning : D.text, fontSize: 18, fontWeight: "700" }}>
+                {showBalance ? formatMXN(uc2.gasto_estimado_fin_mes) : "••••"}
+              </Text>
+              <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>
+                vs ingreso {showBalance ? formatMXN(uc2.ingreso_mensual) : "••••"}
+              </Text>
+            </View>
+            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: D.sep }} />
+            <View style={{ flex: 1, paddingLeft: 16 }}>
+              <Text style={{ color: D.textMuted, fontSize: 11, marginBottom: 4 }}>Déficit estimado</Text>
+              <Text style={{ color: D.error, fontSize: 18, fontWeight: "700" }}>
+                {showBalance ? `-${formatMXN(Math.abs(uc2.deficit_proyectado))}` : "••••"}
+              </Text>
+              <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 2 }}>
+                Corte en {uc2.dias_al_corte} días
+              </Text>
+            </View>
+          </View>
+          {/* Havi message */}
+          <View style={{
+            marginHorizontal: 12,
+            marginBottom: 12,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            backgroundColor: D.surface,
+            borderRadius: 10,
+          }}>
+            <Text style={{ color: D.textSub, fontSize: 12, lineHeight: 17 }}>
+              Si sigues gastando en <Text style={{ color: D.warning, fontWeight: "600" }}>{uc2.categoria_problema}</Text> al mismo ritmo, te faltarán fondos para las mensualidades. Toca para simular.
+            </Text>
+          </View>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

@@ -114,7 +114,7 @@ export default function ProfileScreen() {
                 <Text style={{ color: D.text, fontSize: 18, fontWeight: "600" }}>
                   {user.nombre} {user.apellido}
                 </Text>
-                <Text style={{ color: D.textMuted, fontSize: 12, marginTop: 2 }}>{user.user_id}</Text>
+
                 <View style={{
                   marginTop: 7,
                   alignSelf: "flex-start",

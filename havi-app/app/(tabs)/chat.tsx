@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MarkdownText } from "../../src/utils/markdown";
 import { useAlerts } from "../../src/hooks/useAlerts";
+import { useToast } from "../../src/hooks/useToast";
 import {
   haviService,
   INITIAL_PILLS,
@@ -68,6 +69,7 @@ const makeWelcome = (): ChatMessage => ({
 
 // ── Component ────────────────────────────────────────────────
 export default function ChatScreen() {
+  const { showToast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>([makeWelcome()]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -140,8 +142,12 @@ export default function ChatScreen() {
     const r = action.type === "set_budget"
       ? executeBudgetLimit(action.categoria, action.limite)
       : executePayrollPortability();
+    const toastMsg = action.type === "set_budget"
+      ? `Límite de ${action.categoria} configurado en $${action.limite}`
+      : "Solicitud de portabilidad de nómina enviada";
+    showToast(toastMsg, "success");
     appendHavi(r.text, r.suggestions);
-  }, [appendHavi]);
+  }, [appendHavi, showToast]);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -373,7 +379,7 @@ export default function ChatScreen() {
           </View>
 
           {/* Current conversation as first item */}
-          <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
             <Pressable
               onPress={() => setShowHistory(false)}
               style={({ pressed }) => ({
@@ -442,6 +448,25 @@ export default function ChatScreen() {
               ))
             )}
           </ScrollView>
+
+          {/* Nuevo chat CTA */}
+          <View style={{ paddingHorizontal: 20, paddingVertical: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: D.sep }}>
+            <Pressable
+              onPress={() => { startNewChat(); setShowHistory(false); }}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? "#E5E5E5" : "#FFFFFF",
+                borderRadius: 14,
+                paddingVertical: 14,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+              })}
+            >
+              <Ionicons name="add-circle" size={18} color="#000000" />
+              <Text style={{ color: "#000000", fontSize: 15, fontWeight: "700" }}>Nuevo chat</Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>

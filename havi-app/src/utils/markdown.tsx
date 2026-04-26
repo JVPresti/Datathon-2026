@@ -2,64 +2,54 @@ import React from "react";
 import { Text, Platform } from "react-native";
 
 /**
- * Renders a subset of markdown inline formatting:
- *   **bold**, *italic*, `code`, and lines starting with "- " as bullets.
+ * Renders markdown inline formatting: **bold**, *italic*, `code`, newlines.
+ * Uses a FLAT array — no nested Text wrapping per-line, avoids RN render bugs.
  */
-export function MarkdownText({ text, style }: { text: string; style?: object }) {
-  const lines = text.split("\n");
-  return (
-    <Text style={style}>
-      {lines.map((line, li) => {
-        const isBullet = line.startsWith("- ") || line.startsWith("• ");
-        const content = isBullet ? line.slice(2) : line;
-        return (
-          <Text key={li}>
-            {li > 0 && "\n"}
-            {isBullet && "• "}
-            {parseInline(content)}
-          </Text>
-        );
-      })}
-    </Text>
-  );
+export function MarkdownText({ text, style }: { text: string; style?: any }) {
+  return <Text style={style}>{buildNodes(text)}</Text>;
 }
 
-function parseInline(str: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
-  const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+function buildNodes(text: string): React.ReactNode[] {
+  const result: React.ReactNode[] = [];
+  // Match bold, italic, code, or newline
+  const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|\n/g;
   let last = 0;
-  let m;
-  while ((m = regex.exec(str)) !== null) {
-    if (m.index > last) parts.push(str.slice(last, m.index));
-    const tok = m[0];
-    if (tok.startsWith("**")) {
-      parts.push(
-        <Text key={m.index} style={{ fontWeight: "700", color: "#FFFFFF" }}>
-          {tok.slice(2, -2)}
+  let key = 0;
+  let m: RegExpExecArray | null;
+
+  while ((m = regex.exec(text)) !== null) {
+    // Push any plain text before this match
+    if (m.index > last) result.push(text.slice(last, m.index));
+
+    const [full, bold, italic, code] = m;
+
+    if (full === "\n") {
+      result.push("\n");
+    } else if (bold !== undefined) {
+      result.push(
+        <Text key={key++} style={{ fontWeight: "700" }}>
+          {bold}
         </Text>
       );
-    } else if (tok.startsWith("*")) {
-      parts.push(
-        <Text key={m.index} style={{ fontStyle: "italic" }}>
-          {tok.slice(1, -1)}
+    } else if (italic !== undefined) {
+      result.push(
+        <Text key={key++} style={{ fontStyle: "italic" }}>
+          {italic}
         </Text>
       );
-    } else if (tok.startsWith("`")) {
-      parts.push(
+    } else if (code !== undefined) {
+      result.push(
         <Text
-          key={m.index}
-          style={{
-            fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
-            fontSize: 12,
-            color: "#FFFFFF",
-          }}
+          key={key++}
+          style={{ fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace", fontSize: 12 }}
         >
-          {tok.slice(1, -1)}
+          {code}
         </Text>
       );
     }
-    last = m.index + tok.length;
+    last = m.index + full.length;
   }
-  if (last < str.length) parts.push(str.slice(last));
-  return parts;
+
+  if (last < text.length) result.push(text.slice(last));
+  return result;
 }
