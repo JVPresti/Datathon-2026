@@ -1,6 +1,5 @@
 // ============================================================
-// ALERTS SCREEN — Light mode fintech profesional
-// Sección "Requiere atención" con énfasis visual superior
+// ALERTS — Obsidian Intelligence dark mode
 // ============================================================
 
 import React from "react";
@@ -13,32 +12,33 @@ import { useAlerts } from "../../src/hooks/useAlerts";
 import { HaviAlert } from "../../src/types";
 import { timeAgo } from "../../src/data/mockData";
 
-const C = {
-  bg: "#FFFFFF",
-  surface: "#FAFAFA",
-  card: "#FFFFFF",
-  border: "#F0F0F0",
-  borderAlt: "#E5E7EB",
-  textPrimary: "#111111",
-  textSecondary: "#6B7280",
-  textMuted: "#9CA3AF",
-  accent: "#6D5EF8",
-  accentLight: "#EEF2FF",
-  error: "#EF4444",
-  errorLight: "#FEF2F2",
-  warning: "#F59E0B",
-  warningLight: "#FFFBEB",
-  success: "#10B981",
+const D = {
+  bg: "#07090E",
+  surface: "#0F1318",
+  card: "#161B27",
+  cardAlt: "#1C2235",
+  border: "rgba(255,255,255,0.07)",
+  text: "#EFF6FF",
+  textSub: "rgba(239,246,255,0.55)",
+  textMuted: "rgba(239,246,255,0.30)",
+  accent: "#06B6D4",
+  success: "#4ADE80",
+  warning: "#FBBF24",
+  error: "#F87171",
 };
 
-const ALERT_CONFIG: Record<string, { icon: string; color: string }> = {
-  txn_atipica: { icon: "shield-outline", color: C.error },
-  rechazo_saldo: { icon: "card-outline", color: C.warning },
-  rechazo_limite: { icon: "card-outline", color: C.warning },
-  cashback_proximo_perdido: { icon: "star-outline", color: C.accent },
-  upselling_pro: { icon: "star-outline", color: C.accent },
-  liquidez_proxima: { icon: "trending-down-outline", color: C.warning },
+const ALERT_CFG: Record<string, { icon: string; color: string }> = {
+  txn_atipica: { icon: "shield-outline", color: "#F87171" },
+  rechazo_saldo: { icon: "card-outline", color: "#FBBF24" },
+  rechazo_limite: { icon: "card-outline", color: "#FBBF24" },
+  cashback_proximo_perdido: { icon: "star-outline", color: "#06B6D4" },
+  upselling_pro: { icon: "sparkles-outline", color: "#818CF8" },
+  liquidez_proxima: { icon: "trending-down-outline", color: "#FBBF24" },
 };
+
+function getCfg(type: string) {
+  return ALERT_CFG[type] ?? { icon: "notifications-outline", color: D.accent };
+}
 
 export default function AlertsScreen() {
   const { alerts, showAlert, markAsRead, unreadCount } = useAlerts();
@@ -49,118 +49,92 @@ export default function AlertsScreen() {
   const pasadas = alerts.filter((a) => a.accionada);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: D.bg }}>
       {/* Header */}
-      <View
-        style={{
-          paddingHorizontal: 20,
-          paddingTop: 8,
-          paddingBottom: 16,
-          borderBottomWidth: 1,
-          borderBottomColor: C.border,
-        }}
-      >
-        <Text style={{ color: C.textPrimary, fontSize: 24, fontWeight: "800" }}>
-          Alertas
-        </Text>
+      <View style={{
+        paddingHorizontal: 20,
+        paddingTop: 12,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: D.border,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}>
+        <View>
+          <Text style={{ color: D.text, fontSize: 24, fontWeight: "800" }}>Alertas</Text>
+          {unreadCount > 0 && (
+            <Text style={{ color: D.textMuted, fontSize: 12, marginTop: 2 }}>
+              {unreadCount} sin revisar
+            </Text>
+          )}
+        </View>
         {unreadCount > 0 && (
-          <Text style={{ color: C.textMuted, fontSize: 13, marginTop: 2 }}>
-            {unreadCount} sin leer
-          </Text>
+          <View style={{
+            backgroundColor: "rgba(248,113,113,0.12)",
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            paddingVertical: 5,
+            borderWidth: 1,
+            borderColor: "rgba(248,113,113,0.18)",
+          }}>
+            <Text style={{ color: D.error, fontSize: 13, fontWeight: "700" }}>
+              {unreadCount}
+            </Text>
+          </View>
         )}
       </View>
 
       <ScrollView
-        style={{ flex: 1, backgroundColor: C.surface }}
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── REQUIERE ATENCIÓN — Sección prominente ── */}
+        {/* ── Urgentes ── */}
         {urgentes.length > 0 && (
-          <View style={{ marginTop: 16, marginHorizontal: 16, marginBottom: 8 }}>
-            {/* Banner header de sección */}
-            <LinearGradient
-              colors={["#FEF2F2", "#FFF5F5"]}
-              style={{
-                borderRadius: 20,
-                borderWidth: 1.5,
-                borderColor: "rgba(239,68,68,0.2)",
-                overflow: "hidden",
-              }}
-            >
-              <View
-                style={{
-                  paddingHorizontal: 18,
-                  paddingTop: 16,
-                  paddingBottom: 4,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 10,
-                    backgroundColor: "rgba(239,68,68,0.12)",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="alert-circle" size={18} color={C.error} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: C.error, fontSize: 14, fontWeight: "800" }}>
-                    Requiere atención
-                  </Text>
-                  <Text style={{ color: "rgba(239,68,68,0.7)", fontSize: 12, marginTop: 1 }}>
-                    {urgentes.length} alerta{urgentes.length > 1 ? "s" : ""} pendiente{urgentes.length > 1 ? "s" : ""}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={{ padding: 12, gap: 8 }}>
-                {urgentes.map((alert) => (
-                  <AlertItemUrgent
-                    key={alert.id}
-                    alert={alert}
-                    onPress={() => {
-                      markAsRead(alert.id);
-                      showAlert(alert);
-                    }}
-                    onChat={() => router.push("/(tabs)/chat")}
-                  />
-                ))}
-              </View>
-            </LinearGradient>
+          <View style={{ paddingHorizontal: 16, paddingTop: 20, marginBottom: 8 }}>
+            <Text style={{
+              color: D.textMuted,
+              fontSize: 11,
+              fontWeight: "700",
+              letterSpacing: 1.4,
+              textTransform: "uppercase",
+              marginBottom: 10,
+            }}>
+              Requiere atención
+            </Text>
+            <View style={{ gap: 8 }}>
+              {urgentes.map((a) => (
+                <UrgentCard
+                  key={a.id}
+                  alert={a}
+                  onPress={() => { markAsRead(a.id); showAlert(a); }}
+                  onChat={() => router.push("/(tabs)/chat")}
+                />
+              ))}
+            </View>
           </View>
         )}
 
-        {/* ── Pendientes (prioridad media/baja) ── */}
+        {/* ── Pendientes ── */}
         {pendientes.length > 0 && (
-          <View style={{ paddingHorizontal: 16, marginTop: urgentes.length > 0 ? 8 : 16 }}>
-            <Text
-              style={{
-                color: C.textMuted,
-                fontSize: 11,
-                fontWeight: "700",
-                marginBottom: 8,
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
-              }}
-            >
+          <View style={{ paddingHorizontal: 16, marginTop: urgentes.length > 0 ? 16 : 20 }}>
+            <Text style={{
+              color: D.textMuted,
+              fontSize: 11,
+              fontWeight: "700",
+              letterSpacing: 1.4,
+              textTransform: "uppercase",
+              marginBottom: 10,
+            }}>
               Pendientes
             </Text>
             <View style={{ gap: 8 }}>
-              {pendientes.map((alert) => (
-                <AlertItem
-                  key={alert.id}
-                  alert={alert}
-                  onPress={() => {
-                    markAsRead(alert.id);
-                    showAlert(alert);
-                  }}
+              {pendientes.map((a) => (
+                <AlertCard
+                  key={a.id}
+                  alert={a}
+                  onPress={() => { markAsRead(a.id); showAlert(a); }}
                   onChat={() => router.push("/(tabs)/chat")}
                 />
               ))}
@@ -171,62 +145,42 @@ export default function AlertsScreen() {
         {/* ── Historial ── */}
         {pasadas.length > 0 && (
           <View style={{ paddingHorizontal: 16, marginTop: 24 }}>
-            <Text
-              style={{
-                color: C.textMuted,
-                fontSize: 11,
-                fontWeight: "700",
-                marginBottom: 8,
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
-              }}
-            >
+            <Text style={{
+              color: D.textMuted,
+              fontSize: 11,
+              fontWeight: "700",
+              letterSpacing: 1.4,
+              textTransform: "uppercase",
+              marginBottom: 10,
+            }}>
               Historial
             </Text>
-            <View style={{ gap: 8 }}>
-              {pasadas.map((alert) => (
-                <AlertItem
-                  key={alert.id}
-                  alert={alert}
-                  onPress={() => {}}
-                  onChat={() => router.push("/(tabs)/chat")}
-                  dimmed
-                />
+            <View style={{ gap: 6 }}>
+              {pasadas.map((a) => (
+                <AlertCard key={a.id} alert={a} onPress={() => {}} onChat={() => router.push("/(tabs)/chat")} dimmed />
               ))}
             </View>
           </View>
         )}
 
-        {/* ── Estado vacío ── */}
+        {/* ── Empty ── */}
         {alerts.length === 0 && (
-          <View style={{ alignItems: "center", paddingVertical: 72 }}>
-            <View
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 36,
-                backgroundColor: "rgba(16,185,129,0.08)",
-                borderWidth: 1,
-                borderColor: "rgba(16,185,129,0.15)",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Ionicons name="checkmark-done-outline" size={32} color={C.success} />
+          <View style={{ alignItems: "center", paddingVertical: 80 }}>
+            <View style={{
+              width: 68,
+              height: 68,
+              borderRadius: 34,
+              backgroundColor: "rgba(74,222,128,0.06)",
+              borderWidth: 1,
+              borderColor: "rgba(74,222,128,0.14)",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 16,
+            }}>
+              <Ionicons name="checkmark-done" size={30} color={D.success} />
             </View>
-            <Text style={{ color: C.textPrimary, fontSize: 18, fontWeight: "700" }}>
-              Todo en orden
-            </Text>
-            <Text
-              style={{
-                color: C.textSecondary,
-                fontSize: 14,
-                marginTop: 8,
-                textAlign: "center",
-                lineHeight: 20,
-              }}
-            >
+            <Text style={{ color: D.text, fontSize: 17, fontWeight: "700" }}>Todo en orden</Text>
+            <Text style={{ color: D.textSub, fontSize: 14, marginTop: 8, textAlign: "center", lineHeight: 20 }}>
               Havi te avisará cuando detecte{"\n"}algo relevante
             </Text>
           </View>
@@ -236,65 +190,58 @@ export default function AlertsScreen() {
   );
 }
 
-// ── Alerta urgente — card compacta con énfasis visual ────────
-function AlertItemUrgent({
+// ── Urgent Card — alta prioridad, énfasis visual ─────────────
+
+function UrgentCard({
   alert,
   onPress,
   onChat,
-}: {
-  alert: HaviAlert;
-  onPress: () => void;
-  onChat: () => void;
-}) {
-  const cfg = ALERT_CONFIG[alert.type] ?? { icon: "notifications-outline", color: C.error };
-
+}: { alert: HaviAlert; onPress: () => void; onChat: () => void }) {
+  const cfg = getCfg(alert.type);
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        backgroundColor: pressed ? "rgba(239,68,68,0.06)" : "#FFFFFF",
-        borderRadius: 14,
-        padding: 14,
+        backgroundColor: pressed ? "rgba(248,113,113,0.06)" : D.card,
+        borderRadius: 18,
+        padding: 16,
         borderWidth: 1,
-        borderColor: "rgba(239,68,68,0.18)",
+        borderColor: "rgba(248,113,113,0.18)",
+        borderLeftWidth: 3,
+        borderLeftColor: D.error,
       })}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 }}>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            backgroundColor: "rgba(239,68,68,0.10)",
-            borderWidth: 1,
-            borderColor: "rgba(239,68,68,0.18)",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name={cfg.icon as any} size={18} color={C.error} />
+        <View style={{
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          backgroundColor: "rgba(248,113,113,0.08)",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <Ionicons name={cfg.icon as any} size={18} color={D.error} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: C.textPrimary, fontSize: 14, fontWeight: "700", marginBottom: 2 }}>
+          <Text style={{ color: D.text, fontSize: 14, fontWeight: "700", marginBottom: 2 }}>
             {alert.titulo}
           </Text>
-          <Text style={{ color: C.textSecondary, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
+          <Text style={{ color: D.textSub, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
             {alert.mensaje}
           </Text>
-          <Text style={{ color: C.textMuted, fontSize: 11, marginTop: 4 }}>
+          <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 4 }}>
             {timeAgo(alert.timestamp)}
           </Text>
         </View>
       </View>
 
-      {/* CTAs prominentes */}
       <View style={{ flexDirection: "row", gap: 8 }}>
         <Pressable
           onPress={onPress}
           style={({ pressed }) => ({
             flex: 1,
-            backgroundColor: pressed ? "#DC2626" : C.error,
-            borderRadius: 10,
+            backgroundColor: pressed ? "#DC2626" : D.error,
+            borderRadius: 12,
             paddingVertical: 11,
             alignItems: "center",
           })}
@@ -307,120 +254,92 @@ function AlertItemUrgent({
           onPress={onChat}
           style={({ pressed }) => ({
             flex: 1,
-            backgroundColor: pressed ? C.borderAlt : C.bg,
-            borderRadius: 10,
+            backgroundColor: pressed ? D.cardAlt : D.surface,
+            borderRadius: 12,
             paddingVertical: 11,
             alignItems: "center",
             borderWidth: 1,
-            borderColor: C.border,
+            borderColor: D.border,
             flexDirection: "row",
             justifyContent: "center",
             gap: 5,
           })}
         >
           <Text style={{ fontSize: 11 }}>✦</Text>
-          <Text style={{ color: C.textSecondary, fontSize: 13, fontWeight: "600" }}>
-            Hablar con Havi
-          </Text>
+          <Text style={{ color: D.textSub, fontSize: 13, fontWeight: "600" }}>Hablar con Havi</Text>
         </Pressable>
       </View>
     </Pressable>
   );
 }
 
-// ── Alerta estándar (media/baja) ─────────────────────────────
-function AlertItem({
+// ── Standard Alert Card ───────────────────────────────────────
+
+function AlertCard({
   alert,
   onPress,
   onChat,
   dimmed = false,
-}: {
-  alert: HaviAlert;
-  onPress: () => void;
-  onChat: () => void;
-  dimmed?: boolean;
-}) {
-  const cfg = ALERT_CONFIG[alert.type] ?? {
-    icon: "notifications-outline",
-    color: C.accent,
-  };
-
+}: { alert: HaviAlert; onPress: () => void; onChat: () => void; dimmed?: boolean }) {
+  const cfg = getCfg(alert.type);
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        backgroundColor: pressed ? C.surface : C.card,
+        backgroundColor: pressed ? D.cardAlt : D.card,
         borderRadius: 16,
-        padding: 16,
+        padding: 14,
         borderWidth: 1,
-        borderColor: alert.leida ? C.border : `${cfg.color}28`,
-        opacity: dimmed ? 0.55 : 1,
+        borderColor: alert.leida ? D.border : `${cfg.color}22`,
         borderLeftWidth: alert.leida ? 1 : 3,
-        borderLeftColor: alert.leida ? C.border : cfg.color,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-        elevation: 1,
+        borderLeftColor: alert.leida ? D.border : cfg.color,
+        opacity: dimmed ? 0.45 : 1,
       })}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 13,
-            backgroundColor: `${cfg.color}0E`,
-            borderWidth: 1,
-            borderColor: `${cfg.color}18`,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name={cfg.icon as any} size={20} color={cfg.color} />
+        <View style={{
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          backgroundColor: `${cfg.color}0D`,
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <Ionicons name={cfg.icon as any} size={18} color={cfg.color} />
         </View>
 
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 3 }}>
-            <Text style={{ color: C.textPrimary, fontSize: 14, fontWeight: "600", flex: 1 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 }}>
+            <Text style={{ color: D.text, fontSize: 14, fontWeight: "600", flex: 1 }}>
               {alert.titulo}
             </Text>
             {!alert.leida && (
-              <View
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: 3.5,
-                  backgroundColor: cfg.color,
-                }}
-              />
+              <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: cfg.color }} />
             )}
           </View>
-          <Text style={{ color: C.textSecondary, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
+          <Text style={{ color: D.textSub, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
             {alert.mensaje}
           </Text>
-          <Text style={{ color: C.textMuted, fontSize: 11, marginTop: 5 }}>
+          <Text style={{ color: D.textMuted, fontSize: 11, marginTop: 4 }}>
             {timeAgo(alert.timestamp)}
           </Text>
         </View>
       </View>
 
       {!alert.accionada && (
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 8,
-            marginTop: 12,
-            paddingTop: 12,
-            borderTopWidth: 1,
-            borderTopColor: C.border,
-          }}
-        >
+        <View style={{
+          flexDirection: "row",
+          gap: 8,
+          marginTop: 12,
+          paddingTop: 12,
+          borderTopWidth: 1,
+          borderTopColor: D.border,
+        }}>
           <Pressable
             onPress={onPress}
             style={({ pressed }) => ({
               flex: 1,
-              backgroundColor: pressed ? `${cfg.color}DD` : cfg.color,
+              backgroundColor: pressed ? `${cfg.color}CC` : cfg.color,
               borderRadius: 10,
               paddingVertical: 10,
               alignItems: "center",
@@ -434,21 +353,19 @@ function AlertItem({
             onPress={onChat}
             style={({ pressed }) => ({
               flex: 1,
-              backgroundColor: pressed ? C.surface : C.bg,
+              backgroundColor: pressed ? D.cardAlt : D.surface,
               borderRadius: 10,
               paddingVertical: 10,
               alignItems: "center",
               borderWidth: 1,
-              borderColor: C.border,
+              borderColor: D.border,
               flexDirection: "row",
               justifyContent: "center",
               gap: 5,
             })}
           >
-            <Text style={{ fontSize: 12 }}>✦</Text>
-            <Text style={{ color: C.textSecondary, fontSize: 13, fontWeight: "600" }}>
-              Hablar con Havi
-            </Text>
+            <Text style={{ fontSize: 11 }}>✦</Text>
+            <Text style={{ color: D.textSub, fontSize: 13, fontWeight: "600" }}>Hablar con Havi</Text>
           </Pressable>
         </View>
       )}

@@ -10,7 +10,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <AlertProvider>
-        <StatusBar style="dark" backgroundColor="#FFFFFF" />
+        <StatusBar style="light" backgroundColor="#07090E" />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
         </Stack>
@@ -21,5 +21,5 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#FFFFFF" },
+  root: { flex: 1, backgroundColor: "#07090E" },
 });

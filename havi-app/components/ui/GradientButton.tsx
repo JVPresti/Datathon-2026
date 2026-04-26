@@ -1,38 +1,21 @@
 // ============================================================
-// GradientButton — Botón con gradiente suave — Light mode
-// Gradientes discretos, pastel suave, sin neón
+// GradientButton — Dark mode — Obsidian Intelligence
 // ============================================================
 
 import React from "react";
 import { Pressable, Text, ViewStyle, TextStyle, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-type GradientVariant =
-  | "purple"
-  | "blue"
-  | "green"
-  | "rose"
-  | "orange"
-  | "mono";
+type GradientVariant = "cyan" | "purple" | "blue" | "green" | "rose" | "orange" | "mono";
 
-// Gradientes suaves — max 2 stops, tonos pastel/sobrios
 const GRADIENTS: Record<GradientVariant, [string, string, ...string[]]> = {
-  purple: ["#6D5EF8", "#9D8FF8"],
-  blue: ["#3B82F6", "#60A5FA"],
-  green: ["#10B981", "#34D399"],
-  rose: ["#F43F5E", "#FB7185"],
-  orange: ["#F97316", "#FB923C"],
-  mono: ["#374151", "#6B7280"],
-};
-
-// Color de texto por variante para mantener contraste
-const TEXT_COLORS: Record<GradientVariant, string> = {
-  purple: "#FFFFFF",
-  blue: "#FFFFFF",
-  green: "#FFFFFF",
-  rose: "#FFFFFF",
-  orange: "#FFFFFF",
-  mono: "#FFFFFF",
+  cyan: ["#06B6D4", "#0891B2"],
+  purple: ["#818CF8", "#6366F1"],
+  blue: ["#3B82F6", "#2563EB"],
+  green: ["#4ADE80", "#16A34A"],
+  rose: ["#F87171", "#DC2626"],
+  orange: ["#FBBF24", "#D97706"],
+  mono: ["#374151", "#1F2937"],
 };
 
 interface GradientButtonProps {
@@ -48,7 +31,7 @@ interface GradientButtonProps {
 export function GradientButton({
   label,
   onPress,
-  variant = "purple",
+  variant = "cyan",
   disabled = false,
   size = "md",
   style,
@@ -56,7 +39,6 @@ export function GradientButton({
 }: GradientButtonProps) {
   const padding = size === "sm" ? 10 : size === "lg" ? 18 : 14;
   const fontSize = size === "sm" ? 13 : size === "lg" ? 17 : 15;
-  const textColor = TEXT_COLORS[variant];
 
   return (
     <Pressable
@@ -65,8 +47,8 @@ export function GradientButton({
       style={({ pressed }) => [
         styles.wrapper,
         style,
-        pressed && { opacity: 0.82, transform: [{ scale: 0.97 }] },
-        disabled && { opacity: 0.45 },
+        pressed && { opacity: 0.80, transform: [{ scale: 0.97 }] },
+        disabled && { opacity: 0.35 },
       ]}
     >
       <LinearGradient
@@ -75,7 +57,7 @@ export function GradientButton({
         end={{ x: 1, y: 1 }}
         style={[styles.gradient, { paddingVertical: padding }]}
       >
-        <Text style={[styles.label, { fontSize, color: textColor }, textStyle]}>{label}</Text>
+        <Text style={[styles.label, { fontSize }, textStyle]}>{label}</Text>
       </LinearGradient>
     </Pressable>
   );
@@ -92,6 +74,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   label: {
+    color: "#FFFFFF",
     fontWeight: "700",
     letterSpacing: 0.3,
   },

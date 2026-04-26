@@ -1,5 +1,5 @@
 // ============================================================
-// AppCard — Card reutilizable — Light mode fintech
+// AppCard — Dark mode reutilizable — Obsidian Intelligence
 // ============================================================
 
 import React from "react";
@@ -34,7 +34,7 @@ export function AppCard({
         onPress={onPress}
         style={({ pressed }) => [
           ...cardStyle,
-          pressed && { opacity: 0.88, transform: [{ scale: 0.985 }] },
+          pressed && { opacity: 0.82, transform: [{ scale: 0.985 }] },
         ]}
       >
         {children}
@@ -47,25 +47,25 @@ export function AppCard({
 
 const styles = StyleSheet.create({
   base: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#161B27",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: "rgba(255,255,255,0.07)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
   },
   elevated: {
-    backgroundColor: "#FAFAFA",
-    shadowOpacity: 0.10,
-    shadowRadius: 10,
-    elevation: 4,
+    backgroundColor: "#1C2235",
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 6,
   },
   outlined: {
     backgroundColor: "transparent",
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.10)",
     shadowOpacity: 0,
     elevation: 0,
   },

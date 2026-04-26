@@ -1,5 +1,5 @@
 // ============================================================
-// SectionHeader — Título de sección reutilizable — Light mode
+// SectionHeader — Dark mode — Obsidian Intelligence
 // ============================================================
 
 import React from "react";
@@ -32,12 +32,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    color: "#111111",
-    fontSize: 17,
+    color: "#EFF6FF",
+    fontSize: 16,
     fontWeight: "700",
   },
   action: {
-    color: "#6D5EF8",
+    color: "#06B6D4",
     fontSize: 13,
     fontWeight: "600",
   },

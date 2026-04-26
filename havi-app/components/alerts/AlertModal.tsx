@@ -105,14 +105,14 @@ function AlertContent({
   return (
     <View
       style={{
-        backgroundColor: "#23263A",
+        backgroundColor: "#111520",
         borderTopLeftRadius: 28,
         borderTopRightRadius: 28,
         paddingHorizontal: 24,
         paddingTop: 12,
         paddingBottom: 40,
         borderWidth: 1,
-        borderColor: "#2D3050",
+        borderColor: "rgba(255,255,255,0.08)",
       }}
     >
       {/* Handle bar */}
@@ -120,7 +120,7 @@ function AlertContent({
         style={{
           width: 40,
           height: 4,
-          backgroundColor: "#2D3050",
+          backgroundColor: "rgba(255,255,255,0.10)",
           borderRadius: 2,
           alignSelf: "center",
           marginBottom: 20,
@@ -170,7 +170,7 @@ function AlertContent({
       {/* Havi message bubble */}
       <View
         style={{
-          backgroundColor: "#1A1C2E",
+          backgroundColor: "#0F1825",
           borderRadius: 16,
           borderTopLeftRadius: 4,
           padding: 16,
@@ -178,6 +178,8 @@ function AlertContent({
           flexDirection: "row",
           alignItems: "flex-start",
           gap: 10,
+          borderWidth: 1,
+          borderColor: "rgba(6,182,212,0.12)",
         }}
       >
         <View
@@ -185,14 +187,14 @@ function AlertContent({
             width: 28,
             height: 28,
             borderRadius: 14,
-            backgroundColor: "#FF5A1F",
+            backgroundColor: "#06B6D4",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
           <Text style={{ fontSize: 12 }}>✦</Text>
         </View>
-        <Text style={{ color: "#F0F2F6", fontSize: 14, lineHeight: 22, flex: 1 }}>
+        <Text style={{ color: "#EFF6FF", fontSize: 14, lineHeight: 22, flex: 1 }}>
           {alert.mensaje}
         </Text>
       </View>
@@ -283,15 +285,15 @@ function AlertContent({
           <Pressable
             onPress={onSecondary}
             style={({ pressed }) => ({
-              backgroundColor: pressed ? "#2D3050" : "#1A1C2E",
+              backgroundColor: pressed ? "#1C2235" : "#161B27",
               borderRadius: 14,
               paddingVertical: 14,
               alignItems: "center",
               borderWidth: 1,
-              borderColor: "#2D3050",
+              borderColor: "rgba(255,255,255,0.08)",
             })}
           >
-            <Text style={{ color: "#8B93B8", fontSize: 15, fontWeight: "600" }}>
+            <Text style={{ color: "rgba(239,246,255,0.50)", fontSize: 15, fontWeight: "600" }}>
               {alert.accion_secundaria.label}
             </Text>
           </Pressable>

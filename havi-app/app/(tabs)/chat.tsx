@@ -1,5 +1,5 @@
 // ============================================================
-// HAVI CHAT — Copiloto financiero — Light mode fintech
+// HAVI CHAT — Copiloto financiero — Obsidian Intelligence dark
 // ============================================================
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
@@ -28,159 +28,120 @@ import {
 import { ChatMessage } from "../../src/types";
 import { TRANSACCIONES_MOCK } from "../../src/data/mockData";
 
-// ── Paleta light mode ─────────────────────────────────────────
-const C = {
-  bg: "#FFFFFF",
-  surface: "#FAFAFA",
-  card: "#F3F4F6",
-  border: "#E5E7EB",
-  textPrimary: "#111111",
-  textSecondary: "#6B7280",
-  textMuted: "#9CA3AF",
-  accent: "#6D5EF8",
-  accentDeep: "#5848E0",
+const D = {
+  bg: "#07090E",
+  surface: "#0D1018",
+  card: "#161B27",
+  cardAlt: "#1C2235",
+  border: "rgba(255,255,255,0.07)",
+  borderAccent: "rgba(6,182,212,0.18)",
+  text: "#EFF6FF",
+  textSub: "rgba(239,246,255,0.55)",
+  textMuted: "rgba(239,246,255,0.30)",
+  accent: "#06B6D4",
+  accentDeep: "#0891B2",
+  accentGlow: "rgba(6,182,212,0.10)",
+  success: "#4ADE80",
+  error: "#F87171",
+  inputBg: "#111520",
 };
 
-let messageIdCounter = 0;
-function newId() {
-  return `msg-${++messageIdCounter}-${Date.now()}`;
-}
+let msgId = 0;
+function newId() { return `m-${++msgId}-${Date.now()}`; }
 
-const WELCOME_MESSAGE: ChatMessage = {
+const WELCOME: ChatMessage = {
   id: "welcome",
   role: "havi",
-  content:
-    "Hola Valentina 👋 Soy Havi, tu copiloto financiero. Estoy aquí para ayudarte a entender tus finanzas, detectar movimientos inusuales y encontrar oportunidades de ahorro. ¿En qué te ayudo hoy?",
+  content: "Hola 👋 Soy Havi, tu copiloto financiero. Analizo tus movimientos, detecto anomalías y encuentro oportunidades de ahorro. ¿En qué te puedo ayudar hoy?",
   timestamp: new Date().toISOString(),
   suggestions: INITIAL_PILLS.slice(0, 3).map((p) => p.label),
 };
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [activePills, setActivePills] = useState<string[]>(
-    INITIAL_PILLS.slice(0, 4).map((p) => p.label)
-  );
-  const [pendingAction, setPendingAction] = useState<{
-    action: ChatAction;
-    label: string;
-  } | null>(null);
+  const [activePills, setActivePills] = useState<string[]>(INITIAL_PILLS.slice(0, 4).map((p) => p.label));
+  const [pendingAction, setPendingAction] = useState<{ action: ChatAction; label: string } | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const { alerts } = useAlerts();
+  const dotAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
-  const appendHaviMessage = useCallback(
-    (text: string, suggestions?: string[]) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: newId(),
-          role: "havi",
-          content: text,
-          timestamp: new Date().toISOString(),
-          suggestions,
-        },
-      ]);
-      if (suggestions?.length) setActivePills(suggestions);
-    },
-    []
-  );
+  useEffect(() => {
+    if (isLoading) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(dotAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+          Animated.timing(dotAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      dotAnim.stopAnimation();
+      dotAnim.setValue(0);
+    }
+  }, [isLoading]);
 
-  // ---- Ejecuta acción confirmada (tool execution) -----------
-  const executeAction = useCallback(
-    (action: ChatAction) => {
-      setPendingAction(null);
-      let response;
-      if (action.type === "set_budget") {
-        response = executeBudgetLimit(action.categoria, action.limite);
-      } else {
-        response = executePayrollPortability();
-      }
-      appendHaviMessage(response.text, response.suggestions);
-    },
-    [appendHaviMessage]
-  );
+  const appendHavi = useCallback((text: string, suggestions?: string[]) => {
+    setMessages((prev) => [...prev, {
+      id: newId(), role: "havi", content: text,
+      timestamp: new Date().toISOString(), suggestions,
+    }]);
+    if (suggestions?.length) setActivePills(suggestions);
+  }, []);
 
-  const sendMessage = useCallback(
-    async (text: string) => {
-      if (!text.trim() || isLoading) return;
-      setInput("");
-      setActivePills([]);
-      setPendingAction(null);
+  const executeAction = useCallback((action: ChatAction) => {
+    setPendingAction(null);
+    let r;
+    if (action.type === "set_budget") r = executeBudgetLimit(action.categoria, action.limite);
+    else r = executePayrollPortability();
+    appendHavi(r.text, r.suggestions);
+  }, [appendHavi]);
 
-      const userMsg: ChatMessage = {
-        id: newId(),
-        role: "user",
-        content: text.trim(),
-        timestamp: new Date().toISOString(),
-      };
-      const loadingMsg: ChatMessage = {
-        id: newId(),
-        role: "havi",
-        content: "",
-        timestamp: new Date().toISOString(),
-        status: "sending",
-      };
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return;
+    setInput("");
+    setActivePills([]);
+    setPendingAction(null);
 
-      setMessages((prev) => [...prev, userMsg, loadingMsg]);
-      setIsLoading(true);
+    const userMsg: ChatMessage = { id: newId(), role: "user", content: text.trim(), timestamp: new Date().toISOString() };
+    const loadingMsg: ChatMessage = { id: newId(), role: "havi", content: "", timestamp: new Date().toISOString(), status: "sending" };
 
-      try {
-        const result = await sendHaviMessage(text, TRANSACCIONES_MOCK);
+    setMessages((prev) => [...prev, userMsg, loadingMsg]);
+    setIsLoading(true);
 
-        setMessages((prev) => {
-          const filtered = prev.filter((m) => m.id !== loadingMsg.id);
-          return [
-            ...filtered,
-            {
-              id: newId(),
-              role: "havi",
-              content: result.text,
-              timestamp: new Date().toISOString(),
-              suggestions: result.suggestions,
-            },
-          ];
-        });
-
-        if (result.suggestions?.length) {
-          setActivePills(result.suggestions);
-        }
-
-        // Si la respuesta trae acción pendiente (UC2 budget / UC3 portability)
-        if (result.action && result.actionLabel) {
-          setPendingAction({ action: result.action, label: result.actionLabel });
-        }
-      } catch {
-        setMessages((prev) => prev.filter((m) => m.id !== loadingMsg.id));
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isLoading, appendHaviMessage]
-  );
-
-  const canSend = input.trim().length > 0 && !isLoading;
+    try {
+      const result = await sendHaviMessage(text, TRANSACCIONES_MOCK);
+      setMessages((prev) => {
+        const filtered = prev.filter((m) => m.id !== loadingMsg.id);
+        return [...filtered, { id: newId(), role: "havi", content: result.text, timestamp: new Date().toISOString(), suggestions: result.suggestions }];
+      });
+      if (result.suggestions?.length) setActivePills(result.suggestions);
+      if (result.action && result.actionLabel) setPendingAction({ action: result.action, label: result.actionLabel });
+    } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== loadingMsg.id));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, appendHavi]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
-      {/* Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 20,
-          paddingVertical: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: C.border,
-          backgroundColor: C.bg,
-        }}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: D.bg }}>
+      {/* ── Header ── */}
+      <View style={{
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: D.border,
+        backgroundColor: D.bg,
+      }}>
         <LinearGradient
-          colors={[C.accentDeep, C.accent]}
+          colors={["#06B6D4", "#818CF8", "#A855F7"]}
           style={{
             width: 40,
             height: 40,
@@ -188,45 +149,32 @@ export default function ChatScreen() {
             alignItems: "center",
             justifyContent: "center",
             marginRight: 12,
-            shadowColor: C.accent,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 6,
           }}
         >
           <Text style={{ fontSize: 17 }}>✦</Text>
         </LinearGradient>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: C.textPrimary, fontSize: 16, fontWeight: "700" }}>Havi</Text>
+          <Text style={{ color: D.text, fontSize: 16, fontWeight: "700" }}>Havi</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <View
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: "#10B981",
-              }}
-            />
-            <Text style={{ color: C.textMuted, fontSize: 12 }}>Copiloto financiero activo</Text>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: D.success }} />
+            <Text style={{ color: D.textMuted, fontSize: 11 }}>Copiloto financiero activo</Text>
           </View>
         </View>
-        <Pressable
-          style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: pressed ? C.card : C.surface,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: C.border,
-          })}
-        >
-          <Ionicons name="ellipsis-horizontal" size={16} color={C.textMuted} />
+        <Pressable style={({ pressed }) => ({
+          width: 34,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: pressed ? D.cardAlt : D.card,
+          alignItems: "center",
+          justifyContent: "center",
+          borderWidth: 1,
+          borderColor: D.border,
+        })}>
+          <Ionicons name="ellipsis-horizontal" size={15} color={D.textMuted} />
         </Pressable>
       </View>
 
-      {/* Messages + Input */}
+      {/* ── Messages + Input ── */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -234,34 +182,31 @@ export default function ChatScreen() {
       >
         <ScrollView
           ref={scrollRef}
-          style={{ flex: 1, backgroundColor: C.surface }}
+          style={{ flex: 1 }}
           contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 8 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {messages.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} onSend={sendMessage} />
+            <MessageBubble key={msg.id} message={msg} onSend={sendMessage} dotAnim={dotAnim} />
           ))}
         </ScrollView>
 
-        {/* Pills + Input area */}
-        <View style={{ paddingBottom: 8, backgroundColor: C.bg, borderTopWidth: 1, borderTopColor: C.border }}>
-          {/* CTA de acción pendiente (UC2 budget / UC3 portability) */}
+        {/* ── Input area ── */}
+        <View style={{
+          paddingBottom: Platform.OS === "ios" ? 4 : 8,
+          backgroundColor: D.bg,
+          borderTopWidth: 1,
+          borderTopColor: D.border,
+        }}>
+          {/* Pending action CTA */}
           {pendingAction && !isLoading && (
-            <View
-              style={{
-                marginHorizontal: 16,
-                marginTop: 10,
-                marginBottom: 4,
-                flexDirection: "row",
-                gap: 8,
-              }}
-            >
+            <View style={{ marginHorizontal: 16, marginTop: 10, marginBottom: 4, flexDirection: "row", gap: 8 }}>
               <Pressable
                 onPress={() => executeAction(pendingAction.action)}
                 style={({ pressed }) => ({
                   flex: 1,
-                  backgroundColor: pressed ? C.accentDeep : C.accent,
+                  backgroundColor: pressed ? D.accentDeep : D.accent,
                   borderRadius: 14,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -275,18 +220,20 @@ export default function ChatScreen() {
                 onPress={() => setPendingAction(null)}
                 style={({ pressed }) => ({
                   paddingHorizontal: 16,
-                  backgroundColor: pressed ? C.card : C.surface,
+                  backgroundColor: pressed ? D.cardAlt : D.card,
                   borderRadius: 14,
                   paddingVertical: 12,
                   alignItems: "center",
                   borderWidth: 1,
-                  borderColor: C.border,
+                  borderColor: D.border,
                 })}
               >
-                <Text style={{ color: C.textSecondary, fontSize: 14 }}>Ahora no</Text>
+                <Text style={{ color: D.textSub, fontSize: 14 }}>No</Text>
               </Pressable>
             </View>
           )}
+
+          {/* Suggestion pills */}
           {activePills.length > 0 && !isLoading && !pendingAction && (
             <ScrollView
               horizontal
@@ -294,110 +241,76 @@ export default function ChatScreen() {
               contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 10, paddingTop: 10 }}
               style={{ maxHeight: 56 }}
             >
-              {activePills.map((pill, idx) => (
+              {activePills.map((pill, i) => (
                 <Pressable
-                  key={idx}
+                  key={i}
                   onPress={() => sendMessage(pill)}
                   style={({ pressed }) => ({
-                    backgroundColor: pressed ? C.card : C.surface,
+                    backgroundColor: pressed ? D.cardAlt : D.card,
                     borderRadius: 20,
                     paddingHorizontal: 14,
                     paddingVertical: 8,
                     borderWidth: 1,
-                    borderColor: pressed ? `${C.accent}40` : C.border,
-                    flexShrink: 0,
+                    borderColor: D.border,
                   })}
                 >
-                  <Text style={{ color: C.textSecondary, fontSize: 13, fontWeight: "500" }}>
-                    {pill}
-                  </Text>
+                  <Text style={{ color: D.textSub, fontSize: 13 }}>{pill}</Text>
                 </Pressable>
               ))}
             </ScrollView>
           )}
 
-          {/* Input bar */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-end",
+          {/* Text input row */}
+          <View style={{
+            flexDirection: "row",
+            alignItems: "flex-end",
+            gap: 8,
+            paddingHorizontal: 16,
+            paddingTop: 8,
+            paddingBottom: 4,
+          }}>
+            <View style={{
+              flex: 1,
+              backgroundColor: D.inputBg,
+              borderRadius: 22,
+              borderWidth: 1,
+              borderColor: D.border,
               paddingHorizontal: 16,
-              paddingTop: 8,
-              gap: 10,
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: C.surface,
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: C.border,
-                paddingHorizontal: 18,
-                paddingVertical: 12,
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
+              paddingVertical: Platform.OS === "ios" ? 12 : 8,
+              minHeight: 44,
+              maxHeight: 100,
+              justifyContent: "center",
+            }}>
               <TextInput
                 value={input}
                 onChangeText={setInput}
                 placeholder="Pregúntale a Havi..."
-                placeholderTextColor={C.textMuted}
-                style={{
-                  flex: 1,
-                  color: C.textPrimary,
-                  fontSize: 14,
-                  maxHeight: 100,
-                }}
+                placeholderTextColor={D.textMuted}
+                style={{ color: D.text, fontSize: 15, padding: 0 }}
                 multiline
                 onSubmitEditing={() => sendMessage(input)}
-                returnKeyType="send"
                 blurOnSubmit={false}
               />
             </View>
             <Pressable
               onPress={() => sendMessage(input)}
-              disabled={!canSend}
+              disabled={!input.trim() || isLoading}
               style={({ pressed }) => ({
-                width: 46,
-                height: 46,
-                borderRadius: 23,
-                overflow: "hidden",
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: !input.trim() || isLoading ? D.card : pressed ? D.accentDeep : D.accent,
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: pressed ? 0.8 : !canSend ? 0.35 : 1,
+                borderWidth: 1,
+                borderColor: !input.trim() || isLoading ? D.border : D.accent,
               })}
             >
-              {canSend ? (
-                <LinearGradient
-                  colors={[C.accentDeep, C.accent]}
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: 23,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="send" size={17} color="#fff" />
-                </LinearGradient>
-              ) : (
-                <View
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: 23,
-                    backgroundColor: C.surface,
-                    borderWidth: 1,
-                    borderColor: C.border,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="send" size={17} color={C.textMuted} />
-                </View>
-              )}
+              <Ionicons
+                name="arrow-up"
+                size={18}
+                color={!input.trim() || isLoading ? D.textMuted : "#fff"}
+              />
             </Pressable>
           </View>
         </View>
@@ -406,148 +319,146 @@ export default function ChatScreen() {
   );
 }
 
-// ── MessageBubble ──────────────────────────────────────────────
+// ── MessageBubble ────────────────────────────────────────────
+
 function MessageBubble({
   message,
   onSend,
+  dotAnim,
 }: {
   message: ChatMessage;
-  onSend: (text: string) => void;
+  onSend: (t: string) => void;
+  dotAnim: Animated.Value;
 }) {
   const isHavi = message.role === "havi";
   const isLoading = message.status === "sending";
 
   if (isLoading) {
     return (
-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
-        <HaviAvatar />
-        <View
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, alignSelf: "flex-start", maxWidth: "80%" }}>
+        <LinearGradient
+          colors={["#06B6D4", "#818CF8"]}
           style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: 20,
-            borderBottomLeftRadius: 4,
-            padding: 16,
-            borderWidth: 1,
-            borderColor: C.border,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05,
-            shadowRadius: 4,
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
           }}
         >
-          <TypingIndicator />
+          <Text style={{ fontSize: 11 }}>✦</Text>
+        </LinearGradient>
+        <View style={{
+          backgroundColor: "#161B27",
+          borderRadius: 18,
+          borderTopLeftRadius: 4,
+          paddingHorizontal: 16,
+          paddingVertical: 14,
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.07)",
+          flexDirection: "row",
+          gap: 6,
+          alignItems: "center",
+        }}>
+          {[0, 1, 2].map((i) => (
+            <Animated.View
+              key={i}
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: "#06B6D4",
+                opacity: dotAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.3, i === 1 ? 1 : 0.6],
+                }),
+              }}
+            />
+          ))}
         </View>
       </View>
     );
   }
 
-  if (isHavi) {
+  if (!isHavi) {
     return (
-      <View style={{ alignItems: "flex-start", gap: 6 }}>
-        <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
-          <HaviAvatar />
-          <View
-            style={{
-              backgroundColor: "#FFFFFF",
-              borderRadius: 20,
-              borderBottomLeftRadius: 4,
-              padding: 16,
-              maxWidth: "80%",
-              borderWidth: 1,
-              borderColor: C.border,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-            }}
-          >
-            <Text style={{ color: C.textPrimary, fontSize: 14, lineHeight: 22 }}>
-              {message.content}
-            </Text>
-          </View>
+      <View style={{ alignSelf: "flex-end", maxWidth: "78%" }}>
+        <View style={{
+          backgroundColor: D.card,
+          borderRadius: 18,
+          borderTopRightRadius: 4,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.09)",
+        }}>
+          <Text style={{ color: D.text, fontSize: 15, lineHeight: 22 }}>
+            {message.content}
+          </Text>
         </View>
       </View>
     );
   }
 
-  // User bubble — gradiente suave acento
   return (
-    <View style={{ alignItems: "flex-end" }}>
-      <LinearGradient
-        colors={[C.accentDeep, C.accent]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{
-          borderRadius: 20,
-          borderBottomRightRadius: 4,
-          padding: 14,
-          maxWidth: "75%",
-        }}
-      >
-        <Text style={{ color: "#fff", fontSize: 14, lineHeight: 22 }}>
-          {message.content}
-        </Text>
-      </LinearGradient>
-    </View>
-  );
-}
-
-function HaviAvatar() {
-  return (
-    <LinearGradient
-      colors={["#5848E0", "#6D5EF8"]}
-      style={{
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: "#6D5EF8",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-      }}
-    >
-      <Text style={{ fontSize: 13 }}>✦</Text>
-    </LinearGradient>
-  );
-}
-
-function TypingIndicator() {
-  const dot1 = useRef(new Animated.Value(0)).current;
-  const dot2 = useRef(new Animated.Value(0)).current;
-  const dot3 = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const animate = (dot: Animated.Value, delay: number) => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(dot, { toValue: -4, duration: 300, useNativeDriver: true }),
-          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
-          Animated.delay(600),
-        ])
-      ).start();
-    };
-    animate(dot1, 0);
-    animate(dot2, 150);
-    animate(dot3, 300);
-  }, []);
-
-  return (
-    <View style={{ flexDirection: "row", gap: 4, paddingHorizontal: 4 }}>
-      {[dot1, dot2, dot3].map((dot, i) => (
-        <Animated.View
-          key={i}
+    <View style={{ alignSelf: "flex-start", maxWidth: "88%" }}>
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+        <LinearGradient
+          colors={["#06B6D4", "#818CF8"]}
           style={{
-            width: 7,
-            height: 7,
-            borderRadius: 3.5,
-            backgroundColor: C.textMuted,
-            transform: [{ translateY: dot }],
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
           }}
-        />
-      ))}
+        >
+          <Text style={{ fontSize: 11 }}>✦</Text>
+        </LinearGradient>
+        <View style={{
+          backgroundColor: "#0F1825",
+          borderRadius: 18,
+          borderTopLeftRadius: 4,
+          paddingHorizontal: 16,
+          paddingVertical: 13,
+          borderWidth: 1,
+          borderColor: "rgba(6,182,212,0.14)",
+          flex: 1,
+        }}>
+          <Text style={{ color: D.text, fontSize: 15, lineHeight: 22 }}>
+            {message.content}
+          </Text>
+        </View>
+      </View>
+
+      {message.suggestions && message.suggestions.length > 0 && (
+        <View style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: 8,
+          marginTop: 10,
+          marginLeft: 36,
+        }}>
+          {message.suggestions.map((s, i) => (
+            <Pressable
+              key={i}
+              onPress={() => onSend(s)}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? D.cardAlt : D.card,
+                borderRadius: 16,
+                paddingHorizontal: 12,
+                paddingVertical: 7,
+                borderWidth: 1,
+                borderColor: D.borderAccent,
+              })}
+            >
+              <Text style={{ color: D.accent, fontSize: 13, fontWeight: "500" }}>{s}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
     </View>
   );
 }

@@ -29,10 +29,10 @@ export function InputMinimal({ containerStyle, style, ...props }: InputMinimalPr
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#111520",
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.08)",
     paddingHorizontal: 18,
     paddingVertical: 12,
     flexDirection: "row",
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: "#111111",
+    color: "#EFF6FF",
     fontSize: 14,
     maxHeight: 100,
   },

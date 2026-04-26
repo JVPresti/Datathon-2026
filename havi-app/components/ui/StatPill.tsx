@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   label: {
-    color: "#6B7280",
+    color: "rgba(239,246,255,0.40)",
     fontSize: 11,
     marginTop: 2,
     fontWeight: "500",
