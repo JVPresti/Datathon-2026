@@ -1,138 +1,105 @@
 # datamoles · Hey Datathon 2026
 
-> **Producto**: **Havi** — copiloto financiero proactivo con IA para usuarios de Hey Banco.
+> **Producto**: **Havi** — tu copiloto financiero proactivo con IA, integrado en el ecosistema de Hey Banco.
 > **Equipo**: Diego Quiros (DS Lead) · Fernando Haro · Brayan Ivan · Jorge Vázquez.
-> **Fase actual**: ✅ EDA cerrado · 🚧 Feature Engineering arrancando.
+> **Fase actual**: ✅ EDA & Modelado · ✅ Pipeline API (FastAPI) · ✅ Havi App (React Native/Expo).
 
 ---
 
 ## TL;DR
 
-Tenemos 4 datasets (15,025 clientes · 38,909 productos · 802,384 transacciones · 49,999 conversaciones) limpios, con **integridad referencial 100 %** y un mapa claro de calidad de datos. Sobre eso construimos 4 casos de uso:
+Construimos **Havi**, un copiloto financiero proactivo basado en **Gemini 3.1 Flash**, que no solo responde preguntas, sino que actúa de manera autónoma para proteger e impulsar la salud financiera de los clientes de Hey Banco.
 
-| UC | Qué hace | Quién lo lidera |
+Analizamos 4 datasets masivos (15k clientes, 800k transacciones) y construimos una arquitectura en tres capas:
+1. **Modelos y Datos (`notebooks/`)**: EDA, Feature Engineering y Propensión.
+2. **Backend Inteligente (`pipeline/`)**: FastAPI que orquesta el contexto (Gemelo Digital) y se conecta con la API de Google Gemini.
+3. **Frontend App (`havi-app/`)**: Una app móvil construida con React Native (Expo) siguiendo el design language de Hey Banco, con chat integrado y UI responsiva.
+
+### Los 4 Casos de Uso (UC) Integrados:
+
+| UC | Qué hace | Cómo lo vive el usuario en Havi App |
 |---|---|---|
-| **UC1** | Asistente Financiero Proactivo (alertas) | Fernando |
-| **UC2** | Gemelo Digital (perfil conductual) | Brayan |
-| **UC3** | Upselling Inteligente (recomendaciones) | Jorge |
-| **UC4** | Inteligencia Conversacional (intents + cruces) | Fernando + Jorge |
+| **UC1** | Asistente Financiero Proactivo | Alertas enriquecidas (ej. fondos insuficientes) con CTA para mover dinero con 1 tap. |
+| **UC2** | Gemelo Digital (Conductual) | Tarjeta en el dashboard proyectando el cierre de mes; Havi conoce tus hábitos sin que se los digas. |
+| **UC3** | Upselling Inteligente | Alerta proactiva de "cashback perdido", calculando exactamente cuánto ganaría el usuario con Hey Pro. |
+| **UC4** | Inteligencia Conversacional | Detección de transacciones atípicas y bloqueo de tarjeta directo desde el chat con Havi. |
 
-Los hallazgos por UC y el plan de features están en [`docs/`](./docs).
+---
 
-## Estructura del repo
+## Arquitectura del Repositorio
 
 ```text
 Datathon-2026/
 ├── README.md                           ← estás acá
 ├── .gitignore
 │
-├── docs/                               ← toda la documentación
-│   ├── CONTEXT.md                      project brief + setup
-│   ├── DATA_CONTEXT.md                 esquema técnico de los 4 datasets
-│   ├── FEATURE_ENGINEERING_PLAN.md     bridge a la próxima fase
-│   └── findings/
-│       ├── README.md                   índice de findings
-│       ├── 00_GENERAL.md               foto integral + DQ + métricas globales
-│       ├── UC1_anomalias_y_alertas.md
-│       ├── UC2_gemelo_digital.md
-│       ├── UC3_upselling.md
-│       └── UC4_conversacional.md
+├── havi-app/                           ← 📱 Frontend Móvil (React Native + Expo)
+│   ├── app/                            Enrutamiento (Expo Router), pantallas principales.
+│   ├── components/                     UI Components (Alertas, Cards, Markdown).
+│   └── src/                            Servicios, Contexto (Pipeline API), y Mock Data.
 │
-├── notebooks/
-│   ├── eda/                            EDA transversal por dataset
-│   │   ├── 00_eda_unificado_dq.ipynb
-│   │   ├── 01_eda_carga_datos.ipynb
-│   │   ├── 02_eda_clientes_dq.ipynb
-│   │   └── 03_eda_transacciones_dq.ipynb
-│   ├── uc1/
-│   │   └── 01_eda_rechazos.ipynb
-│   ├── uc2/
-│   │   ├── 01_eda_patrones_gasto_mcc_bi.ipynb
-│   │   └── 02_eda_compromisos_financieros.ipynb
-│   ├── uc3/
-│   │   ├── 01_analisis_portafolio_productos.ipynb
-│   │   ├── 02_eda_cashback_perdido.ipynb
-│   │   └── 03_eda_cashback_perdido_jv.py
-│   └── uc4/
-│       ├── 01_eda_conversaciones.ipynb
-│       └── 02_eda_atipicas.ipynb
+├── pipeline/                           ← 🧠 Backend Inteligente (FastAPI)
+│   ├── main.py                         Endpoints REST para la App (/context, /chat, /health).
+│   ├── context_engine.py               Agrega datos de UC1-UC4 para inyectarlos en el prompt.
+│   └── models_loader.py                Conexión con la API de Gemini usando system prompts.
 │
-├── outputs/                            artefactos generados
-│   └── uc3_cashback_perdido.csv
+├── docs/                               ← 📚 Documentación técnica
+│   ├── ARQUITECTURA_PIPELINE.md        Detalle de la conexión App <-> API <-> Gemini.
+│   ├── CONTEXT.md                      Brief del proyecto.
+│   └── findings/                       Hallazgos de negocio (EDA).
 │
-├── Datathon_Hey_2026_dataset_transacciones 1/
-│   └── dataset_transacciones/
-│       ├── DICCIONARIO_DATOS.md
-│       ├── DICCIONARIO_DATOS.pdf
-│       ├── hey_clientes.csv
-│       ├── hey_productos.csv
-│       └── hey_transacciones.csv      [no versionado: pesa 142 MB]
+├── notebooks/                          ← 📊 Data Science y Machine Learning
+│   ├── eda/                            Análisis transversal por dataset.
+│   └── uc<n>/                          Análisis e ingeniería de features por Caso de Uso.
 │
-└── Datathon_Hey_dataset_conversaciones 1/
-    └── dataset_conversaciones/
-        ├── README.md
-        ├── dataset_50k_anonymized.csv
-        └── dataset_50k_anonymized.parquet
+└── outputs/                            ← 💾 Artefactos y datasets limpios generados
 ```
 
-## Cómo navegar
+## Setup Rápido (Correr el Proyecto)
 
-| Si querés... | Andá a... |
-|---|---|
-| **Entender el proyecto y montar el entorno** | [`docs/CONTEXT.md`](./docs/CONTEXT.md) |
-| **Conocer el esquema de los datasets** | [`docs/DATA_CONTEXT.md`](./docs/DATA_CONTEXT.md) |
-| **Ver el resumen ejecutivo del EDA** | [`docs/findings/00_GENERAL.md`](./docs/findings/00_GENERAL.md) |
-| **Ver hallazgos de un UC específico** | [`docs/findings/UC<n>_*.md`](./docs/findings/) |
-| **Empezar a hacer features** | [`docs/FEATURE_ENGINEERING_PLAN.md`](./docs/FEATURE_ENGINEERING_PLAN.md) |
-| **Re-ejecutar un EDA** | abrir cualquier notebook bajo `notebooks/eda/` o `notebooks/uc<n>/` |
+Para ver la magia en acción, necesitas levantar el backend (Pipeline) y el frontend (App).
 
-## Setup rápido
+### 1. Levantar el Pipeline (Backend)
+
+El backend requiere Python 3.11+.
 
 ```bash
-# 1. crear venv
+cd pipeline
 uv venv .venv --python 3.11
-source .venv/bin/activate         # macOS/Linux
-.venv\Scripts\activate            # Windows
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
 
-# 2. instalar
-uv pip install jupyterlab pandas polars pyarrow matplotlib seaborn \
-               scikit-learn plotly xgboost lightgbm imbalanced-learn \
-               scipy tqdm sentence-transformers
+# Configura tu API Key de Google Gemini
+# En Windows CMD: set GEMINI_API_KEY=tu_clave
+# En macOS/Linux: export GEMINI_API_KEY=tu_clave
 
-# 3. lanzar
-jupyter lab
+# Ejecutar servidor FastAPI
+uvicorn main:app --reload --host=0.0.0.0
 ```
+El servidor correrá en `http://localhost:8000`.
 
-Detalle completo en [`docs/CONTEXT.md`](./docs/CONTEXT.md).
+### 2. Levantar Havi App (Frontend)
 
-## Estado de la fase EDA
+Requiere Node.js 18+ y un dispositivo físico con la app de **Expo Go** (o un simulador iOS/Android).
 
-| Notebook | Estado | Pendiente |
-|---|---|---|
-| `notebooks/eda/00_eda_unificado_dq.ipynb` | ✅ Ejecutado (parcialmente) | Sec 7 (resumen) |
-| `notebooks/eda/01_eda_carga_datos.ipynb` | ✅ Ejecutado | — |
-| `notebooks/eda/02_eda_clientes_dq.ipynb` | ⚠️ Outputs vacíos | Re-ejecutar |
-| `notebooks/eda/03_eda_transacciones_dq.ipynb` | ✅ Ejecutado | — |
-| `notebooks/uc1/01_eda_rechazos.ipynb` | ⚠️ Bug `pd.cut` + celdas inversión sin ejecutar | Fix + re-run |
-| `notebooks/uc2/01_eda_patrones_gasto_mcc_bi.ipynb` | ⚠️ Paths macOS, resumen sin ejecutar | Re-run con paths repo |
-| `notebooks/uc2/02_eda_compromisos_financieros.ipynb` | ✅ Ejecutado | — |
-| `notebooks/uc3/01_analisis_portafolio_productos.ipynb` | ⚠️ Outputs no persistidos | Re-run |
-| `notebooks/uc3/02_eda_cashback_perdido.ipynb` | ⚠️ Falta CSV/JSON | Re-run |
-| `notebooks/uc3/03_eda_cashback_perdido_jv.py` | ✅ Ejecutado, output en `outputs/` | — |
-| `notebooks/uc4/01_eda_conversaciones.ipynb` | ✅ Ejecutado, JSON persistido | — |
-| `notebooks/uc4/02_eda_atipicas.ipynb` | ⚠️ Outputs vacíos | Re-ejecutar |
+```bash
+cd havi-app
+npm install
 
-> Lista completa de tareas para arrancar Feature Eng: [`docs/FEATURE_ENGINEERING_PLAN.md`](./docs/FEATURE_ENGINEERING_PLAN.md) §1.
-
-## Convenciones
-
-- **Notebooks**: `{nn}_{descripcion}_{iniciales_autor}.ipynb`. EDA: 00-09. Feature Eng: 10-19. Modelado: 20-29.
-- **Variables**: `snake_case`.
-- **Features**: prefijo `feat_<bloque>_<descripcion>` (ej. `feat_txn_n_30d`).
-- **Outputs**: en `outputs/`, formato `.parquet` para features, `.json` para entregables, `.png` para gráficos.
-- **Branches**: `feat/uc<n>-<tarea>`, `eda/<tarea>`, `fix/<...>`.
-- **No commitear** `data/`, `.venv/`, `__pycache__/`, `.ipynb_checkpoints/`.
+# Correr la app móvil (usa --tunnel si estás en Windows o en redes distintas)
+npx expo start --tunnel --clear
+```
+Escanea el código QR desde la app de la cámara de tu celular (iOS) o desde la app Expo Go (Android).
 
 ---
+
+## Estado del Proyecto
+
+- ✅ **Data Science**: Datos limpios, análisis conductuales profundos terminados. Modelos de propensión listos.
+- ✅ **Ingeniería (Pipeline)**: Backend unificado que expone todo el contexto financiero en milisegundos.
+- ✅ **Producto (App)**: Diseño premium, alertas contextuales, chat de Gemini completamente integrado con soporte a markdown e interacciones modulares (Pills, CTAs).
+
+### ¿Por qué Havi?
+Havi no te manda a leer el estado de cuenta. Havi lee el estado de cuenta por ti, simula el futuro, detecta dónde puedes mejorar, y te da un botón de "Resolver" para que todo quede solucionado en 1 segundo.
 
 > Hey Banco · Datathon 2026 · Equipo datamoles
