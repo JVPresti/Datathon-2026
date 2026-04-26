@@ -1,0 +1,169 @@
+{
+  "fecha_generacion": "2026-04-26T02:26:39.246947Z",
+  "uc": "UC2",
+  "descripcion": "Contexto JSON para Havi — Gemelo Digital / Alerta de Liquidez",
+  "schema": {
+    "user_id": "str",
+    "nombre_usuario": "str",
+    "zona_riesgo": "str — 'Saludable' | 'Precaucion' | 'Critica'",
+    "score_riesgo": "float — 0 a 1 (mayor = más riesgo)",
+    "tendencia_riesgo": "str — 'Mejorando' | 'Estable' | 'Empeorando'",
+    "delta_score_mensual": "float — cambio vs mes anterior (negativo = mejora)",
+    "gasto_acumulado_mes": "float — MXN gastado este mes hasta hoy",
+    "gasto_estimado_fin_mes": "float — proyección de gasto al cierre del mes",
+    "mensualidades_pendientes": "float — total de compromisos fijos",
+    "ingreso_mensual": "float — ingreso mensual del usuario",
+    "deficit_proyectado": "float — ingreso restante estimado (puede ser negativo)",
+    "dias_al_corte": "int — días restantes hasta fin de mes",
+    "categoria_problema": "str — categoría de mayor gasto discrecional",
+    "comparativa_mes_anterior": "dict — gasto real vs proyectado mes anterior"
+  },
+  "escenarios": [
+    {
+      "id": "zona_roja",
+      "descripcion": "Usuario en zona de riesgo — déficit proyectado",
+      "contexto": {
+        "user_id": "USR-00406",
+        "nombre_usuario": "",
+        "zona_riesgo": "Crítico",
+        "score_riesgo": 2.1117,
+        "tendencia_riesgo": "Empeorando",
+        "delta_score_mensual": 1.2025,
+        "gasto_acumulado_mes": 10801.5,
+        "gasto_estimado_fin_mes": 22323.1,
+        "mensualidades_pendientes": 3017.03,
+        "ingreso_mensual": 12000.0,
+        "deficit_proyectado": -13340.13,
+        "dias_al_corte": 0,
+        "categoria_problema": "supermercado",
+        "comparativa_mes_anterior": {
+          "gasto_real_mes_anterior": 7892.57,
+          "gasto_estimado_fin_mes": 22323.1,
+          "variacion_pct": 182.8
+        }
+      },
+      "tool_call": {
+        "funcion": "setCategoryBudgetLimit",
+        "parametros": {
+          "user_id": "USR-00406",
+          "categoria": "supermercado",
+          "limite_mxn": 15626
+        }
+      },
+      "resultado": {
+        "success": true,
+        "message": "Límite de $15,626 MXN/mes configurado para 'supermercado'. Te avisaré cuando llegues al 80%.",
+        "limite_configurado": 15626,
+        "alerta_pct": 80,
+        "error_code": null
+      }
+    },
+    {
+      "id": "zona_amarilla",
+      "descripcion": "Usuario en precaución — tendencia creciente",
+      "contexto": {
+        "user_id": "USR-00008",
+        "nombre_usuario": "",
+        "zona_riesgo": "Saludable",
+        "score_riesgo": 0.4465,
+        "tendencia_riesgo": "Mejorando",
+        "delta_score_mensual": -0.115,
+        "gasto_acumulado_mes": 0.0,
+        "gasto_estimado_fin_mes": 0.0,
+        "mensualidades_pendientes": 5135.0,
+        "ingreso_mensual": 11500.0,
+        "deficit_proyectado": 6365.0,
+        "dias_al_corte": 0,
+        "categoria_problema": "restaurante",
+        "comparativa_mes_anterior": {
+          "gasto_real_mes_anterior": 1322.45,
+          "gasto_estimado_fin_mes": 0.0,
+          "variacion_pct": -100.0
+        }
+      },
+      "tool_call": {
+        "funcion": "setCategoryBudgetLimit",
+        "parametros": {
+          "user_id": "USR-00008",
+          "categoria": "restaurante",
+          "limite_mxn": 0
+        }
+      },
+      "resultado": {
+        "success": false,
+        "message": "El límite debe ser mayor a $0 MXN",
+        "limite_configurado": null,
+        "alerta_pct": null,
+        "error_code": "LIMITE_INVALIDO"
+      }
+    }
+  ],
+  "conversaciones_reales_dataset": [
+    {
+      "user_id": "USR-03583",
+      "canal": "texto",
+      "input": "Me acaba de llegar un mensaje con lo siguiente: “Actualizamos nuestros procesos por tu seguridad y por normativa” que hiere decir esto ?",
+      "output": "Claro! El mensaje “Actualizamos nuestros procesos por tu seguridad y por normativa” significa que Hey Banco ha realizado mejoras en sus procedimientos y sistemas para garantizar la protección de tu información y cumplir con las regulaciones vigentes. Esto es parte del compromiso del banco para ofrec"
+    },
+    {
+      "user_id": "USR-12263",
+      "canal": "texto",
+      "input": "Si se me generó una Tarjeta de crédito pero cuando me llegara el plástico físico ?",
+      "output": "Claro! Una vez que tu Tarjeta de Crédito Hey es aprobada, debería llegar a tu domicilio en un máximo de 10 días hábiles. Además, la guía de rastreo se genera en unos 5 días hábiles y te la envían por SMS o correo. Si ves que pasa más tiempo o hay algún problema con la guía, no dudes en preguntar. \n\n"
+    },
+    {
+      "user_id": "USR-13734",
+      "canal": "texto",
+      "input": "Actualmente cual es mi limite",
+      "output": "Claro! Para verificar el límite de crédito de tu Tarjeta de Crédito Hey, simplemente inicia sesión en la app, selecciona tu tarjeta de crédito, toca los tres puntos y elige \"Información de mi Tarjeta de Crédito Hey\". Ahí podrás ver toda la información que necesitas, incluido tu límite de crédito act"
+    },
+    {
+      "user_id": "USR-02799",
+      "canal": "texto",
+      "input": "hola eh requiero saber si mi cuenta hey que abri en linea tiene algun limite para recibir depositos en cantidad es decir cual es la cantidad maxima que se puede recibir en una sola exhibicion",
+      "output": "Claro que sí! La Cuenta Hey tiene un límite para recibir depósitos en una sola exhibición, que depende de la verificación de tu perfil. Si eres una Persona Física, el límite inicial es de 3,000 UDIs, que equivalen a aproximadamente $21,000 pesos. Si completas más información, este límite puede aumen"
+    },
+    {
+      "user_id": "USR-04653",
+      "canal": "texto",
+      "input": "Si gasto mil  quinientos pesos de mi tarjeta hey y lo difiero a 6 meses  cuánto pagaría en total ",
+      "output": "Claro que puedo ayudarte. Si decides diferir un gasto de $1,500 de tu Tarjeta de Crédito Hey a 6 meses, el monto total que pagarías dependerá de la tasa de interés anual que tengas asignada a tu tarjeta.\n\nComo no tengo acceso a tu tasa de interés específica, no puedo calcular el total exacto. Sin em"
+    },
+    {
+      "user_id": "USR-09168",
+      "canal": "texto",
+      "input": "Cuanto limite de  crédito tengo?",
+      "output": "Para saber el límite de crédito de tu Tarjeta de Crédito Hey, solo abre la app Hey, ve a 'Tarjeta de Crédito', toca los tres puntos y selecciona 'Información de mi Tarjeta de Crédito Hey'. Ahí encontrarás toda la información sobre tu límite de crédito.\n\nSi necesitas ayuda con algo más, ¡aquí estoy p"
+    },
+    {
+      "user_id": "USR-10311",
+      "canal": "texto",
+      "input": "me acaba de llegar otro intento rechazado",
+      "output": "Lamento que estés viendo más intentos de cobro rechazados en tu cuenta. Esto puede pasar cuando alguien intenta hacer una compra con tus datos, pero la transacción no se completa. Si ves estos intentos, lo importante es que no se hayan descontado de tu saldo y que sigas revisando tus movimientos par"
+    },
+    {
+      "user_id": "USR-01033",
+      "canal": "texto",
+      "input": "Hola havi, una pregunta como se cual es mi limite para sacar efectivo al día ",
+      "output": "¡Claro que puedo ayudarte! Puedes retirar hasta $11,400.00 M.N. al día en un cajero automático. Si necesitas más información sobre tus límites de transacciones o cualquier otro tema, no dudes en preguntarme. ¿Hay algo más con lo que te pueda apoyar?"
+    },
+    {
+      "user_id": "USR-11362",
+      "canal": "texto",
+      "input": "Cómo puedo modificar mi limite de traferencias? ",
+      "output": "Claro que puedo ayudarte. Para modificar el límite de monto máximo diario de tus transferencias en Hey Banco, solo tienes que entrar a la app o a la Banca Web. Ahí, ve a la sección de Perfil y luego a Perfil Transaccional, donde podrás ajustar los límites para transferencias SPEI o TEF según lo que "
+    },
+    {
+      "user_id": "USR-11903",
+      "canal": "texto",
+      "input": "Cuanto tarda en llegar? ",
+      "output": "Claro! La nueva tarjeta física debería llegar a tu casa en un plazo de 7 a 10 días hábiles. Además, la guía de rastreo se genera aproximadamente en 5 días hábiles y te la envían por SMS o correo. Si después de ese tiempo no la has recibido, te recomiendo que revises el 'Buzón' de notificaciones en l"
+    }
+  ],
+  "criterios_aceptacion": {
+    "payload_json_con_schema": true,
+    "tool_setCategoryBudgetLimit_mockeada": true,
+    "n_escenarios": 2,
+    "conversaciones_reales_incluidas": true
+  }
+}

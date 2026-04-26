@@ -1,0 +1,126 @@
+{
+  "fecha_generacion": "2026-04-26T02:26:31.899108Z",
+  "uc": "UC1",
+  "descripcion": "Contexto JSON para Havi — Financial Copilot (rechazo proactivo)",
+  "schema": {
+    "user_id": "str — identificador del usuario",
+    "transaccion_id": "str — ID de la txn rechazada",
+    "situacion": "str — 'rechazo_por_saldo' | 'rechazo_por_limite'",
+    "motivo": "str — motivo_no_procesada raw",
+    "monto_rechazado": "float — monto de la compra en MXN",
+    "comercio": "str — nombre o categoría del comercio",
+    "ciudad_transaccion": "str — ciudad donde ocurrió el cargo",
+    "fecha_hora": "str — timestamp de la transacción",
+    "es_internacional": "bool — si fue cargo en el extranjero",
+    "nombre_usuario": "str — nombre del cliente (para personalizar)",
+    "saldo_actual_producto_origen": "float — saldo disponible en el producto rechazado",
+    "monto_faltante": "float — cuánto le faltó para completar la compra",
+    "tiene_alternativo": "bool — si existe producto alternativo con fondos",
+    "producto_alternativo": "str | None — tipo_producto del alternativo",
+    "producto_alternativo_id": "str | None — ID del producto alternativo",
+    "monto_disponible_alternativo": "float | None — saldo en el producto alternativo",
+    "es_cronico": "bool — si el usuario tiene ≥3 rechazos en 30 días",
+    "canal_preferido": "str — canal de contacto preferido"
+  },
+  "escenarios": [
+    {
+      "id": "escenario_1_saldo",
+      "descripcion": "Rechazo por saldo insuficiente con alternativo disponible",
+      "contexto": {
+        "user_id": "USR-00001",
+        "transaccion_id": "TXN-0000000050",
+        "situacion": "rechazo_por_saldo",
+        "motivo": "saldo_insuficiente",
+        "monto_rechazado": 349.0,
+        "comercio": "NewsDigital MX",
+        "ciudad_transaccion": "CDMX - Benito Juárez",
+        "fecha_hora": "2025-08-23 20:37:31",
+        "es_internacional": false,
+        "nombre_usuario": "cliente USR-00001",
+        "saldo_actual_producto_origen": 80954.6,
+        "monto_faltante": 0.0,
+        "tiene_alternativo": true,
+        "producto_alternativo": "tarjeta_credito_hey",
+        "producto_alternativo_id": "PRD-00000002",
+        "monto_disponible_alternativo": 88790.4,
+        "es_cronico": false,
+        "canal_preferido": "app_android"
+      },
+      "tool_call": {
+        "funcion": "transferFunds",
+        "parametros": {
+          "from_producto_id": "PRD-00000002",
+          "to_producto_id": "TXN-0000000050",
+          "monto": 349.0,
+          "user_id": "USR-00001"
+        }
+      }
+    },
+    {
+      "id": "escenario_2_limite",
+      "descripcion": "Rechazo por límite excedido",
+      "contexto": {
+        "user_id": "USR-00006",
+        "transaccion_id": "TXN-0000000417",
+        "situacion": "rechazo_por_limite",
+        "motivo": "limite_excedido",
+        "monto_rechazado": 499.0,
+        "comercio": "GamerPass",
+        "ciudad_transaccion": "Zacatecas",
+        "fecha_hora": "2025-08-15 12:57:17",
+        "es_internacional": false,
+        "nombre_usuario": "cliente USR-00006",
+        "saldo_actual_producto_origen": 72254.55,
+        "monto_faltante": 0.0,
+        "tiene_alternativo": true,
+        "producto_alternativo": "tarjeta_credito_hey",
+        "producto_alternativo_id": "PRD-00000013",
+        "monto_disponible_alternativo": 15132.9,
+        "es_cronico": false,
+        "canal_preferido": "app_android"
+      }
+    },
+    {
+      "id": "escenario_3_cronico",
+      "descripcion": "Usuario crónico — tono empático y propositivo",
+      "contexto": {
+        "user_id": "USR-00031",
+        "transaccion_id": "TXN-0000001798",
+        "situacion": "rechazo_por_limite",
+        "motivo": "limite_excedido",
+        "monto_rechazado": 5300.0,
+        "comercio": "transferencia",
+        "ciudad_transaccion": "CDMX - Miguel Hidalgo",
+        "fecha_hora": "2025-03-12 16:49:45",
+        "es_internacional": false,
+        "nombre_usuario": "cliente USR-00031",
+        "saldo_actual_producto_origen": 36582.6,
+        "monto_faltante": 0.0,
+        "tiene_alternativo": true,
+        "producto_alternativo": "cuenta_debito",
+        "producto_alternativo_id": "PRD-00000078",
+        "monto_disponible_alternativo": 13909.78,
+        "es_cronico": true,
+        "canal_preferido": "app_ios"
+      }
+    }
+  ],
+  "politica_rechazo_usuario": {
+    "trigger": "El usuario responde 'no', 'no gracias', 'déjalo', 'no hagas nada' o similar",
+    "accion_inmediata": "No se ejecuta transferFunds(). Alerta se marca como 'rechazada_por_usuario'.",
+    "cooldown_horas": 24,
+    "regla": "No mostrar la misma sugerencia de transferencia para el mismo usuario en las próximas 24h.",
+    "excepciones": [
+      "Si el usuario tiene es_cronico=True, mostrar un mensaje diferente (asesoría presupuestal) en lugar de solo silenciar.",
+      "Si el mismo comercio genera otro rechazo dentro del cooldown, sí notificar con un mensaje diferente."
+    ],
+    "estado_alerta_resultante": "rechazada_por_usuario",
+    "feedback_al_modelo": "Incrementar penalización de scoring para alertas rechazadas por este usuario."
+  },
+  "criterios_aceptacion": {
+    "payload_json_con_schema": true,
+    "tool_transferFunds_mockeada": true,
+    "n_ejemplos_conversacion": 3,
+    "rechazo_usuario_documentado": true
+  }
+}
