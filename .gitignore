@@ -33,3 +33,4 @@ Thumbs.db
 # outputs/tmp/
 # outputs/*.parquet
 .env
+node_modules/

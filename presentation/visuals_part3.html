@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Havi Visuals — Parte 3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0a0d14;--card:#111520;--border:#1e2535;--accent:#00d4aa;--accent2:#4f9eff;--accent3:#ff6b6b;--accent4:#f5a623;--text:#e8eaf2;--muted:#6b7394;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;padding:40px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:48px;}
+.tag{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.title{font-size:18px;font-weight:600;margin-bottom:4px;}
+.sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.src{font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:20px;}
+
+/* Pipeline */
+.pipe{display:flex;align-items:stretch;gap:0;margin:16px 0;}
+.pipe-block{flex:1;border-radius:12px;padding:20px 16px;text-align:center;position:relative;}
+.pipe-arrow{display:flex;align-items:center;color:var(--muted);font-size:22px;padding:0 4px;flex-shrink:0;}
+.pipe-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.pipe-items{font-size:12px;color:var(--muted);line-height:1.9;}
+.pipe-items span{display:block;}
+
+/* KPI Table */
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+td{font-size:13px;padding:13px 14px;border-bottom:1px solid rgba(30,37,53,0.5);line-height:1.4;}
+tr:hover td{background:rgba(255,255,255,0.015);}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;}
+.b-teal{background:rgba(0,212,170,0.12);color:var(--accent);}
+.b-blue{background:rgba(79,158,255,0.12);color:var(--accent2);}
+.b-red{background:rgba(255,107,107,0.12);color:var(--accent3);}
+.b-gold{background:rgba(245,166,35,0.12);color:var(--accent4);}
+
+/* Infra blocks */
+.infra-row{display:flex;align-items:center;gap:0;margin:20px 0;}
+.infra-block{flex:1;border-radius:10px;padding:18px;border:1px solid;text-align:center;}
+.infra-arrow{padding:0 8px;color:var(--muted);font-size:20px;flex-shrink:0;}
+.infra-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.infra-detail{font-size:12px;color:var(--muted);line-height:1.7;}
+
+/* Roadmap */
+.roadmap{display:flex;gap:20px;margin-top:16px;}
+.rm-col{flex:1;border-radius:12px;padding:24px;border:1px solid var(--border);}
+.rm-header{font-size:13px;font-weight:700;margin-bottom:4px;}
+.rm-period{font-size:11px;color:var(--muted);margin-bottom:16px;font-family:'DM Mono',monospace;}
+.rm-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;font-size:13px;line-height:1.4;}
+.rm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.checklist-wrap{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px;}
+.check-item{display:flex;align-items:center;gap:8px;background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.2);border-radius:8px;padding:8px 14px;font-size:12px;}
+.check-icon{font-size:14px;}
+</style>
+</head>
+<body>
+
+<!-- VISUAL: Pipeline EDA → FE → Acción (Slide 8) -->
+<div class="card">
+  <p class="tag">Slide 8 · Proceso Técnico</p>
+  <p class="title">Fábrica de Valor: EDA → Feature Engineering → Acción</p>
+  <p class="sub">Flujo completo desde datos crudos hasta decisión operativa</p>
+
+  <div class="pipe">
+    <div class="pipe-block" style="background:rgba(79,158,255,0.07);border:1px solid rgba(79,158,255,0.2);">
+      <div class="pipe-label" style="color:var(--accent2);">📊 EDA</div>
+      <div class="pipe-items">
+        <span>802k transacciones</span>
+        <span>50k conversaciones</span>
+        <span>Integridad 100%</span>
+        <span>Patrones reales</span>
+        <span>Hipótesis validadas</span>
+      </div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-block" style="background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.2);">
+      <div class="pipe-label" style="color:var(--accent);">⚙️ Feature Eng.</div>
+      <div class="pipe-items">
+        <span>73 features / usuario</span>
+        <span>RFM transaccional</span>
+        <span>Ratio deuda/ingreso</span>
+        <span>Embeddings conv.</span>
+        <span>Señales de intención</span>
+      </div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-block" style="background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);">
+      <div class="pipe-label" style="color:var(--accent4);">🧠 Modelos</div>
+      <div class="pipe-items">
+        <span>IsolationForest (UC4)</span>
+        <span>LightGBM (UC2/UC3)</span>
+        <span>Reglas det. (UC1)</span>
+        <span>Intent NLP (UC4)</span>
+        <span>Ranker (UC3)</span>
+      </div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-block" style="background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);">
+      <div class="pipe-label" style="color:var(--accent3);">⚡ Acción</div>
+      <div class="pipe-items">
+        <span>Alerta rechazo UC1</span>
+        <span>Perfil riesgo UC2</span>
+        <span>Oferta Pro UC3</span>
+        <span>Alerta fraude UC4</span>
+        <span>JSON → Havi</span>
+      </div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-block" style="background:linear-gradient(135deg,rgba(0,212,170,0.1),rgba(79,158,255,0.1));border:1px solid rgba(0,212,170,0.3);">
+      <div class="pipe-label" style="color:var(--accent);">🤖 HAVI</div>
+      <div class="pipe-items">
+        <span>FastAPI &lt;350ms</span>
+        <span>Prompt enriquecido</span>
+        <span>Trazable por UC</span>
+        <span>Personalizado</span>
+        <span>Proactivo</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:8px;">
+    <div style="flex:1;background:rgba(79,158,255,0.05);border-radius:8px;padding:14px;border-left:3px solid var(--accent2);">
+      <div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:4px;">UC1 · Tiempo real</div>
+      <div style="font-size:12px;color:var(--muted);">Trigger: INSERT no_procesada → &lt;200ms</div>
+    </div>
+    <div style="flex:1;background:rgba(0,212,170,0.05);border-radius:8px;padding:14px;border-left:3px solid var(--accent);">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:4px;">UC2 + UC3 · Batch diario</div>
+      <div style="font-size:12px;color:var(--muted);">pg_cron 02:00 / 03:00 UTC · 8-20s</div>
+    </div>
+    <div style="flex:1;background:rgba(245,166,35,0.05);border-radius:8px;padding:14px;border-left:3px solid var(--accent4);">
+      <div style="font-size:11px;font-weight:600;color:var(--accent4);margin-bottom:4px;">UC4 · Request-driven</div>
+      <div style="font-size:12px;color:var(--muted);">Cada conversación entrante · &lt;300ms</div>
+    </div>
+  </div>
+  <p class="src">FUENTE · docs/ARQUITECTURA_PIPELINE.md</p>
+</div>
+
+<!-- VISUAL: Tabla de KPIs (Slide 9) -->
+<div class="card">
+  <p class="tag">Slide 9 · Impacto</p>
+  <p class="title">Impacto Esperado por Dimensión</p>
+  <p class="sub">Cada UC aterriza en una métrica de negocio medible</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>UC</th>
+        <th>Dimensión</th>
+        <th>KPI principal</th>
+        <th>Baseline</th>
+        <th>Target Havi</th>
+        <th>Tipo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>UC1</strong></td>
+        <td>Experiencia</td>
+        <td>% rechazos resueltos proactivamente</td>
+        <td>0% (reactivo)</td>
+        <td>&gt;30% de 6,638 eventos</td>
+        <td><span class="badge b-red">Fricción ↓</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC1</strong></td>
+        <td>Experiencia</td>
+        <td>Tiempo medio de resolución de rechazo</td>
+        <td>&gt;24h (soporte)</td>
+        <td>&lt;5 min (proactivo)</td>
+        <td><span class="badge b-teal">Velocidad ↑</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC2</strong></td>
+        <td>Experiencia</td>
+        <td>NPS delta post-personalización</td>
+        <td>7.48 / 10</td>
+        <td>+0.5–1.0 puntos</td>
+        <td><span class="badge b-blue">Confianza ↑</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC2</strong></td>
+        <td>Negocio</td>
+        <td>Detección estrés financiero temprano</td>
+        <td>0 usuarios alertados</td>
+        <td>874 usuarios segmento riesgo</td>
+        <td><span class="badge b-gold">Retención ↑</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC3</strong></td>
+        <td>Negocio</td>
+        <td>Conversión Hey Pro (no-Pro activos)</td>
+        <td>Sin targeting</td>
+        <td>Seg A: tasa conv. &gt;15%</td>
+        <td><span class="badge b-teal">Revenue ↑</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC3</strong></td>
+        <td>Negocio</td>
+        <td>Cashback recuperado / activado</td>
+        <td>$0 (no-Pro sin oferta)</td>
+        <td>$2.67M MXN en juego</td>
+        <td><span class="badge b-teal">Revenue ↑</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC4</strong></td>
+        <td>Negocio</td>
+        <td>Detección fraude conversacional</td>
+        <td>Solo señal técnica</td>
+        <td>Cruce conv × txn · recall ↑</td>
+        <td><span class="badge b-red">Riesgo ↓</span></td>
+      </tr>
+      <tr>
+        <td><strong>UC4</strong></td>
+        <td>Experiencia</td>
+        <td>Resolución en 1er contacto</td>
+        <td>62% single-turn sin contexto</td>
+        <td>&gt;75% con contexto UC4</td>
+        <td><span class="badge b-blue">Calidad ↑</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="src">FUENTE · docs/findings/UC3_upselling.md · docs/ARQUITECTURA_PIPELINE.md</p>
+</div>
+
+<!-- VISUAL: Infra Hoy vs Próximo Sprint (Slide 10) -->
+<div class="card">
+  <p class="tag">Slide 10 · Infraestructura</p>
+  <p class="title">Arquitectura: Implementado Hoy vs Siguiente Sprint</p>
+  <p class="sub">Pipeline operativo con roadmap de hardening honesto</p>
+
+  <div style="margin-bottom:12px;display:flex;gap:20px;">
+    <div style="flex:1;padding:10px 14px;border-radius:8px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.25);font-size:12px;font-weight:600;color:var(--accent);">✅ HOY — Implementado</div>
+    <div style="flex:1;padding:10px 14px;border-radius:8px;background:rgba(107,115,148,0.1);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);">🔜 SIGUIENTE SPRINT — Roadmap</div>
+  </div>
+
+  <div class="infra-row">
+    <div class="infra-block" style="border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.05);">
+      <div class="infra-label" style="color:var(--accent);">Ingesta</div>
+      <div class="infra-detail">CSV → PostgreSQL<br>ETL one-shot<br>4 fuentes · 0 huérfanos<br>Índices críticos activos</div>
+    </div>
+    <div class="infra-arrow">→</div>
+    <div class="infra-block" style="border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.05);">
+      <div class="infra-label" style="color:var(--accent);">Features</div>
+      <div class="infra-detail">feat_users_master<br>feat_uc1_alertas<br>feat_uc3_candidates<br>pg_cron 02/03 UTC</div>
+    </div>
+    <div class="infra-arrow">→</div>
+    <div class="infra-block" style="border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.05);">
+      <div class="infra-label" style="color:var(--accent);">Decisión</div>
+      <div class="infra-detail">FastAPI endpoints<br>/context/full/&lt;id&gt;<br>&lt;350ms P95<br>LLM prompt enriquecido</div>
+    </div>
+    <div class="infra-arrow">→</div>
+    <div class="infra-block" style="border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.05);">
+      <div class="infra-label" style="color:var(--accent);">App Havi</div>
+      <div class="infra-detail">React Native (Expo)<br>Chat proactivo<br>Buzón de alertas<br>4 UCs integrados</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:var(--muted);font-size:13px;margin:4px 0 16px;">▼ Siguiente Sprint</div>
+
+  <div class="infra-row">
+    <div class="infra-block" style="border-color:var(--border);background:rgba(107,115,148,0.06);">
+      <div class="infra-label" style="color:var(--muted);">RBAC</div>
+      <div class="infra-detail" style="font-size:11px;">Roles por equipo<br>Least-privilege<br>Audit log</div>
+    </div>
+    <div class="infra-arrow" style="opacity:.4;">→</div>
+    <div class="infra-block" style="border-color:var(--border);background:rgba(107,115,148,0.06);">
+      <div class="infra-label" style="color:var(--muted);">Cifrado</div>
+      <div class="infra-detail" style="font-size:11px;">TLS en tránsito<br>AES-256 en reposo<br>PII masking</div>
+    </div>
+    <div class="infra-arrow" style="opacity:.4;">→</div>
+    <div class="infra-block" style="border-color:var(--border);background:rgba(107,115,148,0.06);">
+      <div class="infra-label" style="color:var(--muted);">Auditoría</div>
+      <div class="infra-detail" style="font-size:11px;">Trazabilidad señal<br>Drift detection<br>Model versioning</div>
+    </div>
+    <div class="infra-arrow" style="opacity:.4;">→</div>
+    <div class="infra-block" style="border-color:var(--border);background:rgba(107,115,148,0.06);">
+      <div class="infra-label" style="color:var(--muted);">Monitoreo</div>
+      <div class="infra-detail" style="font-size:11px;">Dashboard KPIs<br>Alertas ops<br>SLA garantizado</div>
+    </div>
+  </div>
+  <p class="src">FUENTE · docs/ARQUITECTURA_PIPELINE.md · pipeline/main.py (uvicorn activo)</p>
+</div>
+
+<!-- VISUAL: Roadmap 30/60/90 + Checklist (Slide 12) -->
+<div class="card">
+  <p class="tag">Slide 12 · Cierre</p>
+  <p class="title">Roadmap 30 / 60 / 90 Días</p>
+  <p class="sub">De prototipo defendible a piloto operativo</p>
+
+  <div class="roadmap">
+    <div class="rm-col" style="border-color:rgba(0,212,170,0.3);background:rgba(0,212,170,0.04);">
+      <div class="rm-header" style="color:var(--accent);">Días 1–30</div>
+      <div class="rm-period">Reproducibilidad + Cierre técnico</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent);"></div>Reproducibilidad 100% notebooks</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent);"></div>Feature Eng UC1–UC4 cerrado</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent);"></div>Modelos baseline evaluados</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent);"></div>API /context/full en staging</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent);"></div>Validación con negocio/riesgo</div>
+    </div>
+    <div class="rm-col" style="border-color:rgba(79,158,255,0.3);background:rgba(79,158,255,0.04);">
+      <div class="rm-header" style="color:var(--accent2);">Días 31–60</div>
+      <div class="rm-period">Piloto controlado</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent2);"></div>Piloto UC1 con usuarios reales</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent2);"></div>A/B test UC3 segmento A</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent2);"></div>Métricas NPS pre/post</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent2);"></div>RBAC + cifrado implementado</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent2);"></div>Ajuste de modelos por feedback</div>
+    </div>
+    <div class="rm-col" style="border-color:rgba(245,166,35,0.3);background:rgba(245,166,35,0.04);">
+      <div class="rm-header" style="color:var(--accent4);">Días 61–90</div>
+      <div class="rm-period">Escala + Operaciones</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent4);"></div>Rollout 100% base activa</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent4);"></div>Monitor KPIs en producción</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent4);"></div>Drift detection activo</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent4);"></div>Auditoría completa ciber</div>
+      <div class="rm-item"><div class="rm-dot" style="background:var(--accent4);"></div>Reportes a negocio/riesgo</div>
+    </div>
+  </div>
+
+  <div style="height:1px;background:var(--border);margin:24px 0;"></div>
+  <p style="font-size:13px;font-weight:600;margin-bottom:14px;">✅ Checklist — Listo para Piloto</p>
+  <div class="checklist-wrap">
+    <div class="check-item"><span class="check-icon">✅</span>EDA cerrado en 4 datasets</div>
+    <div class="check-item"><span class="check-icon">✅</span>Integridad referencial 100%</div>
+    <div class="check-item"><span class="check-icon">✅</span>Pipeline FastAPI operativo</div>
+    <div class="check-item"><span class="check-icon">✅</span>App Havi funcional (Expo)</div>
+    <div class="check-item"><span class="check-icon">✅</span>4 UCs con lógica accionable</div>
+    <div class="check-item"><span class="check-icon">✅</span>6,638 eventos UC1 identificados</div>
+    <div class="check-item"><span class="check-icon">✅</span>7,680 candidatos UC3 rankeados</div>
+    <div class="check-item"><span class="check-icon">✅</span>Taxonomía de intents UC4</div>
+    <div class="check-item"><span class="check-icon">🔜</span>Modelos UC2 en producción</div>
+    <div class="check-item"><span class="check-icon">🔜</span>RBAC + cifrado hardening</div>
+    <div class="check-item"><span class="check-icon">🔜</span>Validación negocio/riesgo</div>
+  </div>
+  <p class="src">FUENTE · docs/FEATURE_ENGINEERING_REPORT.md · Equipo datamoles · Hey Datathon 2026</p>
+</div>
+
+</body>
+</html>

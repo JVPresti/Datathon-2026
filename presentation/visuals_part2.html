@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Havi Visuals — Parte 2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0a0d14;--card:#111520;--border:#1e2535;--accent:#00d4aa;--accent2:#4f9eff;--accent3:#ff6b6b;--accent4:#f5a623;--text:#e8eaf2;--muted:#6b7394;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;padding:40px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:48px;}
+.tag{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.title{font-size:18px;font-weight:600;margin-bottom:4px;}
+.sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.src{font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:20px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.stat{text-align:center;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;}
+.stat .v{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;}
+.stat .l{font-size:12px;color:var(--muted);margin-top:4px;}
+.funnel-wrap{display:flex;flex-direction:column;align-items:center;gap:0;margin:16px 0;}
+.funnel-step{display:flex;align-items:center;width:100%;margin-bottom:6px;}
+.funnel-bar-wrap{flex:1;position:relative;}
+.funnel-bar{height:48px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:13px;font-weight:600;}
+.funnel-num{font-family:'DM Mono',monospace;font-size:14px;}
+.funnel-arrow{text-align:center;color:var(--muted);font-size:18px;margin:2px 0;}
+</style>
+</head>
+<body>
+
+<!-- UC2: Zonas de Riesgo Financiero -->
+<div class="card">
+  <p class="tag">Slide 5 · UC2 — Riesgo</p>
+  <p class="title">Distribución por Zona de Riesgo Financiero</p>
+  <p class="sub">Segmentación basada en ratio deuda/ingreso y utilización de crédito</p>
+
+  <div class="grid2">
+    <div>
+      <canvas id="uc2Risk" height="280"></canvas>
+    </div>
+    <div>
+      <canvas id="uc2Personas" height="280"></canvas>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;margin-top:24px;">
+    <div class="stat" style="flex:1;border-color:rgba(0,212,170,0.3);">
+      <div class="v" style="color:var(--accent);">618</div>
+      <div class="l">Score Buró medio / 850</div>
+    </div>
+    <div class="stat" style="flex:1;border-color:rgba(245,166,35,0.3);">
+      <div class="v" style="color:var(--accent4);">5.82%</div>
+      <div class="l">874 usuarios en estrés financiero (ratio &gt; 0.4)</div>
+    </div>
+    <div class="stat" style="flex:1;border-color:rgba(255,107,107,0.3);">
+      <div class="v" style="color:var(--accent3);">1.46×</div>
+      <div class="l">Ratio deuda/ingreso en decil 10</div>
+    </div>
+    <div class="stat" style="flex:1;">
+      <div class="v" style="color:var(--accent2);">2.59</div>
+      <div class="l">Productos activos por cliente (media)</div>
+    </div>
+  </div>
+  <p class="src">FUENTE · notebooks/uc2/04_eda_score_riesgo.ipynb · docs/findings/UC2_gemelo_digital.md</p>
+</div>
+
+<!-- UC3: Funnel Upselling Hey Pro -->
+<div class="card">
+  <p class="tag">Slide 6 · UC3 — Upselling</p>
+  <p class="title">Funnel de Candidatos Hey Pro</p>
+  <p class="sub">De 15,025 clientes a segmentos priorizados por cashback perdido</p>
+
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:start;">
+    <div>
+      <div class="funnel-wrap">
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="background:linear-gradient(90deg,rgba(79,158,255,0.25),rgba(79,158,255,0.1));border:1px solid rgba(79,158,255,0.3);width:100%;">
+              <span>Universo total</span>
+              <span class="funnel-num" style="color:#4f9eff;">15,025</span>
+            </div>
+          </div>
+        </div>
+        <div class="funnel-arrow">▼</div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="background:linear-gradient(90deg,rgba(0,212,170,0.25),rgba(0,212,170,0.1));border:1px solid rgba(0,212,170,0.3);width:87%;">
+              <span>No-Pro (elegibles)</span>
+              <span class="funnel-num" style="color:#00d4aa;">7,680</span>
+            </div>
+          </div>
+        </div>
+        <div class="funnel-arrow">▼</div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="background:linear-gradient(90deg,rgba(245,166,35,0.25),rgba(245,166,35,0.1));border:1px solid rgba(245,166,35,0.3);width:55%;">
+              <span>Seg A: &gt;$300/mes</span>
+              <span class="funnel-num" style="color:#f5a623;">~1,920</span>
+            </div>
+          </div>
+        </div>
+        <div class="funnel-arrow">▼</div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" style="background:linear-gradient(90deg,rgba(255,107,107,0.3),rgba(255,107,107,0.12));border:1px solid rgba(255,107,107,0.4);width:35%;">
+              <span>Seg A + nómina</span>
+              <span class="funnel-num" style="color:#ff6b6b;">~654</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <canvas id="uc3Cashback" height="280"></canvas>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;margin-top:24px;">
+    <div class="stat" style="flex:1;border-color:rgba(0,212,170,0.3);">
+      <div class="v" style="color:var(--accent);">$2.67M</div>
+      <div class="l">Cashback total generado por Pros (MXN)</div>
+    </div>
+    <div class="stat" style="flex:1;border-color:rgba(245,166,35,0.3);">
+      <div class="v" style="color:var(--accent4);">48.9%</div>
+      <div class="l">Usuarios Hey Pro actuales</div>
+    </div>
+    <div class="stat" style="flex:1;">
+      <div class="v" style="color:var(--accent2);">51.1%</div>
+      <div class="l">Target de upselling Hey Pro</div>
+    </div>
+  </div>
+  <p class="src">FUENTE · notebooks/uc3/02_eda_cashback_perdido.ipynb · outputs/uc3_cashback_perdido.csv</p>
+</div>
+
+<!-- UC4: Heatmap Señales Cruzadas -->
+<div class="card">
+  <p class="tag">Slide 7 · UC4 — Anomalías</p>
+  <p class="title">Señales Cruzadas: Transaccional × Conversacional</p>
+  <p class="sub">Cruce de patrones atípicos con señales de intención del chat</p>
+
+  <div class="grid2">
+    <div>
+      <canvas id="uc4Signals" height="300"></canvas>
+    </div>
+    <div>
+      <canvas id="uc4Intents" height="300"></canvas>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:24px;">
+    <div class="stat" style="flex:1;border-color:rgba(245,166,35,0.3);">
+      <div class="v" style="color:var(--accent4);">41,492</div>
+      <div class="l">Txn atípicas (5.17% del total)</div>
+    </div>
+    <div class="stat" style="flex:1;border-color:rgba(255,107,107,0.3);">
+      <div class="v" style="color:var(--accent3);">763</div>
+      <div class="l">Usuarios con patrón atípico (5.1%)</div>
+    </div>
+    <div class="stat" style="flex:1;">
+      <div class="v" style="color:var(--accent2);">1,936</div>
+      <div class="l">Turnos con keywords suscripción/pago</div>
+    </div>
+    <div class="stat" style="flex:1;border-color:rgba(0,212,170,0.3);">
+      <div class="v" style="color:var(--accent);">6.1%</div>
+      <div class="l">Canal voz — mayor share de reporte fraude</div>
+    </div>
+  </div>
+  <p class="src">FUENTE · notebooks/uc4/12_feature_eng_uc4_txn_anomaly.ipynb · docs/findings/UC4_conversacional.md</p>
+</div>
+
+<script>
+Chart.defaults.color = '#6b7394';
+Chart.defaults.borderColor = '#1e2535';
+Chart.defaults.font.family = 'DM Sans';
+
+// UC2 Riesgo — Stacked Bar por zona
+new Chart(document.getElementById('uc2Risk'), {
+  type: 'bar',
+  data: {
+    labels: ['18-25', '26-35', '36-50', '51-60'],
+    datasets: [
+      { label: 'Sin estrés (ratio < 0.2)', data: [1280, 2890, 3420, 1210], backgroundColor: 'rgba(0,212,170,0.65)', borderRadius: 4 },
+      { label: 'Moderado (0.2-0.4)', data: [380, 820, 970, 350], backgroundColor: 'rgba(79,158,255,0.65)', borderRadius: 4 },
+      { label: 'Estrés (> 0.4)', data: [95, 215, 390, 174], backgroundColor: 'rgba(255,107,107,0.75)', borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+      title: { display: true, text: 'Zona de Riesgo por Edad', color: '#e8eaf2', font: { size: 13, weight: '600' }, padding: { bottom: 16 } }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false }, title: { display: true, text: 'Rango de edad' } },
+      y: { stacked: true, grid: { color: '#1e2535' }, title: { display: true, text: 'Usuarios' } }
+    }
+  }
+});
+
+// UC2 Personas financieras — horizontal bar
+new Chart(document.getElementById('uc2Personas'), {
+  type: 'bar',
+  data: {
+    labels: ['Familiar planificado','Empresario/negocios','Conservador c/colchón','Inactivo/dormido','Hey Pro power user','Joven explorador','Receptor de remesas','Apretado por crédito'],
+    datasets: [{
+      label: '% estimado',
+      data: [20, 14, 15, 10, 10, 12, 8, 6],
+      backgroundColor: ['rgba(79,158,255,0.6)','rgba(0,212,170,0.6)','rgba(0,212,170,0.4)','rgba(107,115,148,0.4)','rgba(0,212,170,0.7)','rgba(79,158,255,0.4)','rgba(245,166,35,0.5)','rgba(255,107,107,0.6)'],
+      borderRadius: 5, borderWidth: 0
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'Personas Financieras UC2', color: '#e8eaf2', font: { size: 13, weight: '600' }, padding: { bottom: 16 } },
+      tooltip: { callbacks: { label: ctx => ' ~' + ctx.raw + '% usuarios' } }
+    },
+    scales: {
+      x: { grid: { color: '#1e2535' }, ticks: { callback: v => v + '%' }, max: 25 },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// UC3 Cashback perdido — donut
+new Chart(document.getElementById('uc3Cashback'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Seg A: >$300/mes (~25%)', 'Seg B: $100-$300 (~35%)', 'Seg C: <$100 (~40%)'],
+    datasets: [{
+      data: [25, 35, 40],
+      backgroundColor: ['rgba(255,107,107,0.75)', 'rgba(245,166,35,0.65)', 'rgba(107,115,148,0.35)'],
+      borderColor: ['#ff6b6b', '#f5a623', '#1e2535'],
+      borderWidth: 2,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } },
+      title: { display: true, text: 'Segmentación por Cashback Perdido', color: '#e8eaf2', font: { size: 13, weight: '600' }, padding: { bottom: 12 } },
+      tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + '% de no-Pro' } }
+    }
+  }
+});
+
+// UC4 Señales cruzadas — bubble-style bar
+new Chart(document.getElementById('uc4Signals'), {
+  type: 'bar',
+  data: {
+    labels: ['Atípica + internacional', 'Atípica + nocturna', 'Intl + nocturna', 'Mismatch ciudad', 'Atípica + fraude-keyword'],
+    datasets: [
+      { label: 'Sin cruce conversacional', data: [2100, 3200, 1850, 4100, 420], backgroundColor: 'rgba(107,115,148,0.4)', borderRadius: 5 },
+      { label: 'Con cruce conversacional', data: [680, 950, 520, 820, 340], backgroundColor: 'rgba(245,166,35,0.75)', borderRadius: 5 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } },
+      title: { display: true, text: 'Señal Técnica × Señal Conversacional', color: '#e8eaf2', font: { size: 13, weight: '600' }, padding: { bottom: 16 } }
+    },
+    scales: {
+      x: { stacked: false, grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 25 } },
+      y: { grid: { color: '#1e2535' }, title: { display: true, text: 'Eventos' } }
+    }
+  }
+});
+
+// UC4 Intents — pie
+new Chart(document.getElementById('uc4Intents'), {
+  type: 'doughnut',
+  data: {
+    labels: ['consulta_saldo','problema_transaccion','reporte_fraude','pregunta_beneficios','solicitud_producto','soporte_tecnico','otro'],
+    datasets: [{
+      data: [16.5, 14.2, 8.3, 12.1, 9.4, 11.8, 27.7],
+      backgroundColor: [
+        'rgba(79,158,255,0.7)','rgba(255,107,107,0.7)','rgba(245,166,35,0.75)',
+        'rgba(0,212,170,0.7)','rgba(0,212,170,0.4)','rgba(107,115,148,0.5)','rgba(30,37,53,0.8)'
+      ],
+      borderColor: '#111520', borderWidth: 2, hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 10, font: { size: 10 } } },
+      title: { display: true, text: 'Taxonomía de Intents UC4', color: '#e8eaf2', font: { size: 13, weight: '600' }, padding: { bottom: 12 } },
+      tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + '% conversaciones' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
