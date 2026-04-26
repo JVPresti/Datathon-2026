@@ -168,7 +168,7 @@ export const pipelineClient = {
   async getFullContext(userId: string): Promise<PipelineFullContext> {
     const res = await fetchWithTimeout(
       `${API_BASE_URL}/context/full/${encodeURIComponent(userId)}`,
-      { method: "GET", headers: { Accept: "application/json" } },
+      { method: "GET", headers: { Accept: "application/json", "Bypass-Tunnel-Reminder": "true" } },
       CONTEXT_TIMEOUT_MS
     );
     if (!res.ok) {
@@ -185,6 +185,7 @@ export const pipelineClient = {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          "Bypass-Tunnel-Reminder": "true",
         },
         body: JSON.stringify({ user_id: userId, message }),
       },
