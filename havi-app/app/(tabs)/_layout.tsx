@@ -70,6 +70,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="movements"
+        options={{
+          title: "Movimientos",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="list-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

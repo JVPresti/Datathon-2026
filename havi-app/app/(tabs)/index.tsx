@@ -3,7 +3,7 @@
 // Cashback: informativo, jerarquía secundaria
 // ============================================================
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -20,10 +20,15 @@ import {
   TRANSACCIONES_MOCK,
   UC3_MOCK,
   formatMXN,
-  timeAgo,
 } from "../../src/data/mockData";
-import { Transaccion } from "../../src/types";
-import { AppCard, SectionHeader, GradientButton } from "../../components/ui";
+import { AppCard } from "../../components/ui";
+import {
+  shouldFireUC3,
+  markUC3Fired,
+  generarContextoUC3,
+  generarMensajeProactivoUC3,
+} from "../../src/services/upsellingService";
+import { executePayrollPortability } from "../../src/services/haviService";
 
 // ── Paleta light mode fintech ────────────────────────────────
 const C = {
@@ -36,6 +41,7 @@ const C = {
   textSecondary: "#6B7280",
   textMuted: "#9CA3AF",
   accent: "#6D5EF8",       // morado azulado sobrio — CTA principal
+  accentDeep: "#5848E0",   // hover/pressed de accent
   accentLight: "#EEF2FF",  // fondo acento suave
   blue: "#3B82F6",
   green: "#10B981",
@@ -44,20 +50,19 @@ const C = {
   error: "#EF4444",
 };
 
-const CATEGORIA_ICONS: Record<string, string> = {
-  restaurante: "🍽️",
-  supermercado: "🛒",
-  transporte: "🚌",
-  entretenimiento: "🎬",
-  tecnologia: "💻",
-  ingreso: "💰",
-  default: "💳",
-};
 
 export default function HomeScreen() {
   const router = useRouter();
   const { alerts, showAlert, unreadCount } = useAlerts();
   const user = DEMO_USER;
+
+  // UC3 — Banner proactivo de upselling (una vez por sesión)
+  const [showUC3Banner, setShowUC3Banner] = useState(false);
+  const [uc3ConfirmResult, setUC3ConfirmResult] = useState<string | null>(null);
+  const [uc3Payload, setUC3Payload] = useState<{
+    text: string;
+    suggestions: string[];
+  } | null>(null);
 
   useEffect(() => {
     const urgente = alerts.find((a) => !a.leida && a.priority === "alta");
@@ -67,11 +72,141 @@ export default function HomeScreen() {
     }
   }, []);
 
-  const alertasPendientes = alerts.filter((a) => !a.accionada);
+  // UC3 trigger login: dispara banner proactivo si es elegible
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (shouldFireUC3()) {
+        markUC3Fired();
+        const ctx = generarContextoUC3(TRANSACCIONES_MOCK);
+        const msg = generarMensajeProactivoUC3(ctx);
+        setUC3Payload(msg);
+        setShowUC3Banner(true);
+      }
+    }, 2000); // 2s después de cargar para no saturar al inicio
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleUC3Accept = () => {
+    const result = executePayrollPortability();
+    setShowUC3Banner(false);
+    setUC3ConfirmResult(result.text);
+    setTimeout(() => setUC3ConfirmResult(null), 6000);
+  };
+
   const spendRatio = Math.min((user.gasto_acumulado_mes / user.ingreso_mensual) * 100, 100);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }}>
+      {/* ── UC3 Banner proactivo de Havi (upselling Hey Pro) ── */}
+      {showUC3Banner && uc3Payload && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 20,
+            left: 16,
+            right: 16,
+            zIndex: 100,
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
+            padding: 18,
+            borderWidth: 1,
+            borderColor: "rgba(109,94,248,0.25)",
+            shadowColor: "#6D5EF8",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.18,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
+            <LinearGradient
+              colors={["#5848E0", "#6D5EF8"]}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 17,
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Text style={{ fontSize: 14 }}>✦</Text>
+            </LinearGradient>
+            <Text
+              style={{
+                flex: 1,
+                color: C.textPrimary,
+                fontSize: 13,
+                lineHeight: 20,
+              }}
+            >
+              {uc3Payload.text}
+            </Text>
+            <Pressable onPress={() => setShowUC3Banner(false)}>
+              <Ionicons name="close" size={18} color={C.textMuted} />
+            </Pressable>
+          </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable
+              onPress={handleUC3Accept}
+              style={({ pressed }) => ({
+                flex: 1,
+                backgroundColor: pressed ? C.accentDeep : C.accent,
+                borderRadius: 12,
+                paddingVertical: 10,
+                alignItems: "center",
+              })}
+            >
+              <Text style={{ color: "#fff", fontSize: 13, fontWeight: "700" }}>
+                Sí, quiero activarlo
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setShowUC3Banner(false)}
+              style={({ pressed }) => ({
+                paddingHorizontal: 14,
+                backgroundColor: pressed ? C.card : C.surface,
+                borderRadius: 12,
+                paddingVertical: 10,
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: C.border,
+              })}
+            >
+              <Text style={{ color: C.textSecondary, fontSize: 13 }}>Ahora no</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {/* ── UC3 Toast de confirmación post-aceptación ── */}
+      {uc3ConfirmResult && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 20,
+            left: 16,
+            right: 16,
+            zIndex: 100,
+            backgroundColor: "#10B981",
+            borderRadius: 16,
+            padding: 14,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            shadowColor: "#10B981",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 10,
+          }}
+        >
+          <Ionicons name="checkmark-circle" size={20} color="#fff" />
+          <Text style={{ flex: 1, color: "#fff", fontSize: 13, lineHeight: 18 }} numberOfLines={3}>
+            {uc3ConfirmResult}
+          </Text>
+        </View>
+      )}
+
       <ScrollView
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
@@ -259,22 +394,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── Alertas pendientes ── */}
-        {alertasPendientes.length > 0 && (
-          <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-            <SectionHeader title="Requieren atención" />
-            <View style={{ gap: 10 }}>
-              {alertasPendientes.slice(0, 2).map((alert) => (
-                <AlertCard
-                  key={alert.id}
-                  alert={alert}
-                  onPress={() => showAlert(alert)}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-
         {/* ── Gastos del mes ── */}
         <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
           <AppCard>
@@ -344,22 +463,46 @@ export default function HomeScreen() {
           onPress={() => router.push("/(tabs)/chat")}
         />
 
-        {/* ── Últimas transacciones ── */}
-        <View style={{ paddingHorizontal: 20 }}>
-          <SectionHeader
-            title="Últimos movimientos"
-            action="Ver con Havi"
-            onAction={() => router.push("/(tabs)/chat")}
-          />
-          <AppCard padding={0} style={{ overflow: "hidden" }}>
-            {TRANSACCIONES_MOCK.slice(0, 5).map((txn, idx) => (
-              <TransactionRow
-                key={txn.id}
-                txn={txn}
-                isLast={idx === 4}
-              />
-            ))}
-          </AppCard>
+        {/* ── CTA Movimientos ── */}
+        <View style={{ paddingHorizontal: 20, paddingBottom: 8 }}>
+          <Pressable
+            onPress={() => router.push("/(tabs)/movements")}
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              backgroundColor: pressed ? C.borderAlt : C.surface,
+              borderRadius: 16,
+              paddingHorizontal: 18,
+              paddingVertical: 16,
+              borderWidth: 1,
+              borderColor: C.border,
+            })}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 11,
+                  backgroundColor: `${C.accent}12`,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons name="list-outline" size={18} color={C.accent} />
+              </View>
+              <View>
+                <Text style={{ color: C.textPrimary, fontSize: 15, fontWeight: "700" }}>
+                  Ver movimientos
+                </Text>
+                <Text style={{ color: C.textMuted, fontSize: 12, marginTop: 1 }}>
+                  Todos tus cargos y abonos
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={C.textMuted} />
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -490,114 +633,4 @@ function QuickAction({
   );
 }
 
-function AlertCard({ alert, onPress }: { alert: any; onPress: () => void }) {
-  const isPriority = alert.priority === "alta";
-  const color = isPriority ? C.error : alert.priority === "media" ? C.amber : C.green;
-  const icons: Record<string, string> = {
-    txn_atipica: "shield-outline",
-    rechazo_saldo: "card-outline",
-    rechazo_limite: "card-outline",
-    cashback_proximo_perdido: "star-outline",
-    upselling_pro: "star-outline",
-  };
-  const icon = icons[alert.type] || "notifications-outline";
 
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? C.surface : C.card,
-        borderRadius: 16,
-        padding: 14,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        borderWidth: 1,
-        borderColor: `${color}25`,
-        borderLeftWidth: 3,
-        borderLeftColor: color,
-      })}
-    >
-      <View
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 11,
-          backgroundColor: `${color}10`,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Ionicons name={icon as any} size={17} color={color} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: C.textPrimary, fontSize: 14, fontWeight: "600", marginBottom: 2 }}>
-          {alert.titulo}
-        </Text>
-        <Text style={{ color: C.textSecondary, fontSize: 12 }} numberOfLines={1}>
-          {alert.mensaje}
-        </Text>
-      </View>
-      <Ionicons name="chevron-forward" size={15} color={C.textMuted} />
-    </Pressable>
-  );
-}
-
-function TransactionRow({ txn, isLast }: { txn: Transaccion; isLast: boolean }) {
-  const icon = CATEGORIA_ICONS[txn.categoria] || CATEGORIA_ICONS.default;
-  const isIncome = txn.tipo === "abono";
-
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        borderBottomWidth: isLast ? 0 : 1,
-        borderBottomColor: C.border,
-      }}
-    >
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
-          backgroundColor: txn.es_anomala ? "rgba(239,68,68,0.08)" : C.surface,
-          alignItems: "center",
-          justifyContent: "center",
-          marginRight: 12,
-          borderWidth: txn.es_anomala ? 1 : 0,
-          borderColor: txn.es_anomala ? "rgba(239,68,68,0.2)" : "transparent",
-        }}
-      >
-        <Text style={{ fontSize: 18 }}>{icon}</Text>
-      </View>
-      <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-          <Text style={{ color: C.textPrimary, fontSize: 14, fontWeight: "600" }}>
-            {txn.comercio}
-          </Text>
-          {txn.es_anomala && (
-            <Ionicons name="warning-outline" size={12} color={C.error} />
-          )}
-        </View>
-        <Text style={{ color: C.textMuted, fontSize: 12, marginTop: 1 }}>{txn.categoria}</Text>
-      </View>
-      <View style={{ alignItems: "flex-end" }}>
-        <Text
-          style={{
-            color: isIncome ? C.green : C.textPrimary,
-            fontSize: 14,
-            fontWeight: "700",
-          }}
-        >
-          {isIncome ? "+" : "-"}{formatMXN(txn.monto)}
-        </Text>
-        <Text style={{ color: C.textMuted, fontSize: 11, marginTop: 2 }}>
-          {timeAgo(txn.fecha)}
-        </Text>
-      </View>
-    </View>
-  );
-}

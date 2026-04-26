@@ -17,7 +17,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAlerts } from "../../src/hooks/useAlerts";
-import { haviService, INITIAL_PILLS } from "../../src/services/haviService";
+import {
+  haviService,
+  INITIAL_PILLS,
+  sendHaviMessage,
+  executeBudgetLimit,
+  executePayrollPortability,
+  ChatAction,
+} from "../../src/services/haviService";
 import { ChatMessage } from "../../src/types";
 import { TRANSACCIONES_MOCK } from "../../src/data/mockData";
 
@@ -55,6 +62,10 @@ export default function ChatScreen() {
   const [activePills, setActivePills] = useState<string[]>(
     INITIAL_PILLS.slice(0, 4).map((p) => p.label)
   );
+  const [pendingAction, setPendingAction] = useState<{
+    action: ChatAction;
+    label: string;
+  } | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const { alerts } = useAlerts();
 
@@ -62,11 +73,44 @@ export default function ChatScreen() {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
+  const appendHaviMessage = useCallback(
+    (text: string, suggestions?: string[]) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: newId(),
+          role: "havi",
+          content: text,
+          timestamp: new Date().toISOString(),
+          suggestions,
+        },
+      ]);
+      if (suggestions?.length) setActivePills(suggestions);
+    },
+    []
+  );
+
+  // ---- Ejecuta acción confirmada (tool execution) -----------
+  const executeAction = useCallback(
+    (action: ChatAction) => {
+      setPendingAction(null);
+      let response;
+      if (action.type === "set_budget") {
+        response = executeBudgetLimit(action.categoria, action.limite);
+      } else {
+        response = executePayrollPortability();
+      }
+      appendHaviMessage(response.text, response.suggestions);
+    },
+    [appendHaviMessage]
+  );
+
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
       setInput("");
       setActivePills([]);
+      setPendingAction(null);
 
       const userMsg: ChatMessage = {
         id: newId(),
@@ -86,9 +130,7 @@ export default function ChatScreen() {
       setIsLoading(true);
 
       try {
-        const result = await haviService.sendMessage(text, {
-          transacciones: TRANSACCIONES_MOCK,
-        });
+        const result = await sendHaviMessage(text, TRANSACCIONES_MOCK);
 
         setMessages((prev) => {
           const filtered = prev.filter((m) => m.id !== loadingMsg.id);
@@ -107,13 +149,18 @@ export default function ChatScreen() {
         if (result.suggestions?.length) {
           setActivePills(result.suggestions);
         }
+
+        // Si la respuesta trae acción pendiente (UC2 budget / UC3 portability)
+        if (result.action && result.actionLabel) {
+          setPendingAction({ action: result.action, label: result.actionLabel });
+        }
       } catch {
         setMessages((prev) => prev.filter((m) => m.id !== loadingMsg.id));
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading]
+    [isLoading, appendHaviMessage]
   );
 
   const canSend = input.trim().length > 0 && !isLoading;
@@ -199,7 +246,48 @@ export default function ChatScreen() {
 
         {/* Pills + Input area */}
         <View style={{ paddingBottom: 8, backgroundColor: C.bg, borderTopWidth: 1, borderTopColor: C.border }}>
-          {activePills.length > 0 && !isLoading && (
+          {/* CTA de acción pendiente (UC2 budget / UC3 portability) */}
+          {pendingAction && !isLoading && (
+            <View
+              style={{
+                marginHorizontal: 16,
+                marginTop: 10,
+                marginBottom: 4,
+                flexDirection: "row",
+                gap: 8,
+              }}
+            >
+              <Pressable
+                onPress={() => executeAction(pendingAction.action)}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  backgroundColor: pressed ? C.accentDeep : C.accent,
+                  borderRadius: 14,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                })}
+              >
+                <Text style={{ color: "#fff", fontSize: 14, fontWeight: "700" }}>
+                  ✓ {pendingAction.label}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setPendingAction(null)}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 16,
+                  backgroundColor: pressed ? C.card : C.surface,
+                  borderRadius: 14,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: C.border,
+                })}
+              >
+                <Text style={{ color: C.textSecondary, fontSize: 14 }}>Ahora no</Text>
+              </Pressable>
+            </View>
+          )}
+          {activePills.length > 0 && !isLoading && !pendingAction && (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}

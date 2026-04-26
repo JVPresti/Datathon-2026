@@ -7,6 +7,19 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { UC2Context, HaviAlert, Transaccion, SuggestionPill } from "../types";
 import { DEMO_USER, UC2_MOCK } from "../data/mockData";
+import {
+  detectarIntentFinanzas,
+  generarContextoUC2,
+  generarRespuestaUC2,
+  setCategoryBudgetLimit,
+  SetBudgetResult,
+} from "./digitalTwinService";
+import {
+  generarContextoUC3,
+  generarMensajeProactivoUC3,
+  initiatePayrollPortability,
+  PayrollPortabilityResult,
+} from "./upsellingService";
 
 // ⚠️ En producción esto va en variables de entorno
 // Para el prototipo se configura desde la app
@@ -173,3 +186,70 @@ export class HaviChatService {
 
 // Instancia singleton
 export const haviService = new HaviChatService(true); // demo mode
+
+// ---- Tipos de acciones rápidas de chat ----------------------
+export type ChatAction =
+  | { type: "set_budget"; categoria: string; limite: number }
+  | { type: "initiate_portability" };
+
+export interface HaviResponse {
+  text: string;
+  suggestions: string[];
+  action?: ChatAction;
+  actionLabel?: string;
+}
+
+// ---- Wrapper con soporte UC2/UC3 ----------------------------
+export async function sendHaviMessage(
+  userMessage: string,
+  transacciones?: Transaccion[]
+): Promise<HaviResponse> {
+  // UC2: intent de finanzas → respuesta con datos reales calculados
+  if (detectarIntentFinanzas(userMessage)) {
+    const payload = generarContextoUC2(transacciones);
+    const uc2Response = generarRespuestaUC2(payload);
+    return {
+      text: uc2Response.text,
+      suggestions: uc2Response.suggestions,
+      action: uc2Response.showBudgetCTA
+        ? {
+            type: "set_budget",
+            categoria: uc2Response.budgetSugerido.categoria,
+            limite: uc2Response.budgetSugerido.limite,
+          }
+        : undefined,
+      actionLabel: uc2Response.showBudgetCTA ? "Sí, ponme el límite" : undefined,
+    };
+  }
+
+  // Delegación al servicio existente
+  const result = await haviService.sendMessage(userMessage, {
+    transacciones,
+  });
+  return { text: result.text, suggestions: result.suggestions };
+}
+
+// ---- Ejecución de tool: setCategoryBudgetLimit --------------
+export function executeBudgetLimit(
+  categoria: string,
+  limite: number
+): HaviResponse {
+  const result: SetBudgetResult = setCategoryBudgetLimit(categoria, limite);
+  return {
+    text: result.mensaje_confirmacion,
+    suggestions: ["Ver mis gastos ahora", "¿Qué más puedo optimizar?", "¿Cómo voy hoy?"],
+  };
+}
+
+// ---- Ejecución de tool: initiatePayrollPortability ----------
+export function executePayrollPortability(): HaviResponse {
+  const result: PayrollPortabilityResult = initiatePayrollPortability();
+  return {
+    text: result.mensaje_confirmacion,
+    suggestions: [
+      "¿Cuántos días tarda?",
+      "Ver beneficios de Hey Pro",
+      "¿Cómo descargo mi CLABE?",
+    ],
+  };
+}
