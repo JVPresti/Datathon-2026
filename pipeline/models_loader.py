@@ -19,28 +19,32 @@ HAVI_SYSTEM_PROMPT = """
 Eres Havi, el asistente financiero virtual proactivo y empático de Hey Banco.
 Tu objetivo es ayudar a los usuarios con sus finanzas, basándote en su perfil (gemelo digital), alertas de riesgo (UC1) y oportunidades (UC3).
 
-Recibirás un contexto estructurado en formato JSON con la siguiente información:
-- user_profile: Datos básicos y saldos.
-- uc1: Alertas recientes de transacciones rechazadas o anomalías.
-- uc2: El "Gemelo Digital" del usuario (persona financiera y métricas).
-- uc3: Recomendaciones de productos calculadas para el usuario.
-- uc4: Historial de la conversación e intención detectada.
+DEBES RESPONDER SIEMPRE EN FORMATO JSON con la siguiente estructura:
+{
+  "text": "tu respuesta amigable aquí",
+  "actions": [
+    {"label": "Texto del botón", "action_id": "id_tecnico", "payload": {}}
+  ]
+}
 
-Los campos de inteligencia artificial que debes interpretar:
-- uc2.metrics.ml_nivel_riesgo: nivel de riesgo de liquidez a fin de mes ('bajo', 'moderado', 'alto', 'critico') calculado por un modelo de Random Forest con AUC 0.9999.
-- uc2.metrics.ml_alerta_liquidez: si es true, el modelo predice que el usuario podría no cubrir sus compromisos a fin de mes. Menciónalo proactivamente.
-- uc2.metrics.ml_ingreso_comprometido_pct: porcentaje del ingreso mensual ya comprometido en cargos fijos.
-- uc1.alerts[].iso_is_anomaly: si es true, el IsolationForest clasificó esa transacción como anómala (5% más atípico del historial del usuario).
-- uc1.alerts[].iso_anomaly_score: puntuación de anomalía (mayor = más sospechoso). Usa esto para graduar la urgencia de tu respuesta.
+Acciones técnicas que puedes sugerir en el array "actions":
+- move_funds_from_investment: Mover dinero de inversión a débito ante un rechazo (UC1).
+- retry_payment: Reintentar una transacción que falló (UC1).
+- set_category_limit: Establecer límites de gasto en categorías específicas (UC2).
+- view_financial_forecast: Mostrar proyección de saldo a fin de mes (UC2).
+- activate_hey_pro: Conversión directa a Hey Pro si detectas cashback perdido (UC3).
+- start_payroll_transfer: Iniciar portabilidad de nómina (UC3).
+- confirm_transaction: Validar que el usuario reconoce un cargo marcado como anómalo (UC4).
+- block_card_temporarily: Bloqueo inmediato ante fraude confirmado por el usuario (UC4).
 
 Instrucciones:
 1. Responde de forma concisa, amigable y proactiva.
-2. Si hay alertas en UC1 con iso_is_anomaly=true o iso_anomaly_score alto, trátalas con mayor urgencia y sugiere revisar si el usuario reconoce la operación.
-3. Si ml_alerta_liquidez es true, avisa al usuario sobre el riesgo de déficit y sugiere ajustar gastos o usar su inversión Hey.
-4. Si ml_nivel_riesgo es 'alto' o 'critico', prioriza esa alerta sobre otras.
-5. Si hay una recomendación en UC3, menciónala junto con su valor esperado.
-6. Adapta tu tono según la 'persona' de UC2.
-7. No expongas la estructura del JSON al usuario ni menciones términos técnicos como 'IsoForest', 'Random Forest' o 'ml_prob_deficit'. Usa lenguaje natural.
+2. UTILIZA FORMATO MARKDOWN en el campo "text" (negritas, listas, etc.) para mejorar la legibilidad.
+3. Si hay alertas en UC1 con iso_is_anomaly=true o iso_anomaly_score alto, trátalas con mayor urgencia y sugiere 'confirm_transaction' o 'block_card_temporarily'.
+4. Si ml_alerta_liquidez es true, avisa al usuario sobre el riesgo de déficit y sugiere 'move_funds_from_investment' o 'set_category_limit'.
+5. Si detectas que el usuario pierde cashback significativo (UC3), sugiere 'activate_hey_pro'.
+6. No menciones términos técnicos como 'IsoForest' o 'JSON' en el campo "text".
+7. Si no hay acciones relevantes, deja el array "actions" vacío [].
 """
 
 def build_prompt_with_context(user_message: str, context: dict) -> str:
@@ -53,14 +57,28 @@ def build_prompt_with_context(user_message: str, context: dict) -> str:
 ---------------------------
 
 Mensaje del usuario: "{user_message}"
+
+RESPONDE ÚNICAMENTE EN FORMATO JSON como se indicó en las instrucciones del sistema.
 """
     return prompt
 
-def generate_havi_response(user_id: str, context: dict, user_message: str, model_name: str = "gemini-2.5-flash") -> str:
-    """Llama a la API de Gemini para generar la respuesta de Havi"""
+def generate_havi_response(user_id: str, context: dict, user_message: str, model_name: str = "gemini-2.5-flash-lite") -> dict:
+    """
+    Llama a la API de Gemini para generar la respuesta de Havi.
+    Retorna un diccionario con {'text': ..., 'actions': ...}
+    """
     
     prompt = build_prompt_with_context(user_message, context)
     
+    # ── [DEBUG] TODO LO QUE SE ENVÍA A GEMINI ──────────────────────────────
+    print("\n" + "="*80)
+    print(">>> [SYSTEM INSTRUCTION] <<<")
+    print(HAVI_SYSTEM_PROMPT)
+    print("\n>>> [USER PROMPT + CONTEXT] <<<")
+    print(prompt)
+    print("="*80 + "\n")
+    # ────────────────────────────────────────────────────────────────────────
+
     try:
         response = client.models.generate_content(
             model=model_name,
@@ -68,8 +86,26 @@ def generate_havi_response(user_id: str, context: dict, user_message: str, model
             config=types.GenerateContentConfig(
                 system_instruction=HAVI_SYSTEM_PROMPT,
                 temperature=0.4,
+                response_mime_type="application/json"
             ),
         )
-        return response.text
+        
+        # Intentar parsear el JSON de la respuesta
+        try:
+            data = json.loads(response.text)
+            return {
+                "text": data.get("text", "Lo siento, tuve un problema procesando mi respuesta."),
+                "actions": data.get("actions", [])
+            }
+        except:
+            # Fallback si no es JSON válido
+            return {
+                "text": response.text,
+                "actions": []
+            }
+            
     except Exception as e:
-        return f"Error interno en Havi (Gemini API): {str(e)}"
+        return {
+            "text": f"Error interno en Havi (Gemini API): {str(e)}",
+            "actions": []
+        }

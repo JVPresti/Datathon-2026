@@ -5,8 +5,14 @@ class ChatRequest(BaseModel):
     user_id: str = Field(..., description="ID del usuario en Hey Banco")
     message: str = Field(..., description="El mensaje que el usuario le envía a Havi")
 
+class ChatAction(BaseModel):
+    label: str = Field(..., description="Texto que verá el usuario en el botón")
+    action_id: str = Field(..., description="ID técnico de la acción (e.g. 'retry_payment')")
+    payload: Optional[Dict[str, Any]] = Field(None, description="Datos extra para ejecutar la acción")
+
 class ChatResponse(BaseModel):
     response: str = Field(..., description="Respuesta generada por Havi")
+    actions: List[ChatAction] = Field(default_factory=list, description="Lista de acciones sugeridas para el front-end")
     context_used: Dict[str, Any] = Field(default_factory=dict, description="El contexto consolidado de UC1-UC4 que se utilizó")
 
 # Modelos simulados de contexto de acuerdo a ARQUITECTURA_PIPELINE.md

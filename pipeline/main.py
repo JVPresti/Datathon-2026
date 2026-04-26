@@ -80,18 +80,41 @@ def chat_endpoint(request: ChatRequest):
             raise HTTPException(status_code=404, detail=f"Usuario '{user_id}' no encontrado.")
 
     # 2. Ensamblar contexto real UC1-UC4
-    context = build_context(request.user_id)
+    full_context = build_context(request.user_id)
 
-    # 3. Llamar a Gemini
-    havi_text = generate_havi_response(
+    # 3. Filtrar contexto por intención para optimizar (conforme a solicitud)
+    msg = request.message.lower()
+    context = {
+        "user_profile": full_context["user_profile"],
+        "uc4": full_context["uc4"]
+    }
+    
+    # Determinar qué UCs son relevantes
+    if any(k in msg for k in ["pago", "rechazo", "netflix", "comprar", "no pasó", "tarjeta"]):
+        context["uc1"] = full_context["uc1"]
+    if any(k in msg for k in ["fin de mes", "gasto", "liquidez", "ahorro", "cuanto tengo", "proyeccion"]):
+        context["uc2"] = full_context["uc2"]
+    if any(k in msg for k in ["beneficio", "hey pro", "ganar", "puntos", "cashback", "pro"]):
+        context["uc3"] = full_context["uc3"]
+    if any(k in msg for k in ["fraude", "no reconozco", "extraño", "sospechoso", "seguridad", "bloque"]):
+        context["uc1"] = full_context["uc1"] # Atípicas están en UC1
+
+    # Si no se detectó nada específico, enviamos UC1 y UC2 por defecto (más comunes)
+    if len(context) <= 2:
+        context["uc1"] = full_context["uc1"]
+        context["uc2"] = full_context["uc2"]
+
+    # 4. Llamar a Gemini
+    havi_res = generate_havi_response(
         user_id=request.user_id,
         context=context,
         user_message=request.message,
-        model_name="gemini-2.5-flash",
+        model_name="gemini-2.5-flash-lite",
     )
 
     # 4. Retornar respuesta
     return ChatResponse(
-        response=havi_text,
+        response=havi_res.get("text", ""),
+        actions=havi_res.get("actions", []),
         context_used=context,
     )

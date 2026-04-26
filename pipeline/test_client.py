@@ -83,10 +83,25 @@ def test_chat(user_id: str, message: str, label: str = ""):
 
         if r.status_code == 200:
             data = r.json()
+            res = data.get("response", "")
+            actions = data.get("actions", [])
+            context = data.get("context_used", {})
+
+            print("\n  [DEBUG] Contexto enviado a Gemini:")
+            print("  " + "=" * 50)
+            print(json.dumps(context, indent=4, ensure_ascii=False))
+            print("  " + "=" * 50)
+
             print("\n  Respuesta de Havi:")
             print("  " + "-" * 50)
-            for line in data["response"].splitlines():
+            for line in res.splitlines():
                 print(f"  {line}")
+            
+            if actions:
+                print("\n  Acciones sugeridas para el Front-end:")
+                for act in actions:
+                    print(f"  [ {act['label']} ] -> {act['action_id']}")
+            
             print("  " + "-" * 50)
         elif r.status_code == 404:
             print(f"  ⚠️  {r.json()['detail']}")
@@ -102,48 +117,37 @@ if __name__ == "__main__":
     if not test_health():
         exit(1)
 
-    # ── 2. Inspección de contexto real (sin LLM) ───────────────────────────
-    # USR-00001: tiene rechazo por saldo insuficiente en servicios digitales
+    # ── CASE 1: [UC1] Copilot Proactivo (Rechazos) ─────────────────────────
+    # Usuario USR-00001 tiene un rechazo real por saldo insuficiente.
     test_context("USR-00001")
-
-    # USR-00004: candidato Hey Pro con cashback perdido (score alto en UC3)
-    test_context("USR-00004")
-
-    # ── 3. Conversaciones con Gemini usando datos reales ───────────────────
-
-    # Caso A: usuario con rechazo reciente pregunta por su tarjeta
     test_chat(
         user_id  = "USR-00001",
         message  = "Hola, acabo de intentar pagar mi Netflix y me rechazaron. ¿Qué pasó?",
-        label    = "USR-00001 — Rechazo en servicios digitales",
+        label    = "UC1 — Rechazo por Saldo Insuficiente",
     )
 
-    # Caso B: usuario con rechazo grande en transferencia busca ayuda de liquidez
+    # ── CASE 2: [UC2] Gemelo Digital (Liquidez y Predicción) ───────────────
+    # Usuario USR-00003 tiene compromisos altos y riesgo de liquidez moderado.
     test_chat(
         user_id  = "USR-00003",
-        message  = "Hola Havi, intenté hacer una transferencia grande y no pasó. ¿Tienes información?",
-        label    = "USR-00003 — Rechazo en transferencia de $14,750",
+        message  = "Havi, ¿cómo voy para terminar el mes? Siento que he gastado mucho.",
+        label    = "UC2 — Simulación de Salud Financiera",
     )
 
-    # Caso C: candidato Hey Pro pregunta cómo mejorar sus finanzas
+    # ── CASE 3: [UC3] Upselling Empático (Hey Pro) ────────────────────────
+    # Usuario USR-00004 es candidato ideal a Hey Pro (gana mucho cashback no aprovechado).
     test_chat(
         user_id  = "USR-00004",
-        message  = "¿Cómo puedo ganar más con mi cuenta de Hey Banco?",
-        label    = "USR-00004 — Candidato Hey Pro, pregunta de beneficios",
+        message  = "¿Cómo puedo sacarle más provecho a mi cuenta de Hey?",
+        label    = "UC3 — Recomendación de Hey Pro",
     )
 
-    # Caso D: usuario sin alertas hace una consulta general
-    test_chat(
-        user_id  = "USR-00009",
-        message  = "¿Cuáles son los beneficios de Hey Pro?",
-        label    = "USR-00009 — Consulta general de beneficios",
-    )
-
-    # Caso E: usuario con mención de fraude en historial
+    # ── CASE 4: [UC4] Seguridad Inteligente (Anomalía) ─────────────────────
+    # Usuario USR-00002 tiene alertas de fraude y transacciones marcadas como atípicas.
     test_chat(
         user_id  = "USR-00002",
-        message  = "Acabo de ver un cargo que no reconozco en mi estado de cuenta.",
-        label    = "USR-00002 — Posible fraude, cargo no reconocido",
+        message  = "Vi un cargo extraño en mi cuenta que no reconozco.",
+        label    = "UC4 — Detección de Anomalía / Fraude",
     )
 
-    print("\n✅ Todas las pruebas completadas.")
+    print("\n✅ Todas las pruebas de Casos de Uso completadas.")
